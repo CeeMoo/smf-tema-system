@@ -1,0 +1,1475 @@
+@charset "UTF-8";
+
+@media all
+{
+    
+     * #stcontainer html body * { overflow:visible; }
+  * #stcontainer html iframe, * #stcontainer html frame { overflow:auto; }
+  * #stcontainer html frameset { overflow:hidden; }
+
+  /* (en) Forcing vertical scrollbars in Netscape, Firefox and Safari browsers */
+  /* (de) Erzwingen vertikaler Scrollbalken in Netscape, Firefox und Safari Browsern */
+  #stcontainer html { height: 100%; margin-bottom: 0px; width:100%}
+  #stcontainer body {
+    /* (en) Fix for rounding errors when scaling font sizes in older versions of Opera browser */
+    /* (de) Beseitigung von Rundungsfehler beim Skalieren von Schriftgrößen in älteren Opera Versionen */
+    font-size: 100.01%;
+
+    /* (en) Standard values for colors and text alignment */
+    /* (de) Vorgabe der Standardfarben und Textausrichtung */
+    color: #000;
+    background: #fff;
+    text-align: left;
+  }
+
+  /* (en) Clear borders for <fieldset> and <img> elements */
+  /* (de) Rahmen für <fieldset> und <img> Elemente löschen */
+  #stcontainer fieldset, #stcontainer img { border: 0 solid; }
+
+  /* (en) new standard values for lists, blockquote and cite */
+  /* (de) Neue Standardwerte für Listen & Zitate */
+  #stcontainer ul, #stcontainer ol, #stcontainer dl { margin: 0 0 1em 1em }
+  #stcontainer li { margin-left: 0em; line-height: 1.5em; }
+
+  #stcontainer dt { font-weight: bold; }
+  #stcontainer dd { margin: 0 0 1em 2em; }
+
+  #stcontainer blockquote { margin: 0 0 1em 1.5em; }
+
+ /*------------------------------------------------------------------------------------------------------*/
+
+ /**
+  * @section base layout | Basis Layout
+  * @see     http://www.yaml.../documentation/css-components/base-stylesheet.html
+  *
+  * |-------------------------------|
+  * | #header                       |
+  * |-------------------------------|
+  * | #col1   | #col3     | #col2   |
+  * | 200 px  | flexible  | 200px   |
+  * |-------------------------------|
+  * | #footer                       |
+  * |-------------------------------|
+  */
+
+  #stcontainer #header { position:relative }
+
+  #stcontainer #topnav {
+    position:absolute;
+    top: 10px;
+    right: 10px;
+
+    /* (en) essential for correct alignment in Opera 6 ! */
+    /* (de) Erforderlich, damit im Opera 6 wirklich rechts plaziert ! */
+    text-align: right;
+  }
+
+  /* (en) Backup for correct positioning */
+  /* (de) Absicherung korrekte Positionierung */
+  #stcontainer #header, #stcontainer #nav, #stcontainer #main, #stcontainer #footer { clear:both; }
+
+  /* (en/de) Standard: 200 Pixel */
+  #stcontainer #col1 { float: left; width: 200px }
+  /* (en/de) Standard: 200 Pixel */
+  #stcontainer #col2 { float:right; width: 200px }
+  /* (en) Standard: center column with flexible width */
+  /* (de) Standard: Flexible mittlere Spalte */
+  #stcontainer #col3 { width:auto; margin: 0 200px }
+
+  /* (en) Adjustment: sort #col3 behind float columns using z-index */
+  /* (de) Anpassung: #col3 mittels z-index hinter die float-Spalten verschieben */
+  #stcontainer #col1 {z-index: 3}
+  #stcontainer #col2 {z-index: 5}
+  #stcontainer #col3 {z-index: 1}
+  #stcontainer #col1_content {z-index: 4}
+  #stcontainer #col2_content {z-index: 6}
+  #stcontainer #col3_content {z-index: 2}
+
+  #stcontainer #col1_content, #stcontainer #col2_content, #stcontainer #col3_content { position:relative }
+
+ /*------------------------------------------------------------------------------------------------------*/
+
+ /**
+  * @section generic classes for layout switching | Generische Klassen zur Layoutumschaltung
+  * @see     http://www.yaml.../documentation/css-components/base-stylesheet.html
+  *
+  * .hidecol1 -> 2-column-layout (using #col2 and #col3)
+  * .hidecol2 -> 2-column-layout (using #col1 and #col3)
+  * .hideboth -> single-column-layout (using #col3)
+  */
+
+  #stcontainer .hideboth #col3 {margin-left: 0; margin-right: 0}
+  #stcontainer .hidecol1 #col3 {margin-left: 0; margin-right: 200px}
+  #stcontainer .hidecol2 #col3 {margin-left: 200px; margin-right: 0}
+
+  #stcontainer .hideboth #col1, .hideboth #col2 {display:none}
+  #stcontainer .hidecol1 #col1 {display:none}
+  #stcontainer .hidecol2 #col2 {display:none}
+
+ /*------------------------------------------------------------------------------------------------------*/
+
+ /**
+  * @section clearing methods
+  * @see     http://yaml.../documentation/basics/general.html
+  */
+
+  /* (en) clearfix method for clearing floats */
+  /* (de) Clearfix-Methode zum Clearen der Float-Umgebungen */
+   #stcontainer .clearfix:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden
+  }
+
+  /* (en) essential for Safari browser !! */
+  /* (de) Diese Angabe benötigt der Safari-Browser zwingend !! */
+  #stcontainer .clearfix { display: block }
+
+  /* (en) overflow method for clearing floats */
+  /* (de) Overflow-Methode zum Clearen der Float-Umgebungen */
+  #stcontainer .floatbox { overflow:hidden }
+
+  /* (en) IE-Clearing: Only used in Internet Explorer, switched on in iehacks.css */
+  /* (de) IE-Clearing: Benötigt nur der Internet Explorer und über iehacks.css zugeschaltet */
+  #stcontainer #ie_clearing { display: none }
+
+ /*------------------------------------------------------------------------------------------------------*/
+
+ /**
+  * @section subtemplates
+  * @see     http://www.yaml.../documentation/practice/subtemplates.html
+  */
+
+  #stcontainer .subcolumns, .subcolumns_oldgecko {
+    width: 100%;
+    overflow:hidden;
+  }
+
+  /* (en) alternative class for optional support of old  Mozilla/Netscape browers */
+  /* (de) Alternative Klasse zur optionalen Unterstützung alter Mozilla/Netscape-Brower */
+  #stcontainer .subcolumns_oldgecko { float:left }
+
+  #stcontainer  .c50l, #stcontainer  .c25l, #stcontainer  .c33l, #stcontainer  .c38l, #stcontainer  .c66l, #stcontainer  .c75l, #stcontainer  .c62l {float: left; }
+  #stcontainer  .c50r, #stcontainer  .c25r, #stcontainer  .c33r, #stcontainer  .c38r, #stcontainer  .c66r, #stcontainer  .c75r, #stcontainer  .c62r {float: right; margin-left: -5px; }
+
+  #stcontainer  .c25l, #stcontainer  .c25r { width: 25% }
+  #stcontainer  .c33l, #stcontainer  .c33r { width: 33.333% }
+  #stcontainer  .c50l, #stcontainer  .c50r { width: 50% }
+  #stcontainer  .c66l, #stcontainer  .c66r { width: 66.666% }
+  #stcontainer  .c75l, #stcontainer  .c75r { width: 75% }
+  #stcontainer  .c38l, #stcontainer  .c38r { width: 38.2% }
+  #stcontainer  .c62l, #stcontainer  .c62r { width: 61.8% }
+
+  #stcontainer  .subc  { padding: 0 0.5em }
+  #stcontainer  .subcl { padding: 0 1em 0 0 }
+  #stcontainer  .subcr { padding: 0 0 0 1em }
+
+ /*------------------------------------------------------------------------------------------------------*/
+
+ /**
+  * @section hidden elements | Versteckte Elemente
+  * @see     http://www.yaml.../documentation/basics/skip-links.html
+  *
+  * (en) skip links and hidden content
+  * (de) Skip-Links und versteckte Inhalte
+  */
+
+  /* (en) classes for invisible elements in the base layout */
+  /* (de) Klassen für unsichtbare Elemente im Basislayout */
+  #stcontainer  .skip, #stcontainer  .hideme, #stcontainer  .print {
+    position: absolute;
+    top: -1000em;
+    left: -1000em;
+    height: 1px;
+    width: 1px;
+  }
+
+  /* (en) make skip links visible when using tab navigation */
+  /* (de) Skip-Links für Tab-Navigation sichtbar schalten */
+  #stcontainer  .skip:focus, #stcontainer  .skip:active {
+    position: static;
+    top: 0;
+    left: 0;
+    height: auto;
+    width: auto;
+  }
+  body {margin:0; padding:0;}
+
+  #stcontainer #page_margins { margin:15px 0; width:99%;}
+  #stcontainer #page{margin:0 auto; width:100%; }
+  
+
+  #stcontainer #header {}
+  #stcontainer #topnav {  }
+
+  #stcontainer #main {}
+
+  #stcontainer #footer {}
+
+  #stcontainer #col1 {}
+  #stcontainer #col1_content {  }
+
+  #stcontainer #col2 {}
+  #stcontainer #col2_content {  }
+
+  #stcontainer #col3 {  }
+  #stcontainer #col3_content {  }
+  
+    html * { }
+
+    #stcontainer textarea, #stcontainer pre, #stcontainer tt, #stcontainer code {
+        font-family:Arial, Helvetica, sans-serif;
+        font-size:12px;
+    }
+
+    #stcontainer {
+        font-family:Arial, Helvetica, sans-serif;
+        font-size: 12px;
+        color:#000;
+    }
+
+    #stcontainer h1,#stcontainer h2,#stcontainer h3,#stcontainer h4,#stcontainer h5,#stcontainer h6 { margin: 0 0 0em 0; font-family:Arial, Helvetica, sans-serif;}
+    #stcontainer h1 { font-size: 16px;}                        /* 24px */
+    #stcontainer h2 { font-size: 14px; }                     /* 20px */
+    #stcontainer h3 { font-size: 150% }                        /* 18px */
+    #stcontainer h4 { font-size: 133.33% }                     /* 16px */
+    #stcontainer h5 { font-size: 116.67% }                     /* 14px */
+    #stcontainer h6 { font-size: 116.67%;}  /* 14px */
+
+    #stcontainer p { }
+
+    /* ### Lists | Listen  #### */
+
+    #stcontainer ul, #stcontainer ol, #stcontainer dl {}
+    #stcontainer li {}
+
+    #stcontainer dt { font-weight: bold }
+    #stcontainer dd { margin: 0 0 1em 2em }
+
+    /* ### text formatting | Textauszeichnung ### */
+
+    #stcontainer cite, #stcontainer blockquote { font-style:italic }
+    #stcontainer blockquote { margin: 0 0 1em 1.5em }
+
+    #stcontainer strong,#stcontainer b { font-weight: bold }
+    #stcontainer em,#stcontainer i { font-style:italic }
+
+    #stcontainer pre, #stcontainer code { font-family: monospace; font-size: 1.1em; }
+
+    #stcontainer acronym, #stcontainer abbr {
+        letter-spacing: .07em;
+        border-bottom: .1em dashed #c00;
+        cursor: help;
+    }
+
+    /**
+     * Generic Content Classes
+     * (en) standard classes for positioning and highlighting
+     * (de) Standardklassen zur Positionierung und Hervorhebung
+     *
+     * @section content-generic-classes
+    */
+
+    #stcontainer .note {background: #dfd; padding: 1em; border-top: 1px #bdb dotted; border-bottom: 1px #bdb dotted;}
+    #stcontainer .important {background: #ffd; padding: 1em; border-top: 1px #ddb dotted; border-bottom: 1px #ddb dotted;}
+    #stcontainer .warning {background: #fdd; padding: 1em; border-top: 1px #dbb dotted; border-bottom: 1px #dbb dotted;}
+
+    #stcontainer .float_left { float: left; }
+    #stcontainer .float_right { float: right; }
+    #stcontainer .center { text-align:center; margin: 0.5em auto }
+    #stcontainer .cb{ clear:both; height:0;}
+    #stcontainer .cl{ clear:left; height:0;}
+
+    #stcontainer a {color:#838383; text-decoration:none;}
+    #stcontainer a:focus,
+    #stcontainer a:hover,
+    #stcontainer a:active {text-decoration:underline;}
+
+    #stcontainer #topnav a { color: #aac; font-weight: bold; background:transparent; text-decoration:none; }
+    #stcontainer #topnav a:focus,
+    #stcontainer #topnav a:hover,
+    #stcontainer #topnav a:active{ text-decoration:underline; background-color: transparent;}
+
+    #stcontainer #footer a {color:#d71920; background:transparent; font-weight: normal;}
+    #stcontainer #footer a:focus,
+    #stcontainer #footer a:hover,
+    #stcontainer #footer a:active {color:#d71920; background-color: transparent; text-decoration:underline;}
+
+    /**table { width: auto; border-collapse:collapse; margin-bottom: 0.5em; }
+   table.full { width: 100%; }
+   table.fixed { table-layout:fixed }
+
+   th,td { padding: 0.5em; }
+   thead th { background: #444; color: #fff }
+   tbody th { background: #ccc; color: #333 }
+   tbody th.sub { background: #ddd; color: #333 }*/
+
+    #stcontainer hr {
+        color: #fff;
+        background:transparent;
+        margin: 0 0 0.5em 0;
+        padding: 0 0 0.5em 0;
+        border:0;
+        border-bottom: 1px #000 solid;
+    }
+    #stcontainer img{ background:none; border:none;}
+    #stcontainer img a{ background:none; border:none; line-height:0px;}
+    /*background*/
+    #stcontainer .mh500{min-height: 500px}
+    #stcontainer .bg_login{ background:url(images/bg_top_login.jpg) repeat-x top left #ffffff;}
+    #stcontainer .logo{ width:154px; height:82px;}
+    #stcontainer .w416{ width:416px;}
+    #stcontainer .w346{ width:346px;}
+    #stcontainer .txt1{ width:344px; border:1px solid #DFDFDF; height:22px;}
+    #stcontainer .top_log{background:url(images/top_bg.jpg) no-repeat top center;}
+    #stcontainer .bottom_log{background:url(images/bot_bg.jpg) no-repeat bottom center;}
+    #stcontainer .mid_log{background:url(images/mid_lo.png) repeat-y;}
+    #stcontainer .mc{ margin:0 auto;}
+    #stcontainer .lock{ width:113px; height:117px; background:url(images/lock.png) no-repeat; position:absolute; top:-65px; right:-35px;}
+    #stcontainer .po{ position:relative;}
+    #stcontainer .button_bg{ width:145px; height:35px; text-align:center; background:url(images/login_but.png) no-repeat;}
+    #stcontainer .button_bg a{ font-size:14px; color:#FFFFFF; padding-top:10px; display:block;}
+    #stcontainer .button_bg a:hover{ text-decoration:none; color:#FFFF00;}
+    #stcontainer .red_color{color:#fff;}
+    #stcontainer .upcase{ text-transform:uppercase;}
+
+    /*padding*/
+    #stcontainer .p10t{ padding-top:10px;}
+    #stcontainer .p20t{ padding-top:20px;}
+    #stcontainer .p40t{ padding-top:40px;}
+    #stcontainer .p25t{ padding-top:25px;}
+    #stcontainer .p30b{ padding-bottom:30px;}
+    #stcontainer .p10l{ padding-left:10px;}
+    #stcontainer .p10r{ padding-right:10px;}
+
+    /*margin*/
+    #stcontainer .m60t{ margin-top:60px;}
+
+    /*06122010*/
+    #stcontainer .w98p{ width:99%;}
+    #stcontainer .w100p{ width:100%;}
+    #stcontainer .w80p{ width:87%;}
+    #stcontainer .w15p{ width:100%;}
+    #stcontainer .w100p table{ table-layout:fixed; width:100%;}
+    #stcontainer .w100p table th{
+	background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, rgba(0, 0, 0, 0)), color-stop(100%, rgba(0, 0, 0, 0.07)));
+	  background-image: -webkit-linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.07));
+	  background-image: -moz-linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.07));
+	  background-image: -o-linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.07));
+	  background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.07));
+	  background-color: #f5f5f5 !important;
+	  border-color: #f5f5f5 !important;
+	  border-color: rgba(246, 245, 242, 0.3) !important;
+	  border-width: 2px !important;
+	  color: #333333 !important;
+	  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.15) !important;
+	  *background-color: #f5f5f5 !important;
+		height:23px; color:#FFFFFF;
+        font-weight:normal;
+        padding:5px;
+        text-align:left;
+        font-size: 12px;
+		font-variant:small-caps;
+        font-family: arial;
+        border-right: 1px solid #fff;
+        vertical-align: middle;
+
+    }
+    #stcontainer .w100p table td{ border-bottom:1px solid #ffffff; padding:10px 10px 10px 10px}
+    #stcontainer .w100p .bg_gray1{ background:#f6f6f6;}
+    #stcontainer .w100p .bg_gray2{ background:#efefef;}
+    #stcontainer .w100p .bor{ border-right:1px solid #c3c3c3;}
+    #stcontainer .w100p .bowr{ border-right:1px solid #ffffff;}
+    #stcontainer .b1px{ background:#f5f5f5;border:1px solid #DFDFDF; padding:1px 1px 1px 1px;}
+    #stcontainer .bg_header_dash{ display: none; background:url(images/header_dash.jpg) repeat-x; height:94px;}
+    #stcontainer .bg_top_content{ background:url(images/bg_content_top.jpg) repeat-x; height:67px;}
+    #stcontainer .w230{ width:230px;}
+    #stcontainer .lbl_sort{ width:75px; float:left;}
+    #stcontainer .combo_sort{ width:155px; height:20px;}
+    #stcontainer .page_d{ width:100%; text-align:center; padding-top:20px;}
+    #stcontainer .page_d ul{ list-style:none; margin-left:0px; text-align:center; width:242px; margin:0 auto;}
+    #stcontainer .page_d ul li{ width:21px; height:46px;  background:#f5f5f5; text-align:center; float:left; margin-right:1px; padding-top:0px;}
+    #stcontainer .page_d ul li:hover{ background:#f5f5f5; }
+    #stcontainer .page_d ul li a{ display:block; color:#FFFFFF; text-decoration:none;}
+    #stcontainer .page_d .current{ background:#f5f5f5; }
+    #stcontainer .bgl {border:1px solid #DFDFDF; background:#ffffff; margin-top:10px;}
+    #stcontainer .bgr{ border:1px solid #DFDFDF; background:#ffffff; }
+    #stcontainer .bg_col_right{  background: linear-gradient(to top, #373737 0px, #464646 5px) repeat scroll 0 0 #464646;
+    color: #444444;}
+    #stcontainer .bg_col_right1{  background:#ffffff; }
+    #stcontainer .bg_col_right_bot{ background: linear-gradient(to top, #373737 0px, #464646 5px) repeat scroll 0 0 #464646;
+    color: #444444; height:22px;}
+    #stcontainer .cham_left{ width:6px; height:67px; background: linear-gradient(to top, #373737 0px, #464646 5px) repeat scroll 0 0 #464646;
+    color: #444444; position:absolute; top:0px; left:0px;}
+    #stcontainer .cham_left1{ width:6px; height:15px; background: linear-gradient(to top, #373737 0px, #464646 5px) repeat scroll 0 0 #464646;
+    color: #444444; position:absolute; top:0px; left:0px;}
+    #stcontainer .cham_left_bot{ width:6px; height:22px; background: linear-gradient(to top, #373737 0px, #464646 5px) repeat scroll 0 0 #464646;
+    color: #444444;; position:absolute; bottom:0px; left:0px;}
+    #stcontainer .cham_right_bot{ width:6px; height:22px;background: linear-gradient(to top, #373737 0px, #464646 5px) repeat scroll 0 0 #464646;
+    color: #444444; position:absolute; bottom:0px; right:0px;}
+    #stcontainer .cham_right{ width:6px; height:67px; background: linear-gradient(to top, #373737 0px, #464646 5px) repeat scroll 0 0 #464646;
+    color: #444444; position:absolute; top:0px; right:0px;}
+    #stcontainer .cham_right1{ width:6px; height:15px; background: linear-gradient(to top, #373737 0px, #464646 5px) repeat scroll 0 0 #464646;
+    color: #444444; position:absolute; top:0px; right:0px;}
+    #stcontainer .po{ position:relative;}
+    #stcontainer .icon_re{height:32px; background:url(images/register_icon.png) no-repeat; padding-left:50px; padding-top:10px;}
+    #stcontainer .icon_default{height:32px; background:transparent; padding-left:50px; padding-top:10px;}
+    #stcontainer .p15l{ padding-left:15px;}
+    #stcontainer .p15t{ padding-top:15px;}
+
+
+
+
+    #stcontainer .m5b{ margin-bottom:5px;}
+    #stcontainer .p20b{ padding-bottom:20px;}
+    #stcontainer .left_menu{ width:98%; padding-top:15px;}
+    #stcontainer .left_menu ul{ margin-left:0px; padding-left:0px; list-style:none; margin-bottom:0px;}
+    #stcontainer .left_menu ul li{ background:url(images/bullet.png) no-repeat 15px 9px; padding-left:10px; height:auto; border-bottom:1px solid #FFFFFF}
+    #stcontainer .left_menu ul li:hover{background:url(images/bullet_over.png) no-repeat 15px 9px #464646;}
+    #stcontainer .left_menu ul li a{ display:block; padding-left:15px; padding-top:5px; padding-bottom:5px; color:#000000;}
+    #stcontainer .left_menu ul li a:hover{ color:#FFFFFF; text-decoration:none;}
+    #stcontainer .left_menu .current{background:url(images/bullet_over.png) no-repeat 15px 9px #464646;}
+    #stcontainer .left_menu .current a{ color:#FFFFFF;}
+    #stcontainer .left_menu ul li {margin: 0px;}
+    /*extra css*/
+    #stcontainer #inner_content{
+        width: 98%;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .short_action div{
+        color: #21759B;
+        float: left;
+    }
+
+    .short_action div:hover,
+    .short_action div:active{
+        color: #D54E21;
+    }
+
+    .short_action div.trash{
+        color: #D54E21;
+        background:url(images/bin_icon.png) center top no-repeat;
+        width: 19px;
+        height: 20px;
+    }
+
+    #stcontainer .short_action div.edit{
+        color: #D54E21;
+        background:url(images/edit_icon.png) center top no-repeat;
+        width: 19px;
+        height: 20px;
+    }
+
+    #stcontainer .short_action .trash:hover,
+    #stcontainer .short_action .trash:active{
+        color: #FF0000;
+    }
+
+    /*Miscellaneous*/
+    #loading {
+        clear:both;
+        text-align:center;
+        padding:33px 0px 10px 0px;
+        font-size:12px;
+        /*position: fixed;*/
+        font-family:Verdana, Arial, Helvetica, sans-serif;
+        left:55%;
+        top:50%;
+        display: none;
+        z-index: 1000;
+        font-size: 2em;
+        font-weight: bold;
+        margin: 0.67em 0;
+    }
+
+    #stcontainer .float_left{
+        float:left
+    }
+
+    #stcontainer th span.icon_desc{
+        background: url(images/icon_desc.png)  no-repeat right;
+        width: 18px;
+        height: 16px;
+        float: right;
+    }
+
+    #stcontainer th span.icon_asc{
+        background: url(images/icon_asc.png)  no-repeat right;
+        float: right;
+        width: 18px;
+        height: 16px;
+    }
+
+    #stcontainer .hide{
+        display: none;
+    }
+
+    #stcontainer a.button{
+        text-decoration: none;
+    }
+    #stcontainer th.column-id{
+        width: 35px;
+    }
+
+    #stcontainer th.column-short_action{
+        width: 155px;
+    }
+
+    #stcontainer .inner_container{
+        padding: 15px;
+    }
+
+    #stcontainer .short_action span,
+    #stcontainer .short_action span a {
+        color: #21759B;
+    }
+
+    #stcontainer .short_action span.trash{
+        color: #D54E21;
+    }
+
+    #stcontainer .short_action span.trash:hover{
+        color: #FF0000;
+    }
+
+    #stcontainer .short_action span:hover,
+    #stcontainer .short_action span a:hover,
+    #stcontainer .short_action span:active,
+    #stcontainer .short_action span a:active{
+        color: #D54E21;
+        text-decoration: none;
+    }
+
+    #stcontainer #side-nav{
+        float:left;
+        width:12%;
+    }
+
+    /* Standard Form */
+    #stcontainer form.stform{
+        padding: 25px 0 0 15px;
+		margin-top:10px;
+    }
+
+    #stcontainer form.stform ul li img.preview{
+        border:2px solid #DFDFDF;
+        float:left;
+        margin:3px;
+        padding:5px;
+        width:114px;
+    }
+
+    img.favicon{
+	width:16px !important;
+	height:16px !important;
+    }
+	
+    #stcontainer form.stform ul{
+        list-style: none;
+        margin: 0;
+        padding: 0
+    }
+    #stcontainer form.stform ul li{
+        margin: 0;
+        padding: 0 0 10px;
+        width: 80%;
+    }
+    #stcontainer form.stform ul label{
+         width:200px;
+         float:left;
+         padding: 7px 0 0;
+    }
+
+    #stcontainer form.stform ul li div label{
+        float:none;
+        width: auto;
+        padding: 0;
+    }
+
+    #stcontainer form.stform ul li div div{
+        float:left;
+        background: transparent;
+        width: 100px;
+        padding: 0
+    }
+
+    #stcontainer form.stform ul li div div.upload_button_div{
+        float:none;
+        background: transparent;
+        width: auto;
+        padding: 0;
+        margin: 10px 0;
+    }
+
+    #stcontainer form.stform ul li div label.required{
+        background: url("images/icon_required.png") no-repeat scroll right 0px transparent;
+        padding-right: 10px;
+    }
+
+    #stcontainer form.stform ul li div{
+        padding: 5px 15px 5px 5px;
+        float: left;
+        background-color: #fff;
+        width: 305px;
+    }
+
+    #stcontainer form.stform ul li div.error,
+    #stcontainer form.stform ul li div div.error{
+        border: none;
+        background-color: #FFEBE8;
+    }
+
+    #stcontainer form.stform div.required{
+        background: url("images/icon_required.png") no-repeat scroll 315px 4px #fff;
+    }
+
+    #stcontainer form.stform ul li input[type="text"],
+    #stcontainer form.stform ul li input[type="password"],
+    #stcontainer form.stform ul li select,
+    #stcontainer form.stform ul li textarea{
+        width:300px;
+        border:1px solid #DFDFDF;
+        height:22px;
+    }
+
+    #stcontainer form.stform ul li textarea{
+        height:100px;
+        overflow: auto;
+    }
+
+    #stcontainer form.stform ul li select{
+        width:302px;
+    }
+
+    #stcontainer form.stform ul input[type="text"]:hover,
+    #stcontainer form.stform ul input[type="text"]:focus,
+    #stcontainer form.stform ul input[type="password"]:hover,
+    #stcontainer form.stform ul input[type="password"]:focus,
+    #stcontainer form.stform ul select:hover,
+    #stcontainer form.stform ul select:focus,
+    #stcontainer form.stform ul textarea:hover,
+    #stcontainer form.stform ul textarea:focus{
+        background:scroll #ffffff none 0 0 repeat;
+    }
+    /*
+    #stcontainer form.stform ul li input[type="checkbox"],
+    #stcontainer form.stform ul li input[type="radio"]{
+        width:14px;
+        border: none 1px ;
+        margin-bottom:0px;
+    }
+
+
+    #stcontainer form.stform ul li input:hover[type="checkbox"],
+    #stcontainer form.stform ul li input:hover[type="radio"],
+    #stcontainer form.stform ul li input:focus[type="checkbox"],
+    #stcontainer form.stform ul li input:focus[type="radio"]{
+        background:transparent;
+    }
+    */
+
+
+
+    #stcontainer form.stform .desc{
+        background-color: #DFDFDF;
+        border: #E6E6E6 solid 1px;
+        width: 20%;
+        padding: 3px;
+        margin: 0;
+        float: left;
+        visibility: hidden;
+    }
+
+    #stcontainer form.stform .error{
+        border: red solid 1px;
+        margin: 0;
+    }
+
+    #stcontainer form.stform input.error{
+        margin: 1px;
+    }
+    #stcontainer form.stform textarea.error{
+        margin: 1px;
+    }
+
+  	#stcontainer .button {  
+		background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, rgba(0, 0, 0, 0)), color-stop(100%, rgba(0, 0, 0, 0.07)));
+	  background-image: -webkit-linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.07));
+	  background-image: -moz-linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.07));
+	  background-image: -o-linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.07));
+	  background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.07));
+	  background-color: #EC644B !important;
+	  border-color: #f5f5f5 !important;
+	  border-color: rgba(246, 245, 242, 0.3) !important;
+	  border-width: 2px !important;
+	  height: 30px !important;
+    line-height: 18px !important;
+	  color: white !important;
+	  border-radius:0 !important;
+	  margin: -5px 0 0 !important;
+	  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.15) !important;
+	  *background-color: #1b99b8 !important;
+		padding:5px 10px !important;
+    }
+    #stcontainer form.stform button,
+    #stcontainer form.stform input[type="submit"]{
+	  background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, rgba(0, 0, 0, 0)), color-stop(100%, rgba(0, 0, 0, 0.07)));
+	  background-image: -webkit-linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.07));
+	  background-image: -moz-linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.07));
+	  background-image: -o-linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.07));
+	  background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.07));
+	  background-color: #EC644B !important;
+	  border-color: #f5f5f5 !important;
+	  border-color: rgba(246, 245, 242, 0.3) !important;
+	  border-width: 2px !important;
+	  height: 30px !important;
+    line-height: 25px !important;
+	  color: white !important;
+	  margin:15px 0 10px 203px !important;
+	  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.15) !important;
+	  *background-color: #1b99b8 !important;
+		padding:5px 10px !important;
+    }
+	#stcontainer #tabs a span:hover,
+	#stcontainer form.stform .button:hover, #stcontainer form.stform .button:focus,
+	#stcontainer .button:hover,
+	#stcontainer .button:focus,
+    #stcontainer form.stform input[type="submit"]:focus,
+    #stcontainer form.stform input[type="submit"]:hover{
+      background: #333333 !important;
+	  color: white;
+	  *background: #333333;
+    }
+
+	#stcontainer form.stform .button {
+	background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, rgba(0, 0, 0, 0)), color-stop(100%, rgba(0, 0, 0, 0.07)));
+	  background-image: -webkit-linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.07));
+	  background-image: -moz-linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.07));
+	  background-image: -o-linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.07));
+	  background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.07));
+	  background-color: #EC644B !important;
+	  border-color: #f5f5f5 !important;
+	  border-color: rgba(246, 245, 242, 0.3) !important;
+	  border-width: 2px !important;
+	  height: 30px !important;
+		line-height: 18px !important;
+	  color: white !important;
+	  border-radius:0 !important;
+	  margin:15px 0 !important;
+	  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.15) !important;
+	  *background-color: #1b99b8 !important;
+    }
+	#stcontainer form.stform .button:hover, #stcontainer form.stform .button:focus, #stcontainer form.stform .button:active, #stcontainer form.stform .button.active, #stcontainer form.stform .button.disabled, #stcontainer form.stform .button[disabled] {
+	  background-color: #EC644B;
+	  color: white;
+	  *background-color: #EC644B;
+	}
+
+	#stcontainer form.stform .button:active, #stcontainer form.stform .button.active {
+	  background-color: #EC644B \9;
+	}
+	
+
+    /* Tooltip ----------------------------------*/
+    .ui-tooltip {
+        padding:8px;
+        position:absolute;
+        z-index:9999;
+        -o-box-shadow: 0 0 5px #aaa;
+        -moz-box-shadow: 0 0 5px #aaa;
+        -webkit-box-shadow: 0 0 5px #aaa;
+        box-shadow: 0 0 5px #aaa;
+    }
+    /* Fades and background-images don't work well together in IE6, drop the image */
+    * html .ui-tooltip {
+        background-image: none;
+    }
+    body .ui-tooltip { border-width:2px; }
+    /*NOTIFICATION BOX - NO DESCRIPTION */
+
+    #stcontainer .notification {
+        min-height: 70px;
+        width: 580px;
+        display: none;
+        position: fixed;
+        left: 33%;
+        top: 45%;
+
+        /*Border Radius*/
+        border-radius: 5px;
+        -moz-border-radius: 5px;
+        -webkit-border-radius: 5px;
+
+        /*Box Shadow*/
+        -moz-box-shadow: 2px 2px 2px #cfcfcf;
+        -webkit-box-shadow: 2px 2px 4px #cfcfcf;
+        box-shadow: 2px 2px 2px #cfcfcf;
+        cursor: pointer;
+        margin-bottom: 30px;
+    }
+
+    #stcontainer .notification span {
+        background: url("images/error.png") no-repeat right top;
+        display: block;
+        width: 19px;
+        height: 19px;
+        position: absolute;
+        top:-9px;
+        right: -8px;
+    }
+
+    #stcontainer .notification .text {
+        overflow: hidden;
+
+    }
+    #stcontainer .notification .text span{
+        background: transparent;
+        width: auto;
+        height: auto;
+        position: relative;
+        top:0;
+        right: 0;
+    }
+
+    #stcontainer .notification p {
+        width: 500px;
+        font-family: Arial, Helvetica, sans-serif;
+        color: #323232;
+        font-size: 14px;
+        line-height: 21px;
+        text-align: justify;
+        float: right;
+        margin: 1em 15px 1em 0;
+        *margin-top: 15px; /*for lt IE8*/
+
+
+        /* TEXT SHADOW */
+        text-shadow: 0px 0px 1px #f9f9f9;
+    }
+
+    /*Auto Width Rules*/
+
+    #stcontainer .autoWidth{
+        width: auto;
+    }
+
+    #stcontainer .autoWidth p {
+        width: auto;
+        float: left;
+    }
+
+
+
+    /*SUCCESS BOX*/
+
+    #stcontainer .notification_success {
+        border-top: 1px solid #edf7d0;
+        border-bottom: 1px solid #b7e789;
+
+        /*Background Gradients*/
+        background: #dff3a8;
+        background: -moz-linear-gradient(top,#dff3a8,#c4fb92);
+        background: -webkit-gradient(linear, left top, left bottom, from(#dff3a8), to(#c4fb92));
+    }
+
+    #stcontainer .notification_success:before {
+        float: left;
+        margin: 23px 15px 0px 15px;
+    }
+
+    #stcontainer .notification_success strong {
+        color: #61b316;
+        margin-right: 15px;
+    }
+
+    /*ERROR BOX*/
+
+    #stcontainer .notification_error {
+        border-top: 1px solid #f7d0d0;
+        border-bottom: 1px solid #c87676;
+
+        /*Background Gradients*/
+        background: #f3c7c7;
+        background: -moz-linear-gradient(top,#f3c7c7,#eea2a2);
+        background: -webkit-gradient(linear, left top, left bottom, from(#f3c7c7), to(#eea2a2));
+    }
+
+    #stcontainer .notification_error:before {
+        content: url("images/error.png");
+        float: left;
+        margin: 20px 15px 0px 15px;
+    }
+
+    #stcontainer .notification_error strong {
+        color: #b31616;
+        margin-right: 15px;
+    }
+
+    /*MESSAGE BOX*/
+
+    #stcontainer .notification_message {
+        border-top: 1px solid #f4f4f4;
+        border-bottom: 1px solid #d7d7d7;
+
+        /*Background Gradients*/
+        background: #f0f0f0;
+        background: -moz-linear-gradient(top,#f0f0f0,#e1e1e1);
+        background: -webkit-gradient(linear, left top, left bottom, from(#f0f0f0), to(#e1e1e1));
+    }
+
+    #stcontainer .notification_message:before {
+        float: left;
+        margin: 25px 15px 0px 15px;
+    }
+
+    #stcontainer .notification_message strong {
+        color: #323232;
+        margin-right: 15px;
+    }
+
+    /*WARNING BOX*/
+
+
+
+    .ui-button-text-only span.ui-button-text {
+        text-transform: uppercase;
+    }
+
+    .stDialog {
+        min-height: 70px;
+        width: 580px !important;
+        display: none;
+        position: fixed;
+        left: 33%;
+        top: 45%;
+        padding: 20px 15px 0 0;
+        background: transparent;
+        border:none;
+    }
+
+    .stDialog .ui-dialog-content{
+        border-top: 1px solid #fefbcd;
+        border-bottom: 1px solid #e6e837;
+        border-radius: 5px;
+        -moz-border-radius: 5px;
+        -webkit-border-radius: 5px;
+        -moz-box-shadow: 2px 2px 2px #cfcfcf;
+        -webkit-box-shadow: 2px 2px 4px #cfcfcf;
+        box-shadow: 2px 2px 2px #cfcfcf;
+        /*Background Gradients*/
+        background: #feffb1;
+        background: -moz-linear-gradient(top,#feffb1,#f0f17f);
+        background: -webkit-gradient(linear, left top, left bottom, from(#feffb1), to(#f0f17f));
+        padding-bottom: 30px;
+    }
+    .stDialog .ui-dialog-content:before {
+            content: url(images/warning.png);
+            float: left;
+            margin: 15px 15px 0px 25px;
+    }
+
+    .stDialog .ui-dialog-content strong {
+            color: #e5ac00;
+            margin-right: 15px;
+    }
+
+    .stDialog .ui-dialog-titlebar-close span {
+        display: block;
+        width: 19px;
+        height: 19px;
+        position: relative;
+        top:0;
+        right: 0;
+    }
+
+    .stDialog .ui-dialog-titlebar-close:hover{
+        padding: 1px;
+    }
+
+    .stDialog a.ui-state-hover,
+    .stDialog a.ui-state-forcus{
+        background: transparent;
+        border: none;
+        padding: 1px;
+    }
+
+    .stDialog .ui-widget-header {
+        background: none repeat scroll 0 0 transparent;
+        border: medium none;
+        float: right;
+        height: 20px;
+        position: absolute;
+        right: 0;
+        top: 2px;
+        z-index: 9999;
+    }
+    .stDialog .ui-widget-header .ui-dialog-title{
+        display: none;
+    }
+
+    .stDialog p {
+        font-family: Arial, Helvetica, sans-serif;
+        color: #323232;
+        font-size: 14px;
+        line-height: 21px;
+        text-align: justify;
+        float: left;
+        margin-right: 15px;
+        *margin-top: 15px; /*for lt IE8*/
+        /* TEXT SHADOW */
+        text-shadow: 0px 0px 1px #f9f9f9;
+        width: 400px;
+    }
+
+    .stDialog .ui-dialog-buttonpane {
+        background: transparent;
+        border-width: 0;
+        margin: -46px 0 0 0;
+        padding: 0;
+        text-align: left;
+    }
+
+    .stDialog .ui-dialog-buttonpane .ui-dialog-buttonset {
+        float: right;
+    }
+
+    /* Swicht button */
+
+    #stcontainer .cb-enable, .cb-disable, .cb-enable span, .cb-disable span { background: url(images/switch.gif) repeat-x; display: block; float: left; }
+    #stcontainer .cb-enable span, .cb-disable span { line-height: 30px; display: block; background-repeat: no-repeat; font-weight: bold; }
+    #stcontainer .cb-enable span { background-position: left -90px; padding: 0 10px; }
+    #stcontainer .cb-disable span { background-position: right -180px;padding: 0 10px; }
+    #stcontainer .cb-disable.selected { background-position: 0 -30px; }
+    #stcontainer .cb-disable.selected span { background-position: right -210px; color: #fff; }
+    #stcontainer .cb-enable.selected { background-position: 0 -60px; }
+    #stcontainer .cb-enable.selected span { background-position: left -150px; color: #fff; }
+    #stcontainer .switch label { cursor: pointer; }
+    /*    Check button*/
+    #stcontainer div.switch_checkbox{
+        background: url("images/icon_checkbox.png") no-repeat left top;
+        display: block;
+        float: left;
+        width: 15px;
+        height: 15px;
+        cursor: pointer;
+    }
+
+    #stcontainer div.cb-disable{
+        background-position: 0;
+    }
+    #stcontainer div.cb-enable{
+        background-position: -16px 0;
+    }
+    /*    Editor css*/
+    #stcontainer #poststuff table{ table-layout:fixed; width: auto;}
+    #stcontainer #poststuff table th{
+        background:none;
+        height:auto;
+        font-weight:normal;
+        padding:0;
+        width: auto;
+        
+    }
+    #stcontainer #poststuff table td{ padding:0px; border: none;}
+    #stcontainer #poststuff .bg_gray1{ background:#f6f6f6;}
+    #stcontainer #poststuff .bg_gray2{ background:#efefef;}
+    #stcontainer #poststuff .bor{ border-right:0px solid #c3c3c3;}
+    #stcontainer #poststuff .bowr{ border-right:0px solid #ffffff;}
+    
+
+    #stcontainer form.stform ul li div#poststuff div{
+        width: 100%;
+    }
+    #stcontainer form.stform ul li div#poststuff div#media-buttons{
+        width: 200px;
+    }
+    #stcontainer form.stform ul li div#poststuff:hover,
+    #stcontainer form.stform ul li div#poststuff div:hover,
+    #stcontainer form.stform ul li div#poststuff div.focus{
+        background-color: transparent;
+    }
+    #stcontainer form.stform ul li div#poststuff div#quicktags {
+        background-color: #DFDFDF;
+        background-image: url("images/ed-bg.gif");
+        border-color: #DFDFDF;
+    }
+    #stcontainer #editorcontainer textarea {
+        width: 99.9%;
+        border: none;
+        height: 150px;
+    }
+    #stcontainer form.stform ul li div#poststuff tr.mceLast td.mceLast div{
+        width: 90%;
+    }
+    #stcontainer form.stform ul li div#poststuff div.wp-media-buttons {
+        line-height: 1;
+        padding: 9px 0 0;
+        width: auto;
+    }
+    #stcontainer form.stform ul li div#poststuff .quicktags-toolbar{
+        background-color: #E9E9E9;
+    }
+    #stcontainer form.stform ul li div#poststuff #post-body .postarea .wp_themeSkin .mceStatusbar a.mceResize{
+        top: 0px;
+    }
+
+    /* About tab */
+    #stcontainer .b1px_gray{ border:1px solid #c1c1c1; padding:1px 1px 1px 1px;}
+    #stcontainer .bg_list{ background:url(images/bg_list.jpg) repeat-x; color:#FFF; font-size:15px; padding:5px 0px 7px 0px;}
+    #stcontainer .bg_tt_list{ background:url(images/icon_list.jpg) no-repeat 0px 0px; padding-left:25px; line-height:18px;}
+    #stcontainer .t_w80{ width:64%;}
+    #stcontainer .t_w98{ width:98%;}
+    #stcontainer .t_w20{ width:18.5%;}
+    #stcontainer .m5r{ margin-right:5px;}
+    #stcontainer .b1pd{ border-bottom:1px dotted #999999; padding-bottom:10px;}
+    #stcontainer .gray_color{ color:#999999;}
+    #stcontainer .bg_top_form{ width:100%; height:14px;}
+    #stcontainer .bg_bot_form{ width:100%; height:11px; } 
+    #stcontainer .form_con{ width:480px; padding-left:35px;}
+    #stcontainer .bg_txt{ width:85%; height:24px; padding-top:5px; padding-left:10px; margin-bottom:3px;}
+    #stcontainer .bg_comment{  width:85%; height:122px; margin-bottom:3px; padding-top:5px; padding-left:10px; overflow: auto } /*background:url(images/bg_comment.jpg) repeat;border:0px;*/
+    #stcontainer .lbl_form{ width:76px; float:left;}
+    #stcontainer .white_bg_po{ background:#FFF; position:absolute; top:-19px; left:35px; padding:5px 5px 5px 5px;}
+    #stcontainer .w256{ width:100%;}
+    #stcontainer .w256 p{ line-height:20px;}
+    #stcontainer .bg_tt_con{ background:url("images/bg_tt_contact.jpg") repeat-x; color:#FFF; font-size:15px; padding:7px 0px 7px 0; width:100%;}
+    #stcontainer .bg_country{ background:url("images/bg_country.jpg") no-repeat; padding:7px 0px 18px 10px; font-weight:bold; color:#F00;}
+    #stcontainer .letter{ width:63px; height:48px; position:absolute; top:-17px; left:0px; background:url(images/letter.png) no-repeat;}
+    #stcontainer .bg_list p{
+        margin: 0;
+    }
+
+    #stcontainer p.img_feed img{
+        margin-right: 5px;
+        border: 1px solid #C1C1C1;
+        padding: 1px;
+        float: left;
+        width: 200px;
+        height: auto;
+    }
+
+    #stcontainer form.form_con input.error {
+        margin-bottom: 3px;
+    }
+    #stcontainer form.form_con textarea.error {
+        margin-bottom: 3px;
+    }
+
+    /**********************************/
+
+    #stcontainer a.buttonAction{
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+    #stcontainer .buttonActionContainer{
+        left: 186px;
+        margin-top: -30px;
+        position: absolute;
+    }
+
+    #stcontainer div.showMenuButton{
+        background: url("images/show_admin_btn.png") no-repeat;
+        height: 25px;
+        width: 121px;
+        cursor: pointer;
+        float: right;
+    }
+
+    #stcontainer div.switch_checkbox{
+        background: url("images/icon_checkbox.png") no-repeat left top;
+        display: block;
+        float: left;
+        width: 15px;
+        height: 15px;
+        cursor: pointer;
+    }
+
+    #stcontainer div.cb-disable{
+        background-position: 0;
+    }
+    #stcontainer div.cb-enable{
+        background-position: -16px 0;
+    }
+
+    #stcontainer div.togglescreen{
+        background: url("images/togglescreen.png") no-repeat left top;
+        width: 24px;
+        height: 24px;
+        background-position: 0 -24px;
+        cursor: pointer;
+    }
+    
+    /*    Custom Field css*/
+    #side-sortables .stCustomField,
+    #advanced-sortables .stCustomField,
+    #normal-sortables .stCustomField{
+        margin-bottom: 30px;
+    }
+    
+    #side-sortables .stCustomField h3.hndle,
+    #advanced-sortables .stCustomField h3.hndle,
+    #normal-sortables .stCustomField h3.hndle{
+        background: url("images/red-grad.png") repeat-x scroll left top #DFDFDF;
+        text-shadow: 0 0px 0 #FFFFFF;
+        color: #FFFFFF;
+    }
+    
+    #side-sortables .ui-sortable .stCustomField h3.hndle,
+    #side-sortables .ui-sortable .stCustomField h3.hndle:hover,
+    #advanced-sortables .ui-sortable .stCustomField h3.hndle,
+    #advanced-sortables .ui-sortable .stCustomField h3.hndle:hover,
+    #normal-sortables .ui-sortable .stCustomField h3.hndle,
+    #normal-sortables .ui-sortable .stCustomField h3.hndle:hover{        
+        color: #FFFFFF;
+    }    
+    
+    #side-sortables .stCustomField h3 span.logo{
+        background: url("images/logo_post_side.png") no-repeat scroll left top;
+        width: 70px;
+        height: 38px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        margin: 0 0 0 5px;
+    }
+    
+    #advanced-sortables .stCustomField h3 span.logo,
+    #normal-sortables .stCustomField h3 span.logo{
+        background: url("images/logo_big.png") no-repeat scroll left top;
+        width: 100px;
+        height: 53px;
+        position: absolute;
+        left: 0;
+        top: 0;
+        margin: 0 0 0 5px;
+    }
+    
+    #advanced-sortables .stCustomField h3 span,
+    #normal-sortables .stCustomField h3 span{
+        margin-left: 100px;
+    }
+    
+    #side-sortables .stCustomField h3 span{
+        margin-left: 75px;
+    }
+    
+    #advanced-sortables .stForm,
+    #normal-sortables .stForm{
+        margin-top: 35px;
+        padding-bottom: 10px;
+    }
+    
+    #side-sortables .stForm {
+        margin-top: 20px;
+        padding-bottom: 10px;
+    }
+
+    .meta-box-sortables .stCustomField:hover div.handlediv {
+        background: url("images/menu-bits.gif") no-repeat scroll left -111px transparent;
+    }
+    
+    #side-sortables .stCustomField .stForm ul{
+        margin-left: 15px;
+    }
+    
+    .stCustomField .stForm label{
+         width:100px;
+         float:left;
+         padding: 0;
+         font-size: 12px;
+    }
+    
+    #side-sortables .stCustomField .stForm label{        
+        width:100%;
+    }
+
+    .stCustomField .stForm input[type="text"],
+    .stCustomField .stForm input[type="password"],
+    .stCustomField .stForm select,
+    .stCustomField .stForm textarea{
+        width:300px;
+        border:1px solid #DFDFDF;
+        height:22px;
+    }
+    
+    #side-sortables .stCustomField .stForm input[type="text"],
+    #side-sortables .stCustomField .stForm input[type="password"],
+    #side-sortables .stCustomField .stForm select,
+    #side-sortables .stCustomField .stForm textarea{
+        width:230px;
+    }
+
+    .stCustomField .stForm textarea{
+        height:100px;
+        overflow: auto;
+    }
+
+    .stCustomField .stForm select{
+        width:302px;
+    }
+    
+    #side-sortables .stCustomField .stForm select{
+        width:232px;
+    }
+
+    .stCustomField .stForm input[type="text"]:hover,
+    .stCustomField .stForm input[type="text"]:focus,
+    .stCustomField .stForm input[type="password"]:hover,
+    .stCustomField .stForm input[type="password"]:focus,
+    .stCustomField .stForm select:hover,
+    .stCustomField .stForm select:focus,
+    .stCustomField .stForm textarea:hover,
+    .stCustomField .stForm textarea:focus{
+        background:scroll #ffffff none 0 0 repeat;
+    }
+    
+    #stcontainer #tabs {
+
+        width:100%;
+        font-size:12px;
+        line-height:normal;
+        overflow:hidden;
+		height:33px;
+		margin-top:10px;
+    }
+
+    #stcontainer #tabs ul {
+        margin:0;
+
+        list-style:none;
+        padding-top:6px;
+        padding-left:15px;
+
+    }
+
+    #stcontainer #tabs li {
+        display:inline;
+        margin:0;
+        padding:0;
+    }
+
+    #stcontainer #tabs a {
+        float:left;
+        margin:0;
+        padding:0 0 0 8px;
+        text-decoration:none;
+    }
+
+    #stcontainer #tabs a span {
+		background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, rgba(0, 0, 0, 0)), color-stop(100%, rgba(0, 0, 0, 0.07)));
+	  background-image: -webkit-linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.07));
+	  background-image: -moz-linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.07));
+	  background-image: -o-linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.07));
+	  background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.07));
+	  background-color: #EC644B !important;
+	  border-color: #f5f5f5 !important;
+	  border-color: rgba(246, 245, 242, 0.3) !important;
+	  border-width: 2px !important;
+	  height: 30px !important;
+		line-height: 28px !important;
+	  color: white !important;
+	  border-radius:0 !important;
+	  padding:5px 10px;
+	  margin:15px 0 !important;
+	  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.15) !important;
+	  *background-color: #1b99b8 !important;
+    }
+    /* Commented Backslash Hack hides rule from IE5-Mac \*/
+    #stcontainer #tabs a span {float:none;}
+
+    /* End IE5-Mac hack */
+    #stcontainer #tabs a:hover span {
+    }
+
+    #stcontainer #tabs a:hover {
+        background-position:0% -32px;
+        color:#fff;
+    }
+
+    #stcontainer #tabs a:hover span {
+        background-position:100% -32px;
+        color:#fff;
+    }
+    #stcontainer #tabs .current a{
+        background-position:0% -32px;
+        color:#fff;
+    }
+    #stcontainer #tabs .current span{
+        background-position:100% -32px;
+        color:#fff;
+    }
+    /*    Begin subtabs menu*/
+    #stcontainer .sub_tabs {
+
+        /*	width:583px;*/
+        font-size:93%;
+        line-height:normal;
+
+        margin-bottom:1em; /*margin between menu and rest of page*/
+        overflow:hidden;
+        padding-top:3px;
+        float: right;
+    }
+
+    #stcontainer .sub_tabs ul {
+        margin:0;
+        padding:0px 10px 0 0px;
+        list-style:none;
+        /*	width:583px;*/
+
+    }
+
+    #stcontainer .sub_tabs li {
+        display:inline;
+        margin:0;
+        padding:0;
+    }
+
+    #stcontainer .sub_tabs a {
+        float:left;
+        background:url(images/left_sub.png) no-repeat left top;
+        margin:0;
+        padding:0 0 0 6px;
+        text-decoration:none;
+    }
+
+    #stcontainer .sub_tabs a span {
+        float:left;
+        display:block;
+        background:url(images/right_sub.png) no-repeat right top;
+        padding:4px 12px 4px 6px;
+        margin-right:2px;
+        color:#FFF;
+    }
+
+    /* Commented Backslash Hack hides rule from IE5-Mac \*/
+    #stcontainer .sub_tabs a span {float:none;}
+
+    /* End IE5-Mac hack */
+    #stcontainer .sub_tabs a:hover span {
+    }
+
+    #stcontainer .sub_tabs a:hover {
+        background-position:0% -28px;
+        text-decoration:none;
+    }
+
+    #stcontainer .sub_tabs a:hover span {
+        background-position:100% -28px;
+        text-decoration:none;
+    }
+    #stcontainer .sub_tabs .curr_sub a{
+        background-position:0% -28px;
+        text-decoration:none;
+    }
+
+    #stcontainer .sub_tabs .curr_sub a span {
+        background-position:100% -28px;
+        text-decoration:none;
+    }
+
+}
