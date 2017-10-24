@@ -1,313 +1,399 @@
 <?php
 
-
 if (!defined('SMF'))
 	die('Hacking attempt...');
 
-function DownloadsMain()
+function AddCategory()
 {
-	global $boardurl, $modSettings, $boarddir, $currentVersion, $context;
+	global $context,  $smcFunc;
 
-	$currentVersion = '2.0';
+	$context['downloads_boards'] = array('');
+	$request = $smcFunc['db_query']('', "
+	SELECT
+		b.ID_BOARD, b.name AS bName, c.name AS cName
+	FROM {db_prefix}boards AS b, {db_prefix}categories AS c
+	WHERE b.ID_CAT = c.ID_CAT ORDER BY c.cat_order, b.board_order");
+	while ($row = $smcFunc['db_fetch_assoc']($request))
+		$context['downloads_boards'][$row['ID_BOARD']] = $row['cName'] . ' - ' . $row['bName'];
+	$smcFunc['db_free_result']($request);
 
-	if (empty($modSettings['tema_url']))
-		$modSettings['tema_url'] = $boardurl . '/tema/';
+	 $dbresult = $smcFunc['db_query']('', "
+	 SELECT
+	 	c.ID_CAT, c.title,c.roworder
+	 FROM {db_prefix}tema_cat AS c
+	 ORDER BY c.roworder ASC");
+	$context['downloads_cat'] = array();
+	 while($row = $smcFunc['db_fetch_assoc']($dbresult))
+		{
+			$context['downloads_cat'][] = array(
+			'ID_CAT' => $row['ID_CAT'],
+			'title' => $row['title'],
+			'roworder' => $row['roworder'],
+			);
+		}
+	$smcFunc['db_free_result']($dbresult);
 
-	if (empty($modSettings['tema_path']))
-		$modSettings['tema_path'] = $boarddir . '/tema/';
-
-	// Load the language files
-	if (loadlanguage('tema') == false)
-		loadLanguage('tema','english');
-
-
-   loadtemplate('tema2.1');
-   $context['downloads21beta'] = true;
-
-
-	// Download Actions pretty big array heh
-	$subActions = array(
-		'view' => 'Downloads_ViewDownload',
-		'bulkactions' => 'Downloads_BulkActions',
-		'delete' => 'Downloads_DeleteDownload',
-		'delete2' => 'Downloads_DeleteDownload2',
-		'edit' => 'Downloads_EditDownload',
-		'edit2' => 'Downloads_EditDownload2',
-		'report' => 'Downloads_ReportDownload',
-		'report2' => 'Downloads_ReportDownload2',
-		'deletereport' => 'Downloads_DeleteReport',
-		'reportlist' => 'Downloads_ReportList',
-		'rate' => 'Downloads_RateDownload',
-		'viewrating' => 'Downloads_ViewRating',
-		'delrating' => 'Downloads_DeleteRating',
-		'catup' => 'Downloads_CatUp',
-		'catdown' => 'Downloads_CatDown',
-		'catperm' => 'Downloads_CatPerm',
-		'catperm2' => 'Downloads_CatPerm2',
-		'catpermlist' => 'Downloads_CatPermList',
-		'catpermdelete' => 'Downloads_CatPermDelete',
-		'catimgdel' => 'Downloads_CatImageDelete',
-		'fileimgdel' => 'Downloads_FileImageDelete',
-		'addcat' => 'Downloads_AddCategory',
-		'addcat2' => 'Downloads_AddCategory2',
-		'editcat' => 'Downloads_EditCategory',
-		'editcat2' => 'Downloads_EditCategory2',
-		'deletecat' => 'Downloads_DeleteCategory',
-		'deletecat2' => 'Downloads_DeleteCategory2',
-		'myfiles' => 'Downloads_MyFiles',
-		'approvelist' => 'Downloads_ApproveList',
-		'approve' => 'Downloads_ApproveDownload',
-		'unapprove' => 'Downloads_UnApproveDownload',
-		'add' => 'Downloads_AddDownload',
-		'add2' => 'Downloads_AddDownload2',
-		'search' => 'Downloads_Search',
-		'search2' => 'Downloads_Search2',
-		'stats' => 'Downloads_Stats',
-		'filespace' => 'Downloads_FileSpaceAdmin',
-		'filelist' => 'Downloads_FileSpaceList',
-		'recountquota' => 'Downloads_RecountFileQuotaTotals',
-		'addquota' => 'Downloads_AddQuota',
-		'deletequota' => 'Downloads_DeleteQuota',
-		'next' => 'Downloads_NextDownload',
-		'prev' => 'Downloads_PreviousDownload',
-		'cusup' => 'Downloads_CustomUp',
-		'cusdown' => 'Downloads_CustomDown',
-		'cusadd' => 'Downloads_CustomAdd',
-		'cusdelete' => 'Downloads_CustomDelete',
-		'downfile' => 'Downloads_DownloadFile',
-		'import' => 'Downloads_ImportDownloads',
-		'importtp' => 'Downloads_ImportTinyPortalDownloads',
-
-	);
-
-
-	// Follow the sa or just go to  the main function
-	if (isset($_GET['sa']))
-		$sa = $_GET['sa'];
+	if (isset($_REQUEST['cat']))
+		$parent  = (int) $_REQUEST['cat'];
 	else
-		$sa = '';
-		
-	if (!empty($subActions[$sa]))
-		$subActions[$sa]();
-	else
-		Downloads_MainView();
+		$parent = 0;
 
+	$context['cat_parent'] = $parent;
+}
+
+function AddCategory2($title,$description,$image,$boardselect,$parent,$locktopic,$disablerating,$sortby,$orderby)
+{
+	global $txt, $sourcedir, $modSettings, $smcFunc;
+	
+	// Do the order
+	$dbresult = $smcFunc['db_query']('', "
+	SELECT
+		MAX(roworder) as cat_order
+	FROM {db_prefix}tema_cat
+	WHERE ID_PARENT = $parent
+	ORDER BY roworder DESC");
+	$row = $smcFunc['db_fetch_assoc']($dbresult);
+
+	if ($smcFunc['db_affected_rows']() == 0)
+		$order = 0;
+	else
+		$order = $row['cat_order'];
+	$order++;
+
+	// Insert the category
+	$smcFunc['db_query']('', "INSERT INTO {db_prefix}tema_cat
+			(title, description,roworder,image,ID_BOARD,ID_PARENT,disablerating,locktopic,sortby,orderby)
+		VALUES ('$title', '$description',$order,'$image',$boardselect,$parent,$disablerating,$locktopic,'$sortby','$orderby')");
+	$smcFunc['db_free_result']($dbresult);
+
+	// Get the Category ID
+	$cat_id = $smcFunc['db_insert_id']('{db_prefix}tema_cat', 'id_cat');
+
+
+	$testGD = get_extension_funcs('gd');
+	$gd2 = in_array('imagecreatetruecolor', $testGD) && function_exists('imagecreatetruecolor');
+	unset($testGD);
+
+	// Upload Category image File
+	if (isset($_FILES['picture']['name']) && $_FILES['picture']['name'] != '')
+	{
+
+		$sizes = @getimagesize($_FILES['picture']['tmp_name']);
+
+			// No size, then it's probably not a valid pic.
+			if ($sizes === false)
+				fatal_error($txt['tema_error_invalid_picture'],false);
+
+			require_once($sourcedir . '/Subs-Graphics.php');
+
+			if ((!empty($modSettings['tema_set_cat_width']) && $sizes[0] > $modSettings['tema_set_cat_width']) || (!empty($modSettings['tema_set_cat_height']) && $sizes[1] > $modSettings['tema_set_cat_height']))
+			{
+
+					// Delete the temp file
+					@unlink($_FILES['picture']['tmp_name']);
+					fatal_error($txt['tema_error_img_size_height'] . $sizes[1] . $txt['tema_error_img_size_width'] . $sizes[0],false);
+
+			}
+
+		// Move the file
+		$extensions = array(
+					1 => 'gif',
+					2 => 'jpeg',
+					3 => 'png',
+					5 => 'psd',
+					6 => 'bmp',
+					7 => 'tiff',
+					8 => 'tiff',
+					9 => 'jpeg',
+					14 => 'iff',
+					);
+		$extension = isset($extensions[$sizes[2]]) ? $extensions[$sizes[2]] : '.bmp';
+
+
+		$filename = $cat_id . '.' . $extension;
+
+		move_uploaded_file($_FILES['picture']['tmp_name'], $modSettings['tema_path'] . 'catimgs/' . $filename);
+		@chmod($modSettings['tema_path'] . 'catimgs/' . $filename, 0644);
+
+		// Update the filename for the category
+		$smcFunc['db_query']('', "UPDATE {db_prefix}tema_cat
+		SET filename = '$filename' WHERE ID_CAT = $cat_id LIMIT 1");
+
+
+	}
 
 }
 
-function Downloads_MainView()
+function EditCategory($cat)
 {
-	global $context, $scripturl, $mbname, $txt, $modSettings, $user_info, $smcFunc;
+	global $context, $smcFunc;
+	$context['downloads_boards'] = array('');
+	$request = $smcFunc['db_query']('', "
+	SELECT
+		b.ID_BOARD, b.name AS bName, c.name AS cName
+	FROM {db_prefix}boards AS b, {db_prefix}categories AS c
+	WHERE b.ID_CAT = c.ID_CAT ORDER BY c.cat_order, b.board_order");
+	while ($row = $smcFunc['db_fetch_assoc']($request))
+		$context['downloads_boards'][$row['ID_BOARD']] = $row['cName'] . ' - ' . $row['bName'];
+	$smcFunc['db_free_result']($request);
 
-	TopDownloadTabs();
-
-	// View the main Downloads
-
-	// Is the user allowed to view the downloads?
-	isAllowedTo('themes_view');
-
-	// Load the main downloads template
-	$context['sub_template']  = 'mainview';
-
-
-	// Get the main groupid
-	if ($user_info['is_guest'])
-		$groupid = -1;
-	else
-		$groupid =  $user_info['groups'][0];
-
-	if (isset($_REQUEST['cat']))
-		$cat = (int) $_REQUEST['cat'];
-	else
-		$cat = 0;
-
-	if (!empty($cat))
-	{
-
-		// Check the permission
-		Downloads_GetCatPermission($cat,'view');
-
-		// Get category name used for the page title
-		$dbresult1 = $smcFunc['db_query']('', "
-		SELECT
-			ID_CAT, title, roworder, description, image,
-			disablerating, orderby, sortby,ID_PARENT
-		FROM {db_prefix}tema_cat
-		WHERE ID_CAT = $cat LIMIT 1");
-		$row1 = $smcFunc['db_fetch_assoc']($dbresult1);
-		$context['downloads_cat_name'] = $row1['title'];
-		$context['downloads_sortby'] = $row1['sortby'];
-		$context['downloads_orderby'] = $row1['orderby'];
-		$context['downloads_cat_norate'] = $row1['disablerating'];
-		if ($context['downloads_cat_norate'] == '')
-			$context['downloads_cat_norate'] = 0;
-
-		$smcFunc['db_free_result']($dbresult1);
-
-		Downloads_GetParentLink($row1['ID_PARENT']);
-
-		// Link Tree
-		$context['linktree'][] = array(
-					'url' => $scripturl . '?action=tema;cat=' . $cat,
-					'name' => $context['downloads_cat_name']
-				);
-
-		// Set the page title
-		$context['page_title'] = $mbname . ' - ' . $context['downloads_cat_name'];
-
-		// Get the total number of pages
-		$total = Downloads_GetTotalByCATID($cat);
-
-
-		$context['start'] = (int) $_REQUEST['start'];
-
-		$context['downloads_total'] = $total;
-
-
-		// Check if we are sorting stuff heh
-		$sortby = '';
-		$orderby = '';
-		if (isset($_REQUEST['sortby']))
+	$dbresult = $smcFunc['db_query']('', "
+	SELECT
+		ID_CAT, title,roworder
+	FROM {db_prefix}tema_cat
+	ORDER BY roworder ASC");
+	$context['downloads_cat'] = array();
+	 while($row = $smcFunc['db_fetch_assoc']($dbresult))
 		{
-			switch ($_REQUEST['sortby'])
-			{
-				case 'date':
-					$sortby = 'p.ID_FILE';
-
-				break;
-				case 'title':
-					$sortby = 'p.title';
-				break;
-
-				case 'mostview':
-					$sortby = 'p.views';
-				break;
-
-				case 'mostdowns':
-					$sortby = 'p.totaldownloads';
-				break;
-				case 'filesize':
-					$sortby = 'p.filesize';
-				break;
-				case 'membername':
-					$sortby = 'm.real_name';
-				break;
-
-				case 'mostrated':
-					$sortby = 'p.totalratings';
-				break;
-
-
-				default:
-					$sortby = 'p.ID_FILE';
-				break;
-			}
-
-			$sortby2 = $_REQUEST['sortby'];
-
-			$context['downloads_sortby'] = $sortby2;
-		}
-		else
-		{
-			if (!empty($context['downloads_sortby']))
-				$sortby = $context['downloads_sortby'];
-			else
-				$sortby = 'p.ID_FILE';
-
-			$sortby2 = 'date';
-
-			$context['downloads_sortby'] = $sortby2;
-		}
-
-
-		if (isset($_REQUEST['orderby']))
-		{
-			switch ($_REQUEST['orderby'])
-			{
-				case 'asc':
-					$orderby = 'ASC';
-
-				break;
-				case 'desc':
-					$orderby = 'DESC';
-				break;
-
-
-
-				default:
-					$orderby = 'DESC';
-				break;
-			}
-
-			$orderby2 = $_REQUEST['orderby'];
-
-			$context['downloads_orderby2'] = $orderby2;
-		}
-		else
-		{
-
-			if (!empty($context['downloads_orderby']))
-				$orderby = $context['downloads_orderby'];
-			else
-				$orderby = 'DESC';
-
-			$orderby2 = 'desc';
-
-			$context['downloads_orderby2'] = $orderby2;
-		}
-
-
-		// Show the downloads
-		$dbresult = $smcFunc['db_query']('', "
-		SELECT
-			p.ID_FILE, p.totalratings, p.rating, p.filesize, p.views, p.title, p.id_member, m.real_name,
-		 	 p.date, p.description, p.totaldownloads
-		FROM {db_prefix}tema_file as p
-			LEFT JOIN {db_prefix}members AS m ON (p.id_member = m.id_member)
-		WHERE  p.ID_CAT = $cat AND p.approved = 1
-		ORDER BY $sortby $orderby
-		LIMIT $context[start]," . $modSettings['tema_set_files_per_page']);
-		$context['downloads_files'] = array();
-		while($row = $smcFunc['db_fetch_assoc']($dbresult))
-		{
-			$context['downloads_files'][] = array(
-			'ID_FILE' => $row['ID_FILE'],
+			$context['downloads_cat'][] = array(
+			'ID_CAT' => $row['ID_CAT'],
 			'title' => $row['title'],
-			'totalratings' => $row['totalratings'],
-			'rating' => $row['rating'],
-			'filesize' => $row['filesize'],
-			'views' => $row['views'],
-			'id_member' => $row['id_member'],
-			'real_name' => $row['real_name'],
-			'date' => $row['date'],
+			'roworder' => $row['roworder'],
+			);
+		}
+	$smcFunc['db_free_result']($dbresult);
+
+	$dbresult = $smcFunc['db_query']('', "
+	SELECT
+		ID_CAT, title, image, filename, description,ID_BOARD,
+		ID_PARENT,disablerating, redirect, showpostlink, locktopic, sortby, orderby
+	FROM {db_prefix}tema_cat
+	WHERE ID_CAT = $cat LIMIT 1");
+
+	$row = $smcFunc['db_fetch_assoc']($dbresult);
+			$context['tema_catinfo'] = array(
+			'ID_CAT' => $row['ID_CAT'],
+			'title' => $row['title'],
+			'image' => $row['image'],
+			'filename' => $row['filename'],
 			'description' => $row['description'],
-			'totaldownloads' => $row['totaldownloads'],
+			'ID_BOARD' => $row['ID_BOARD'],
+			'ID_PARENT' => $row['ID_PARENT'],
+			'disablerating' => $row['disablerating'],
+			'redirect' => $row['redirect'],
+			'showpostlink' => $row['showpostlink'],
+			'locktopic' => $row['locktopic'],
+			'sortby' => $row['sortby'],
+			'orderby' => $row['orderby'],
+			);
+	$smcFunc['db_free_result']($dbresult);
+
+
+	// Get all the custom fields
+	$dbresult = $smcFunc['db_query']('', "
+	SELECT
+		title, defaultvalue, is_required, ID_CUSTOM
+	FROM  {db_prefix}tema_custom_field
+	WHERE ID_CAT = " . $context['tema_catinfo']['ID_CAT'] . "
+	ORDER BY roworder desc");
+	$context['tema_custom'] = array();
+	while($row = $smcFunc['db_fetch_assoc']($dbresult))
+	{
+			$context['tema_custom'][] = array(
+			'title' => $row['title'],
+			'ID_CUSTOM' => $row['ID_CUSTOM'],
+			'defaultvalue' => $row['defaultvalue'],
+			'is_required' => $row['is_required'],
 
 			);
-
-		}
-		$smcFunc['db_free_result']($dbresult);
-
+	}
+	$smcFunc['db_free_result']($dbresult);
 
 
-		$context['page_index'] = constructPageIndex($scripturl . '?action=tema;cat=' . $cat . ';sortby=' . $context['downloads_sortby'] . ';orderby=' . $context['downloads_orderby2'], $_REQUEST['start'], $total, $modSettings['tema_set_files_per_page']);
+	$context['catid'] = $cat;
+
+}
+
+function EditCategory2($title,$description,$catid,$image,$boardselect,$parent,$locktopic,$disablerating,$sortby,$orderby)
+{
+	global $txt, $modSettings, $sourcedir, $smcFunc;
+
+	$smcFunc['db_query']('', "UPDATE {db_prefix}tema_cat
+		SET title = '$title', image = '$image', description = '$description', ID_BOARD = $boardselect,
+		ID_PARENT = $parent, disablerating = $disablerating, locktopic = $locktopic,
+		orderby = '$orderby', sortby = '$sortby'
+		WHERE ID_CAT = $catid LIMIT 1");
 
 
+	$testGD = get_extension_funcs('gd');
+	$gd2 = in_array('imagecreatetruecolor', $testGD) && function_exists('imagecreatetruecolor');
+	unset($testGD);
+
+	// Upload Category image File
+	if (isset($_FILES['picture']['name']) && $_FILES['picture']['name'] != '')
+	{
+		$sizes = @getimagesize($_FILES['picture']['tmp_name']);
+
+			// No size, then it's probably not a valid pic.
+			if ($sizes === false)
+				fatal_error($txt['tema_error_invalid_picture'],false);
+
+			require_once($sourcedir . '/Subs-Graphics.php');
+
+			if ((!empty($modSettings['tema_set_cat_width']) && $sizes[0] > $modSettings['tema_set_cat_width']) || (!empty($modSettings['tema_set_cat_height']) && $sizes[1] > $modSettings['tema_set_cat_height']))
+			{
+
+				// Delete the temp file
+				@unlink($_FILES['picture']['tmp_name']);
+				fatal_error($txt['tema_error_img_size_height'] . $sizes[1] . $txt['tema_error_img_size_width'] . $sizes[0],false);
+
+			}
+		// Move the file
+		$extensions = array(
+					1 => 'gif',
+					2 => 'jpeg',
+					3 => 'png',
+					5 => 'psd',
+					6 => 'bmp',
+					7 => 'tiff',
+					8 => 'tiff',
+					9 => 'jpeg',
+					14 => 'iff',
+					);
+		$extension = isset($extensions[$sizes[2]]) ? $extensions[$sizes[2]] : '.bmp';
 
 
-		if (!empty($modSettings['tema_who_viewing']))
-		{
-			$context['can_moderate_forum'] = allowedTo('moderate_forum');
+		$filename = $catid . '.' . $extension;
 
-				// SMF 1.1.x
-				// Taken from Display.php
-				// Start out with no one at all viewing it.
+		move_uploaded_file($_FILES['picture']['tmp_name'], $modSettings['tema_path'] . 'catimgs/' . $filename);
+		@chmod($modSettings['tema_path'] . 'catimgs/' . $filename, 0644);
+
+		$smcFunc['db_query']('', "UPDATE {db_prefix}tema_cat
+		SET filename = '$filename' WHERE ID_CAT = $catid LIMIT 1");
+
+
+	}
+}
+function DeleteCategory($catid)
+{
+	global $context, $mbname, $txt, $smcFunc;
+	$context['catid'] = $catid;
+	$dbresult = $smcFunc['db_query']('', "
+	SELECT
+		ID_CAT, title
+	FROM {db_prefix}tema_cat
+	WHERE ID_CAT = $catid");
+	$row = $smcFunc['db_fetch_assoc']($dbresult);
+	$context['cat_title'] = $row['title'];
+	$smcFunc['db_free_result']($dbresult);
+	$dbresult2 = $smcFunc['db_query']('', "
+	SELECT
+		COUNT(*) as totalfiles
+	FROM {db_prefix}tema_file
+	WHERE ID_CAT = $catid AND approved = 1");
+	$row2 = $smcFunc['db_fetch_assoc']($dbresult2);
+	$context['totalfiles'] = $row2['totalfiles'];
+	$smcFunc['db_free_result']($dbresult2);
+
+}
+
+function DeleteCategory2($catid)
+{
+	global $modSettings, $smcFunc;
+	@ini_set('max_execution_time', '300');
+	$dbresult = $smcFunc['db_query']('', "
+	SELECT
+		ID_FILE, filename
+	FROM {db_prefix}tema_file
+	WHERE ID_CAT = $catid");
+	while($row = $smcFunc['db_fetch_assoc']($dbresult))
+	{
+		@unlink($modSettings['tema_path'] . $row['filename']);
+		$smcFunc['db_query']('', "DELETE FROM {db_prefix}tema_rating WHERE ID_FILE  = " . $row['ID_FILE']);
+		$smcFunc['db_query']('', "DELETE FROM {db_prefix}tema_report WHERE ID_FILE  = " . $row['ID_FILE']);
+		$smcFunc['db_query']('', "DELETE FROM {db_prefix}tema_creport WHERE ID_FILE  = " . $row['ID_FILE']);
+	}
+	$smcFunc['db_free_result']($dbresult);
+	$smcFunc['db_query']('', "UPDATE {db_prefix}tema_cat SET ID_PARENT = 0 WHERE ID_PARENT = $catid");
+	$smcFunc['db_query']('', "DELETE FROM {db_prefix}tema_file WHERE ID_CAT = $catid");
+	$smcFunc['db_query']('', "DELETE FROM {db_prefix}tema_cat WHERE ID_CAT = $catid LIMIT 1");
+}
+
+function ViewDownload($id)
+{
+	global $context,  $modSettings, $user_info, $scripturl, $txt, $smcFunc;
+	$dbresult = $smcFunc['db_query']('', "
+	SELECT
+		ID_FILE, ID_CAT
+	FROM {db_prefix}tema_file
+	WHERE ID_FILE = $id  LIMIT 1");
+	$row = $smcFunc['db_fetch_assoc']($dbresult);
+	$smcFunc['db_free_result']($dbresult);
+	$dbresult = $smcFunc['db_query']('', "
+	SELECT
+		p.ID_FILE, p.totalratings, p.rating, p.ID_CAT, p.keywords, p.demourl,
+		p.filesize, p.filename, p.orginalfilename, p.fileurl,
+	 	p.approved, p.views, p.title, p.id_member, m.real_name, p.date, p.description,
+	   	c.title CAT_TITLE, c.ID_PARENT, c.disablerating, p.credits, p.totaldownloads,  p.lastdownload, p.picture, p.pictureurl
+	FROM ({db_prefix}tema_file as p,  {db_prefix}tema_cat AS c)
+		LEFT JOIN {db_prefix}members AS m ON  (p.id_member = m.id_member)
+	WHERE p.ID_FILE = $id AND p.ID_CAT = c.ID_CAT LIMIT 1");
+    if ($smcFunc['db_affected_rows']()== 0)
+    	fatal_error($txt['tema_error_no_downloadexist'],false);
+    $row = $smcFunc['db_fetch_assoc']($dbresult);
+    GetCatPermission($row['ID_CAT'],'view');
+	if ($row['approved'] == 0 && $user_info['id'] != $row['id_member'])
+	{
+		if (!allowedTo('themes_manage'))
+			fatal_error($txt['tema_error_file_notapproved'],false);
+	}
+	$context['downloads_file'] = array(
+		'ID_FILE' => $row['ID_FILE'],
+		'id_member' => $row['id_member'],
+		'views' => $row['views'],
+		'title' => $row['title'],
+		'description' => $row['description'],
+		'filesize' => $row['filesize'],
+		'filename' => $row['filename'],
+		'ID_CAT' => $row['ID_CAT'],
+		'date' => timeformat($row['date']),
+		'keywords' => $row['keywords'],
+		'real_name' => $row['real_name'],
+		'totalratings' => $row['totalratings'],
+		'rating' => $row['rating'],
+		'CAT_TITLE' => $row['CAT_TITLE'],
+		'disablerating' => @$row['disablerating'],
+		'credits' => $row['credits'],
+		'orginalfilename' => $row['orginalfilename'],
+		'totaldownloads' => $row['totaldownloads'],
+		'lastdownload' => $row['lastdownload'],
+		'fileurl' => $row['fileurl'],
+		'picture' => $row['picture'],
+		'pictureurl' => $row['pictureurl'],
+		'demourl' => $row['demourl'],
+	);
+	$smcFunc['db_free_result']($dbresult);
+	GetParentLink($row['ID_PARENT']);
+	$context['linktree'][] = array(
+					'url' => $scripturl . '?action=tema;cat=' . $row['ID_CAT'],
+					'name' => $row['CAT_TITLE']
+				);
+	$result = $smcFunc['db_query']('', "
+	SELECT
+		f.title, d.value
+	FROM  ({db_prefix}tema_custom_field as f,{db_prefix}tema_custom_field_data as d)
+	WHERE d.ID_CUSTOM = f.ID_CUSTOM AND d.ID_FILE = " . $context['downloads_file']['ID_FILE'] .  "
+	ORDER BY f.roworder desc");
+	$context['downloads_custom'] = array();
+	while ($row = $smcFunc['db_fetch_assoc']($result))
+	{
+		$context['downloads_custom'][] = array(
+			'value' => $row['value'],
+			'title' => $row['title'],
+		);
+	}
+	$smcFunc['db_free_result']($result);
+	$dbresult = $smcFunc['db_query']('', "UPDATE {db_prefix}tema_file
+		SET views = views + 1 WHERE ID_FILE = $id LIMIT 1");
+	if (!empty($modSettings['tema_who_viewing']))
+	{
+		$context['can_moderate_forum'] = allowedTo('moderate_forum');
+
 				$context['view_members'] = array();
 				$context['view_members_list'] = array();
 				$context['view_num_hidden'] = 0;
-				$whoID = (string) $cat;
+				$whoID = (string) $id;
 
-				// Search for members who have this downloads id set in their GET data.
 				$request = $smcFunc['db_query']('', "
 					SELECT
 						lo.id_member, lo.log_time, mem.real_name, mem.member_name, mem.show_online,
@@ -315,7 +401,7 @@ function Downloads_MainView()
 					FROM {db_prefix}log_online AS lo
 						LEFT JOIN {db_prefix}members AS mem ON (mem.id_member = lo.id_member)
 						LEFT JOIN {db_prefix}membergroups AS mg ON (mg.ID_GROUP = IF(mem.ID_GROUP = 0, mem.ID_POST_GROUP, mem.ID_GROUP))
-					WHERE INSTR(lo.url, 's:9:\"downloads\";s:3:\"cat\";s:" . strlen($whoID ) .":\"$cat\";') OR lo.session = '" . ($user_info['is_guest'] ? 'ip' . $user_info['ip'] : session_id()) . "'");
+					WHERE INSTR(lo.url, 's:9:\"downloads\";s:2:\"sa\";s:4:\"view\";s:2:\"id\";s:" . strlen($whoID ) .":\"$id\";') OR lo.session = '" . ($user_info['is_guest'] ? 'ip' . $user_info['ip'] : session_id()) . "'");
 				while ($row = $smcFunc['db_fetch_assoc']($request))
 				{
 					if (empty($row['id_member']))
@@ -330,7 +416,6 @@ function Downloads_MainView()
 					if ($is_buddy)
 						$link = '<b>' . $link . '</b>';
 
-					// Add them both to the list and to the more detailed list.
 					if (!empty($row['show_online']) || allowedTo('moderate_forum'))
 						$context['view_members_list'][$row['log_time'] . $row['member_name']] = empty($row['show_online']) ? '<i>' . $link . '</i>' : $link;
 					$context['view_members'][$row['log_time'] . $row['member_name']] = array(
@@ -348,551 +433,823 @@ function Downloads_MainView()
 						$context['view_num_hidden']++;
 				}
 
-				// The number of guests is equal to the rows minus the ones we actually used ;).
 				$context['view_num_guests'] = $smcFunc['db_num_rows']($request) - count($context['view_members']);
 				$smcFunc['db_free_result']($request);
 
-				// Sort the list.
 				krsort($context['view_members']);
 				krsort($context['view_members_list']);
 
+
+	}
+}
+
+function AddDownload($cat)
+{
+	global $context, $txt,  $user_info, $smcFunc;
+	$context['tema_cat'] = $cat;
+	GetCatPermission($cat,'addfile');
+	if ($user_info['is_guest'])
+		$groupid = -1;
+	else
+		$groupid =  $user_info['groups'][0];
+		$dbresult = $smcFunc['db_query']('', "
+		SELECT
+			c.ID_CAT, c.title, p.view, p.addfile
+		FROM {db_prefix}tema_cat AS c
+			LEFT JOIN {db_prefix}tema_catperm AS p ON (p.ID_GROUP = $groupid AND c.ID_CAT = p.ID_CAT)
+		WHERE c.redirect = 0 ORDER BY c.roworder ASC");
+		if ($smcFunc['db_num_rows']($dbresult) == 0)
+		 	fatal_error($txt['tema_error_no_catexists'] , false);
+
+		$context['downloads_cat'] = array();
+		 while($row = $smcFunc['db_fetch_assoc']($dbresult))
+			{
+				if ($row['view'] == '0' || $row['addfile'] == '0' )
+					continue;
+
+				$context['downloads_cat'][] = array(
+					'ID_CAT' => $row['ID_CAT'],
+					'title' => $row['title'],
+				);
+			}
+		$smcFunc['db_free_result']($dbresult);
+
+	$result = $smcFunc['db_query']('', "
+	SELECT
+		title, defaultvalue, is_required, ID_CUSTOM
+	FROM  {db_prefix}tema_custom_field
+	WHERE ID_CAT = " . $cat);
+	$context['downloads_custom'] = array();
+	while ($row = $smcFunc['db_fetch_assoc']($result))
+	{
+			$context['downloads_custom'][] = array(
+					'ID_CUSTOM' => $row['ID_CUSTOM'],
+					'title' => $row['title'],
+					'defaultvalue' => $row['defaultvalue'],
+					'is_required' => $row['is_required'],
+				);
+	}
+	$smcFunc['db_free_result']($result);
+	$context['quotalimit'] = GetQuotaGroupLimit($user_info['id']);
+	$context['userspace'] = GetUserSpaceUsed($user_info['id']);
+}
+
+function AddDownload2($title,$description,$keywords,$cat,$fileurl,$demourl,$pictureurl,$filesize,$approved )
+{
+	global $txt, $scripturl, $modSettings, $sourcedir, $gd2, $user_info, $smcFunc;
+	GetCatPermission($cat,'addfile');
+	if (!empty($modSettings['tema_set_enable_multifolder']))
+		CreateDownloadFolder();
+		$result = $smcFunc['db_query']('', "
+		SELECT
+			f.title, f.is_required, f.ID_CUSTOM
+		FROM  {db_prefix}tema_custom_field as f
+		WHERE f.is_required = 1 AND f.ID_CAT = " . $cat);
+		while ($row2 = $smcFunc['db_fetch_assoc']($result))
+		{
+	 		if (!isset($_REQUEST['cus_' . $row2['ID_CUSTOM']]))
+	 		{
+	 			fatal_error($txt['tema_err_req_custom_field'] . $row2['title'], false);
+	 		}
+	 		else
+	 		{
+	 			if ($_REQUEST['cus_' . $row2['ID_CUSTOM']] == '')
+	 				fatal_error($txt['tema_err_req_custom_field'] . $row2['title'], false);
+	 		}
+	 	}
+		$smcFunc['db_free_result']($result);
+	$dbresult = $smcFunc['db_query']('', "
+	SELECT
+		ID_BOARD,locktopic
+	FROM {db_prefix}tema_cat
+	WHERE ID_CAT = $cat");
+	$rowcat = $smcFunc['db_fetch_assoc']($dbresult);
+	$smcFunc['db_free_result']($dbresult);
+
+	if (isset($_FILES['download']['name']) && $_FILES['download']['name'] != '')
+	{
+		$orginalfilename =  $smcFunc['db_escape_string']($_FILES['download']['name']);
+		$filesize = $_FILES['download']['size'];
+
+		if (!empty($modSettings['tema_max_filesize']) && $filesize > $modSettings['tema_max_filesize'])
+		{
+			@unlink($_FILES['download']['tmp_name']);
+			fatal_error($txt['tema_error_file_filesize'] . format_size($modSettings['tema_max_filesize'] , 2),false);
 		}
 
+		$quotalimit = GetQuotaGroupLimit($user_info['id']);
+		$userspace = GetUserSpaceUsed($user_info['id']);
+		if ($quotalimit != 0  &&  ($userspace + $filesize) >  $quotalimit)
+		{
+			@unlink($_FILES['download']['tmp_name']);
+			fatal_error($txt['tema_error_space_limit'] . format_size($userspace, 2) . ' / ' . format_size($quotalimit, 2),false);
+		}
+		$filename = $user_info['id'] . '_' . date('d_m_y_g_i_s'); //. '.' . $extension;
+		$extrafolder = '';
+		if (!empty($modSettings['tema_set_enable_multifolder']))
+			$extrafolder = $modSettings['tema_folder_id'] . '/';
+		move_uploaded_file($_FILES['download']['tmp_name'], $modSettings['tema_path'] . $extrafolder .  $filename);
+		@chmod($modSettings['tema_path'] . $extrafolder .  $filename, 0644);
+		$t = time();
+		$file_id = 0;
+		$smcFunc['db_query']('', "INSERT INTO {db_prefix}tema_file
+							(ID_CAT, filesize,filename, orginalfilename, keywords, title, description,id_member,date,approved,pictureurl,demourl)
+						VALUES ($cat, $filesize, '" . $extrafolder . $filename . "', '$orginalfilename',   '$keywords','$title', '$description'," . $user_info['id']  . ",$t,$approved,'$pictureurl','$demourl')");
 
+		$file_id = $smcFunc['db_insert_id']('{db_prefix}tema_file', 'id_file');
+		if (!empty($modSettings['tema_set_enable_multifolder']))
+				ComputeNextFolderID($file_id);
 	}
 	else
 	{
-		$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'];
+		if (empty($fileurl))
+			fatal_error($txt['tema_error_no_download']);
+		else
+		{
+			$t = time();
+			$file_id = 0;
+			$smcFunc['db_query']('', "INSERT INTO {db_prefix}tema_file
+								(id_cat, fileurl, keywords, title, description,id_member,date,approved,pictureurl,demourl)
+							VALUES ($cat, '$fileurl', '$keywords', '$title', '$description'," . $user_info['id'] . ",$t,$approved,'$pictureurl','$demourl')");
+			$file_id = $smcFunc['db_insert_id']('{db_prefix}tema_file', 'id_file');;
 
+		}
+
+	}
+	if (isset($_FILES['picture']['name']) && $_FILES['picture']['name'] != '')
+	{
+
+		$sizes = @getimagesize($_FILES['picture']['tmp_name']);
+			if ($sizes === false)
+				fatal_error($txt['tema_error_invalid_picture'],false);
+
+			require_once($sourcedir . '/Subs-Graphics.php');
+			if ((!empty($modSettings['tema_set_file_image_width']) && $sizes[0] > $modSettings['tema_set_file_image_width']) || (!empty($modSettings['tema_set_file_image_height']) && $sizes[1] > $modSettings['tema_set_file_image_height']))
+			{
+				$widthresim = $modSettings['tema_set_file_image_width'];
+				$heightresim = $modSettings['tema_set_file_image_height'];
+				resmikclt($widthresim,$heightresim,$_FILES['picture']['tmp_name'],$_FILES['picture']['tmp_name']);
+			}
+		$extensions = array(
+					1 => 'gif',
+					2 => 'jpeg',
+					3 => 'png',
+					5 => 'psd',
+					6 => 'bmp',
+					7 => 'tiff',
+					8 => 'tiff',
+					9 => 'jpeg',
+					14 => 'iff',
+					);
+		$extension = isset($extensions[$sizes[2]]) ? $extensions[$sizes[2]] : '.bmp';
+		$filename = $file_id . '.' . $extension;
+		move_uploaded_file($_FILES['picture']['tmp_name'], $modSettings['tema_path'] . 'temaresim/' . $filename);
+		@chmod($modSettings['tema_path'] . 'temaresim/' . $filename, 0644);
+		$smcFunc['db_query']('', "UPDATE {db_prefix}tema_file
+		SET picture = '$filename' WHERE ID_FILE = $file_id LIMIT 1");
+	}
+					$result = $smcFunc['db_query']('', "
+					SELECT
+						f.title, f.is_required, f.ID_CUSTOM
+					FROM  {db_prefix}tema_custom_field as f
+					WHERE f.ID_CAT = " . $cat);
+					while ($row2 = $smcFunc['db_fetch_assoc']($result))
+					{
+						if (isset($_REQUEST['cus_' . $row2['ID_CUSTOM']]))
+						{
+
+							$custom_data = $smcFunc['htmlspecialchars']($_REQUEST['cus_' . $row2['ID_CUSTOM']],ENT_QUOTES);
+
+							$smcFunc['db_query']('', "INSERT INTO {db_prefix}tema_custom_field_data
+							(ID_FILE, ID_CUSTOM, value)
+							VALUES('$file_id', " . $row2['ID_CUSTOM'] . ", '$custom_data')");
+						}
+					}
+					$smcFunc['db_free_result']($result);
+
+				if ($filesize != 0)
+					UpdateUserFileSizeTable($user_info['id'],$filesize);
+
+				if ($rowcat['ID_BOARD'] != 0 && $approved == 1)
+				{
+					require_once($sourcedir . '/Subs-Post.php');
+
+					$showpostlink = '[url]' . $scripturl . '?action=tema;sa=view;down=' . $file_id . '[/url]';
+					$msgOptions = array(
+						'id' => 0,
+						'subject' => $title,
+						'body' => '[b]' . $title . "[/b]\n\n$showpostlink",
+						'icon' => 'xx',
+						'smileys_enabled' => 1,
+						'attachments' => array(),
+					);
+					$topicOptions = array(
+						'id' => 0,
+						'board' => $rowcat['ID_BOARD'],
+						'poll' => null,
+						'lock_mode' => $rowcat['locktopic'],
+						'sticky_mode' => null,
+						'mark_as_read' => true,
+					);
+					$posterOptions = array(
+						'id' => $user_info['id'],
+						'update_post_count' => !$user_info['is_guest'] && !isset($_REQUEST['msg']),
+					);
+					preparsecode($msgOptions['body']);
+					createPost($msgOptions, $topicOptions, $posterOptions);
+					$ID_TOPIC = $topicOptions['id'];
+					$smcFunc['db_query']('', "UPDATE {db_prefix}tema_file SET ID_TOPIC = $ID_TOPIC WHERE ID_FILE = $file_id LIMIT 1");
+				}
+				UpdateCategoryTotals($cat);
+}
+
+function EditDownload($id,$groupid)
+{
+	global $context, $txt, $user_info, $smcFunc;
+    $dbresult = $smcFunc['db_query']('', "
+    SELECT
+    	p.ID_FILE, p.ID_CAT, p.keywords, p.filesize,
+    	p.filename, p.approved, p.views, p.title, p.id_member,
+      	m.real_name, p.date, p.description, p.fileurl,p.orginalfilename, p.picture, p.pictureurl, p.demourl
+    FROM {db_prefix}tema_file as p
+       LEFT JOIN {db_prefix}members AS m ON (m.id_member = p.id_member)
+     WHERE p.ID_FILE = $id  LIMIT 1");
+	if ($smcFunc['db_affected_rows']()== 0)
+    	fatal_error($txt['tema_error_no_downloadexist'],false);
+    $row = $smcFunc['db_fetch_assoc']($dbresult);
+	GetCatPermission($row['ID_CAT'],'editfile');
+
+	$context['downloads_file'] = array(
+		'ID_FILE' => $row['ID_FILE'],
+		'id_member' => $row['id_member'],
+		'views' => $row['views'],
+		'title' => $row['title'],
+		'description' => $row['description'],
+		'filesize' => $row['filesize'],
+		'filename' => $row['filename'],
+		'fileurl' => $row['fileurl'],
+		'ID_CAT' => $row['ID_CAT'],
+		'date' => timeformat($row['date']),
+		'keywords' => $row['keywords'],
+		'real_name' => $row['real_name'],
+		'orginalfilename' => $row['orginalfilename'],
+		'picture' => $row['picture'],
+		'pictureurl' => $row['pictureurl'],
+		'demourl' => $row['demourl'],
+	);
+	$smcFunc['db_free_result']($dbresult);
+
+	$result = $smcFunc['db_query']('', "
+	SELECT
+		f.title, f.is_required, f.ID_CUSTOM, d.value
+	FROM  {db_prefix}tema_custom_field as f
+		LEFT JOIN {db_prefix}tema_custom_field_data as d ON (d.ID_CUSTOM = f.ID_CUSTOM)
+	WHERE ID_FILE = " . $context['downloads_file']['ID_FILE'] . " AND ID_CAT = " . $context['downloads_file']['ID_CAT']);
+	$context['downloads_custom'] = array();
+	while ($row = $smcFunc['db_fetch_assoc']($result))
+	{
+		$context['downloads_custom'][] = array(
+			'ID_CUSTOM' => $row['ID_CUSTOM'],
+			'title' => $row['title'],
+			'is_required' => $row['is_required'],
+			'value' => $row['value'],
+
+		);
+	}
+	$smcFunc['db_free_result']($result);
+
+
+	if (allowedTo('themes_manage') || (allowedTo('themes_edit') && $user_info['id'] == $context['downloads_file']['id_member']))
+	{
+		 	$dbresult = $smcFunc['db_query']('', "
+		 	SELECT
+		 		c.ID_CAT, c.title, p.view, p.addfile
+		 	FROM {db_prefix}tema_cat AS c
+		 		LEFT JOIN {db_prefix}tema_catperm AS p ON (p.ID_GROUP = $groupid AND c.ID_CAT = p.ID_CAT)
+		 	WHERE c.redirect = 0 ORDER BY c.roworder ASC");
+			$context['downloads_cat'] = array();
+		 	while($row = $smcFunc['db_fetch_assoc']($dbresult))
+			{
+				if ($row['view'] == '0' || $row['addfile'] == '0' )
+					continue;
+
+				$context['downloads_cat'][] = array(
+				'ID_CAT' => $row['ID_CAT'],
+				'title' => $row['title'],
+				);
+			}
+			$smcFunc['db_free_result']($dbresult);
+
+		$context['quotalimit'] = GetQuotaGroupLimit($user_info['id']);
+		$context['userspace'] = GetUserSpaceUsed($user_info['id']);
+	}
+	else
+		fatal_error($txt['tema_error_noedit_permission']);
+}
+
+function EditDownload2($id,$title,$description,$keywords,$cat,$fileurl,$pictureurl,$demourl,$filesize,$approved)
+{
+	global $txt, $modSettings, $sourcedir, $smcFunc, $user_info;
+    $dbresult = $smcFunc['db_query']('', "
+    SELECT
+    	id_member,ID_CAT, filename,filesize
+    FROM {db_prefix}tema_file
+    WHERE ID_FILE = $id LIMIT 1");
+    $row = $smcFunc['db_fetch_assoc']($dbresult);
+	$memID = $row['id_member'];
+	$oldfilesize = $row['filesize'];
+	$oldfilename = $row['filename'];
+	GetCatPermission($row['ID_CAT'],'editfile');
+
+	$smcFunc['db_free_result']($dbresult);
+	if (allowedTo('themes_manage') || (allowedTo('themes_edit') && $user_info['id'] == $memID))
+	{
+
+		if (!is_writable($modSettings['tema_path']))
+			fatal_error($txt['tema_write_error'] . $modSettings['tema_path']);
+		$result = $smcFunc['db_query']('', "
+		SELECT
+			f.title, f.is_required, f.ID_CUSTOM
+		FROM  {db_prefix}tema_custom_field as f
+		WHERE f.is_required = 1 AND f.ID_CAT = " . $cat);
+		while ($row2 = $smcFunc['db_fetch_assoc']($result))
+		{
+	 		if (!isset($_REQUEST['cus_' . $row2['ID_CUSTOM']]))
+	 		{
+	 			fatal_error($txt['tema_err_req_custom_field'] . $row2['title'], false);
+	 		}
+	 		else
+	 		{
+	 			if ($_REQUEST['cus_' . $row2['ID_CUSTOM']] == '')
+	 				fatal_error($txt['tema_err_req_custom_field'] . $row2['title'], false);
+	 		}
+	 	}
+		$smcFunc['db_free_result']($result);
+
+
+	// Upload Category image File
+	if (isset($_FILES['picture']['name']) && $_FILES['picture']['name'] != '')
+	{
+
+		$sizes = @getimagesize($_FILES['picture']['tmp_name']);
+
+			// No size, then it's probably not a valid pic.
+			if ($sizes === false)
+				fatal_error($txt['tema_error_invalid_picture'],false);
+
+			require_once($sourcedir . '/Subs-Graphics.php');
+
+			if ((!empty($modSettings['tema_set_file_image_width']) && $sizes[0] > $modSettings['tema_set_file_image_width']) || (!empty($modSettings['tema_set_file_image_height']) && $sizes[1] > $modSettings['tema_set_file_image_height']))
+			{
+
+					// Delete the temp file
+					@unlink($_FILES['picture']['tmp_name']);
+					fatal_error($txt['tema_error_img_size_height'] . $sizes[1] . $txt['tema_error_img_size_width'] . $sizes[0],false);
+
+			}
+
+		// Move the file
+		$extensions = array(
+					1 => 'gif',
+					2 => 'jpeg',
+					3 => 'png',
+					5 => 'psd',
+					6 => 'bmp',
+					7 => 'tiff',
+					8 => 'tiff',
+					9 => 'jpeg',
+					14 => 'iff',
+					);
+		$extension = isset($extensions[$sizes[2]]) ? $extensions[$sizes[2]] : '.bmp';
+
+
+		$filename = $id . '.' . $extension;
+
+		move_uploaded_file($_FILES['picture']['tmp_name'], $modSettings['tema_path'] . 'temaresim/' . $filename);
+		@chmod($modSettings['tema_path'] . 'temaresim/' . $filename, 0644);
+
+		// Update the filename for the category
+		$smcFunc['db_query']('', "UPDATE {db_prefix}tema_file
+		SET picture = '$filename' WHERE ID_FILE = $id LIMIT 1");
+
+
+	}
+
+
+		// Process Uploaded file
+		if (isset($_FILES['download']['name']) && $_FILES['download']['name'] != '')
+		{
+
+			// Store the orginal filename
+			$orginalfilename =  $smcFunc['db_escape_string']($_FILES['download']['name']);
+			$filesize = $_FILES['download']['size'];
+
+
+			if (!empty($modSettings['tema_max_filesize']) && $filesize > $modSettings['tema_max_filesize'])
+			{
+				// Delete the temp file
+				@unlink($_FILES['download']['tmp_name']);
+				fatal_error($txt['tema_error_file_filesize'] . format_size($modSettings['tema_max_filesize'], 2) ,false);
+			}
+			// Check Quota
+			$quotalimit = GetQuotaGroupLimit($user_info['id']);
+			$userspace = GetUserSpaceUsed($user_info['id']);
+			// Check if exceeds quota limit or if there is a quota
+			if ($quotalimit != 0  &&  ($userspace + $filesize) >  $quotalimit)
+			{
+				@unlink($_FILES['download']['tmp_name']);
+				fatal_error($txt['tema_error_space_limit'] . format_size($userspace, 2) . ' / ' . format_size($quotalimit, 2) ,false);
+			}
+
+			// Delete the old files
+			@unlink($modSettings['tema_path'] . $oldfilename );
+
+			$extrafolder = '';
+
+			if ($modSettings['tema_set_enable_multifolder'])
+				$extrafolder = $modSettings['tema_folder_id'] . '/';
+
+
+			// Filename Member Id + Day + Month + Year + 24 hour, Minute Seconds
+			$filename = $user_info['id'] . '_' . date('d_m_y_g_i_s');
+			move_uploaded_file($_FILES['download']['tmp_name'], $modSettings['tema_path'] . $extrafolder . $filename);
+			@chmod($modSettings['tema_path'] . $extrafolder . $filename, 0644);
+
+
+			// Update the Database entry
+			$t = time();
+
+			$smcFunc['db_query']('', "UPDATE {db_prefix}tema_file
+					SET ID_CAT = $cat, filesize = $filesize, filename = '" . $extrafolder . $filename . "', approved = $approved,
+					 date =  $t, title = '$title', description = '$description', keywords = '$keywords',
+					  orginalfilename = '$orginalfilename', pictureurl = '$pictureurl', demourl = '$demourl'
+					  WHERE ID_FILE = $id LIMIT 1");
+
+			UpdateUserFileSizeTable($memID,$oldfilesize * -1);
+			UpdateUserFileSizeTable($memID,$filesize);
+
+
+			// Update the file totals
+			if ($cat != $row['ID_CAT'])
+			{
+				UpdateCategoryTotals($cat);
+				UpdateCategoryTotals($row['ID_CAT']);
+			}
+
+
+					// Change the file owner if selected
+					if (allowedTo('themes_manage') && isset($_REQUEST['pic_postername']))
+					{
+						$pic_postername = str_replace('"','', $_REQUEST['pic_postername']);
+						$pic_postername = str_replace("'",'', $pic_postername);
+						$pic_postername = str_replace('\\','', $pic_postername);
+						$pic_postername = $smcFunc['htmlspecialchars']($pic_postername, ENT_QUOTES);
+
+						$memid = 0;
+
+						$dbresult = $smcFunc['db_query']('', "
+						SELECT
+							real_name, id_member
+						FROM {db_prefix}members
+						WHERE real_name = '$pic_postername' OR member_name = '$pic_postername'  LIMIT 1");
+						$row = $smcFunc['db_fetch_assoc']($dbresult);
+						$smcFunc['db_free_result']($dbresult);
+
+						if ($smcFunc['db_affected_rows']() != 0)
+						{
+							// Member found update the file owner
+
+							$memid = $row['id_member'];
+							$smcFunc['db_query']('', "UPDATE {db_prefix}tema_file
+							SET id_member = $memid WHERE ID_FILE = $id LIMIT 1");
+
+						}
+
+					}
+					UpdateCategoryTotalByFileID($id);
+					// Redirect to the users files page.
+					redirectexit('action=tema;sa=myfiles;u=' . $user_info['id']);
+
+
+		}
+		else
+		{
+			// Update the download properties if no upload has been set
+
+				$smcFunc['db_query']('', "UPDATE {db_prefix}tema_file
+				SET ID_CAT = $cat, title = '$title', description = '$description', keywords = '$keywords',
+				approved = $approved,
+				fileurl = '$fileurl', pictureurl = '$pictureurl', demourl = '$demourl'
+
+				WHERE ID_FILE = $id LIMIT 1");
+
+
+					// Update the file totals
+					if ($cat != $row['ID_CAT'])
+					{
+						UpdateCategoryTotals($cat);
+						UpdateCategoryTotals($row['ID_CAT']);
+					}
+
+				// Change the file owner if selected
+
+					if (allowedTo('themes_manage') && isset($_REQUEST['pic_postername']))
+					{
+						$pic_postername = str_replace('"','', $_REQUEST['pic_postername']);
+						$pic_postername = str_replace("'",'', $pic_postername);
+						$pic_postername = str_replace('\\','', $pic_postername);
+						$pic_postername = $smcFunc['htmlspecialchars']($pic_postername, ENT_QUOTES);
+
+						$memid = 0;
+
+						$dbresult = $smcFunc['db_query']('', "
+						SELECT
+							real_name, id_member
+						FROM {db_prefix}members
+						WHERE real_name = '$pic_postername' OR member_name = '$pic_postername'  LIMIT 1");
+						$row = $smcFunc['db_fetch_assoc']($dbresult);
+						$smcFunc['db_free_result']($dbresult);
+
+						if ($smcFunc['db_affected_rows']() != 0)
+						{
+							// Member found update the file owner
+							$memid = $row['id_member'];
+							$smcFunc['db_query']('', "UPDATE {db_prefix}tema_file
+							SET id_member = $memid WHERE ID_FILE = $id LIMIT 1");
+
+
+						}
+
+					}
+
+					UpdateCategoryTotalByFileID($id);
+
+					// Check for any custom fields
+
+					$smcFunc['db_query']('', "DELETE FROM  {db_prefix}tema_custom_field_data
+							WHERE ID_FILE = " . $id);
+
+					$result = $smcFunc['db_query']('', "
+					SELECT
+						f.title, f.is_required, f.ID_CUSTOM
+					FROM  {db_prefix}tema_custom_field as f
+					WHERE f.ID_CAT = " . $cat);
+					while ($row2 = $smcFunc['db_fetch_assoc']($result))
+					{
+						if (isset($_REQUEST['cus_' . $row2['ID_CUSTOM']]))
+						{
+
+							$custom_data = $smcFunc['htmlspecialchars']($_REQUEST['cus_' . $row2['ID_CUSTOM']],ENT_QUOTES);
+
+							$smcFunc['db_query']('', "INSERT INTO {db_prefix}tema_custom_field_data
+							(ID_FILE, ID_CUSTOM, value)
+							VALUES('$id', " . $row2['ID_CUSTOM'] . ", '$custom_data')");
+						}
+					}
+					$smcFunc['db_free_result']($result);
+
+
+			// Redirect to the users files page.
+			redirectexit('action=tema;sa=myfiles;u=' . $user_info['id']);
+
+		}
+
+	}
+	else
+		fatal_error($txt['tema_error_noedit_permission']);
+
+
+}
+
+function DeleteDownload($id)
+{
+	global $context, $txt, $smcFunc;
+    $dbresult = $smcFunc['db_query']('', "
+    SELECT
+    	p.ID_FILE, p.fileurl, p.ID_CAT, p.keywords, p.totaldownloads,
+     	p.filesize, p.filename, p.approved, p.views, p.title, p.id_member, p.date, m.real_name, p.description
+    FROM {db_prefix}tema_file as p
+    LEFT JOIN {db_prefix}members AS m ON (p.id_member = m.id_member)
+    WHERE ID_FILE = $id  LIMIT 1");
+	if ($smcFunc['db_affected_rows']()== 0)
+    	fatal_error($txt['tema_error_no_downloadexist'],false);
+    $row = $smcFunc['db_fetch_assoc']($dbresult);
+	// Check the category permission
+	GetCatPermission($row['ID_CAT'],'delfile');
+	// File information
+	$context['downloads_file'] = array(
+		'ID_FILE' => $row['ID_FILE'],
+		'id_member' => $row['id_member'],
+		'views' => $row['views'],
+		'title' => $row['title'],
+		'description' => $row['description'],
+		'filesize' => $row['filesize'],
+		'filename' => $row['filename'],
+		'ID_CAT' => $row['ID_CAT'],
+		'date' => timeformat($row['date']),
+		'keywords' => $row['keywords'],
+		'real_name' => $row['real_name'],
+		'fileurl' => $row['fileurl'],
+		'totaldownloads' => $row['totaldownloads'],
+	);
+	$smcFunc['db_free_result']($dbresult);
+}
+
+function DeleteDownload2($id)
+{
+	global $txt, $smcFunc;
+    $dbresult = $smcFunc['db_query']('', "
+    SELECT
+    	p.ID_FILE, p.ID_CAT, p.id_member
+    FROM {db_prefix}tema_file as p
+    WHERE ID_FILE = $id LIMIT 1");
+	$row = $smcFunc['db_fetch_assoc']($dbresult);
+	if (empty($row['ID_FILE']))
+		fatal_error($txt['tema_error_no_file_selected'],false);
+	$memID = $row['id_member'];
+	$smcFunc['db_free_result']($dbresult);
+	GetCatPermission($row['ID_CAT'],'delfile');
+}
+
+function DeleteFileByID($id)
+{
+	global $modSettings, $smcFunc, $sourcedir,$boarddir;
+
+	require_once($sourcedir . '/RemoveTopic.php');
+    $dbresult = $smcFunc['db_query']('', "
+    SELECT
+    	p.ID_FILE,  p.ID_CAT, p.filesize, p.filename,  p.id_member, p.ID_TOPIC, p.picture
+    FROM {db_prefix}tema_file as p
+    WHERE ID_FILE = $id LIMIT 1");
+	$row = $smcFunc['db_fetch_assoc']($dbresult);
+	$oldfilesize = $row['filesize'];
+	$memID = $row['id_member'];
+	$smcFunc['db_free_result']($dbresult);
+	if ($row['filename'] != '')
+		@unlink($modSettings['tema_path'] . $row['filename']);
+	$oldfilesize = $oldfilesize * -1;
+	if ($oldfilesize != 0)
+	UpdateUserFileSizeTable($memID,$oldfilesize);
+	UpdateCategoryTotalByFileID($id);
+	$smcFunc['db_query']('', "DELETE FROM {db_prefix}tema_rating WHERE ID_FILE  = $id");
+	$smcFunc['db_query']('', "DELETE FROM {db_prefix}tema_report WHERE ID_FILE  = $id");
+	$smcFunc['db_query']('', "DELETE FROM {db_prefix}tema_creport WHERE ID_FILE  = $id");
+	$smcFunc['db_query']('', "DELETE FROM {db_prefix}tema_custom_field_data WHERE ID_FILE  = $id");
+	$smcFunc['db_query']('', "DELETE FROM {db_prefix}tema_file WHERE ID_FILE = $id LIMIT 1");
+	$yolumuz = $boarddir.'/tema/temaresim/';
+	@unlink($yolumuz.$row['picture']);
+ 	if ($row['ID_TOPIC'] != 0)
+		removeTopics($row['ID_TOPIC']);
+}
+function ReportDownload2($comment,$id,$commentdate,$memid)
+{
+	global  $smcFunc;
+	$smcFunc['db_query']('', "INSERT INTO {db_prefix}tema_report
+			(id_member, comment, date, ID_FILE)
+		VALUES (" . $memid . ",'$comment', $commentdate,$id)");
+}
+
+function CatUp($cat)
+{
+	global $txt, $smcFunc;
+	$dbresult1 = $smcFunc['db_query']('', "
+	SELECT
+		roworder,ID_PARENT
+	FROM {db_prefix}tema_cat
+	WHERE ID_CAT = $cat");
+	$row = $smcFunc['db_fetch_assoc']($dbresult1);
+	$ID_PARENT = $row['ID_PARENT'];
+	$oldrow = $row['roworder'];
+	$o = $row['roworder'];
+	$o--;
+	$smcFunc['db_free_result']($dbresult1);
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
-		c.ID_CAT, c.title, p.view, c.roworder, c.description, c.image, c.filename, c.redirect
-	FROM {db_prefix}tema_cat AS c
-	LEFT JOIN {db_prefix}tema_catperm AS p ON (p.ID_GROUP = $groupid AND c.ID_CAT = p.ID_CAT)
-	WHERE c.ID_PARENT = 0 ORDER BY c.roworder ASC");
-	$context['downloads_cats'] = array();
-	while($row = $smcFunc['db_fetch_assoc']($dbresult))
+		ID_CAT, roworder
+	FROM {db_prefix}tema_cat
+	WHERE ID_PARENT = $ID_PARENT AND roworder = $o");
+	if ($smcFunc['db_affected_rows']() == 0)
+		fatal_error($txt['tema_error_nocat_above'],false);
+	$row2 = $smcFunc['db_fetch_assoc']($dbresult);
+	$smcFunc['db_query']('', "UPDATE {db_prefix}tema_cat
+		SET roworder = $oldrow WHERE ID_CAT = " .$row2['ID_CAT']);
+	$smcFunc['db_query']('', "UPDATE {db_prefix}tema_cat
+		SET roworder = $o WHERE ID_CAT = $cat");
+	$smcFunc['db_free_result']($dbresult);
+	redirectexit('action=tema;cat=' . $ID_PARENT);
+}
+
+function CatDown($cat)
+{
+	global $txt, $smcFunc;
+	$dbresult1 = $smcFunc['db_query']('', "
+	SELECT
+		ID_PARENT, roworder
+	FROM {db_prefix}tema_cat
+	WHERE ID_CAT = $cat LIMIT 1");
+	$row = $smcFunc['db_fetch_assoc']($dbresult1);
+	$ID_PARENT = $row['ID_PARENT'];
+	$oldrow = $row['roworder'];
+	$o = $row['roworder'];
+	$o++;
+
+	$smcFunc['db_free_result']($dbresult1);
+	$dbresult = $smcFunc['db_query']('', "
+	SELECT
+		ID_CAT, roworder
+	FROM {db_prefix}tema_cat
+	WHERE ID_PARENT = $ID_PARENT AND roworder = $o");
+	if ($smcFunc['db_affected_rows']()== 0)
+		fatal_error($txt['tema_error_nocat_below'],false);
+	$row2 = $smcFunc['db_fetch_assoc']($dbresult);
+	$smcFunc['db_query']('', "UPDATE {db_prefix}tema_cat
+		SET roworder = $oldrow WHERE ID_CAT = " .$row2['ID_CAT']);
+	$smcFunc['db_query']('', "UPDATE {db_prefix}tema_cat
+		SET roworder = $o WHERE ID_CAT = $cat");
+	$smcFunc['db_free_result']($dbresult);
+	redirectexit('action=tema;cat=' . $ID_PARENT);
+}
+
+function MyFiles($u)
+{
+	global $context, $modSettings,$smcFunc, $user_info;
+	$context['downloads_userid'] = $u;
+    $dbresult = $smcFunc['db_query']('', "
+    SELECT
+    	real_name
+    FROM {db_prefix}members
+    WHERE id_member = $u LIMIT 1");
+	$row = $smcFunc['db_fetch_assoc']($dbresult);
+	$context['downloads_userdownloads_name'] = $row['real_name'];
+	$smcFunc['db_free_result']($dbresult);
+	$userid = $context['downloads_userid'];
+	$context['start'] = (int) $_REQUEST['start'];
+	$extra_page = '';
+	if ($user_info['id'] == $userid)
+		$extra_page = '';
+	else
+		$extra_page = ' AND p.approved = 1';
+	$dbresult = $smcFunc['db_query']('', "
+	SELECT
+		COUNT(*) AS total
+	FROM {db_prefix}tema_file as p
+	WHERE p.id_member = $userid " . $extra_page);
+	$row = $smcFunc['db_fetch_assoc']($dbresult);
+	$total = $row['total'];
+	$smcFunc['db_free_result']($dbresult);
+	$context['downloads_total'] = $total;
+	if ($user_info['id'] == $userid)
+    	$dbresult = $smcFunc['db_query']('', "
+    	SELECT
+    		p.ID_FILE, p.filesize, p.approved, p.views, p.id_member,
+    		 m.real_name, p.date, p.totaldownloads, p.rating, p.totalratings, p.title
+    	FROM {db_prefix}tema_file as p, {db_prefix}members AS m
+    	WHERE p.id_member = $userid AND p.id_member = m.id_member
+    	ORDER BY p.ID_FILE DESC LIMIT $context[start]," . $modSettings['tema_set_files_per_page']);
+	else
+    	$dbresult = $smcFunc['db_query']('', "
+    	SELECT
+    		p.ID_FILE, p.filesize, p.approved, p.views,
+    		p.id_member, m.real_name, p.date, p.totaldownloads, p.rating, p.totalratings, p.title
+    	FROM {db_prefix}tema_file as p, {db_prefix}members AS m
+    	WHERE p.id_member = $userid AND p.id_member = m.id_member AND p.approved = 1
+    	ORDER BY p.ID_FILE DESC LIMIT $context[start]," . $modSettings['tema_set_files_per_page']);
+
+    	$context['downloads_files'] = array();
+		while($row = $smcFunc['db_fetch_assoc']($dbresult))
 		{
-			$context['downloads_cats'][] = array(
-			'ID_CAT' => $row['ID_CAT'],
+			$context['downloads_files'][] = array(
+			'ID_FILE' => $row['ID_FILE'],
 			'title' => $row['title'],
-			'view' => $row['view'],
-			'roworder' => $row['roworder'],
-			'description' => $row['description'],
-			'filename' => $row['filename'],
-			'redirect' => $row['redirect'],
-			'image' => $row['image'],
+			'totalratings' => $row['totalratings'],
+			'rating' => $row['rating'],
+			'filesize' => $row['filesize'],
+			'views' => $row['views'],
+			'id_member' => $row['id_member'],
+			'real_name' => $row['real_name'],
+			'date' => $row['date'],
+			'totaldownloads' => $row['totaldownloads'],
+			'approved' => $row['approved'],
+
 			);
 
 		}
 		$smcFunc['db_free_result']($dbresult);
-
-
-		// Downloads waiting for approval
-		$dbresult3 = $smcFunc['db_query']('', "
-		SELECT
-			COUNT(*) as totalfiles
-		FROM {db_prefix}tema_file
-		WHERE approved = 0");
-		$row2 = $smcFunc['db_fetch_assoc']($dbresult3);
-		$totalfiles = $row2['totalfiles'];
-		$smcFunc['db_free_result']($dbresult3);
-		$context['downloads_waitapproval'] = $totalfiles;
-		// Reported Downloads
-		$dbresult4 = $smcFunc['db_query']('', "
-		SELECT
-			COUNT(*) as totalreport
-		FROM {db_prefix}tema_report");
-		$row2 = $smcFunc['db_fetch_assoc']($dbresult4);
-		$totalreport = $row2['totalreport'];
-		$smcFunc['db_free_result']($dbresult4);
-		$context['downloads_totalreport'] = $totalreport;
-
-		// Total reported Comments
-		$dbresult6 = $smcFunc['db_query']('', "
-		SELECT
-			COUNT(*) as totalcreport
-		FROM {db_prefix}tema_creport");
-		$row2 = $smcFunc['db_fetch_assoc']($dbresult6);
-		$totalcomments = $row2['totalcreport'];
-		$smcFunc['db_free_result']($dbresult6);
-		$context['downloads_totalcreport'] = $totalcomments;
-
-	}
-
 }
 
-function Downloads_AddCategory()
-{
-	global $context, $mbname, $txt, $modSettings, $sourcedir;
-	isAllowedTo('themes_manage');
-	require_once($sourcedir . '/Subs-Tema2.php');
-	AddCategory();
-	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_text_addcategory'];
-	$context['sub_template']  = 'add_category';
-	$context['show_spellchecking'] = !empty($modSettings['enableSpellChecking']) && function_exists('pspell_new');
-
-}
-
-function Downloads_AddCategory2()
-{
-	global $txt, $sourcedir, $smcFunc;
-	isAllowedTo('themes_manage');
-	$title = $smcFunc['htmlspecialchars']($_REQUEST['title'],ENT_QUOTES);
-	$description = $smcFunc['htmlspecialchars']($_REQUEST['description'],ENT_QUOTES);
-	$image =  htmlspecialchars($_REQUEST['image'],ENT_QUOTES);
-	$boardselect = (int) $_REQUEST['boardselect'];
-	$parent = (int) $_REQUEST['parent'];
-	$locktopic = isset($_REQUEST['locktopic']) ? 1 : 0;
-	$disablerating  = isset($_REQUEST['disablerating']) ? 1 : 0;
-	if (empty($title))
-	fatal_error($txt['tema_error_cat_title'],false);
-		$sortby = '';
-		$orderby = '';
-		if (isset($_REQUEST['sortby']))
-		{
-			switch ($_REQUEST['sortby'])
-			{
-				case 'date':
-					$sortby = 'p.ID_FILE';
-
-				break;
-				case 'title':
-					$sortby = 'p.title';
-				break;
-
-				case 'mostview':
-					$sortby = 'p.views';
-				break;
-
-				case 'mostrated':
-					$sortby = 'p.totalratings';
-				break;
-
-				case 'mostdowns':
-					$sortby = 'p.totaldownloads';
-				break;
-				case 'filesize':
-					$sortby = 'p.filesize';
-				break;
-				case 'membername':
-					$sortby = 'm.real_name';
-				break;
-
-
-				default:
-					$sortby = 'p.ID_FILE';
-				break;
-			}
-
-		}
-		else
-		{
-			$sortby = 'p.ID_FILE';
-		}
-
-
-		if (isset($_REQUEST['orderby']))
-		{
-			switch ($_REQUEST['orderby'])
-			{
-				case 'asc':
-					$orderby = 'ASC';
-
-				break;
-				case 'desc':
-					$orderby = 'DESC';
-				break;
-
-				default:
-					$orderby = 'DESC';
-				break;
-			}
-		}
-		else
-		{
-			$orderby = 'DESC';
-		}
-
-	require_once($sourcedir . '/Subs-Tema2.php');
-	AddCategory2($title,$description,$image,$boardselect,$parent,$locktopic,$disablerating,$sortby,$orderby);	
-	redirectexit('action=tema;sa=admincat');
-}
-
-function Downloads_EditCategory()
-{
-	global $context, $mbname, $txt, $modSettings, $sourcedir;
-	isAllowedTo('themes_manage');
-	$cat = (int) $_REQUEST['cat'];
-	if (empty($cat))
-		fatal_error($txt['tema_error_no_cat']);
-	require_once($sourcedir . '/Subs-Tema2.php');
-	EditCategory($cat);
-	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_text_editcategory'];
-	$context['sub_template']  = 'edit_category';
-	$context['show_spellchecking'] = !empty($modSettings['enableSpellChecking']) && function_exists('pspell_new');
-
-}
-
-function Downloads_EditCategory2()
-{
-	global $txt,$sourcedir, $smcFunc;
-	
-	isAllowedTo('themes_manage');
-	$title = $smcFunc['htmlspecialchars']($_REQUEST['title'], ENT_QUOTES);
-	$description = $smcFunc['htmlspecialchars']($_REQUEST['description'], ENT_QUOTES);
-	$catid = (int) $_REQUEST['catid'];
-	$image = $smcFunc['htmlspecialchars']($_REQUEST['image'], ENT_QUOTES);
-	$parent = (int) $_REQUEST['parent'];
-	$boardselect = (int) $_REQUEST['boardselect'];
-	$locktopic = isset($_REQUEST['locktopic']) ? 1 : 0;
-	$disablerating  = isset($_REQUEST['disablerating']) ? 1 : 0;
-	if (empty($title))
-		fatal_error($txt['tema_error_cat_title'],false);
-
-		$sortby = '';
-		$orderby = '';
-		if (isset($_REQUEST['sortby']))
-		{
-			switch ($_REQUEST['sortby'])
-			{
-				case 'date':
-					$sortby = 'p.ID_FILE';
-
-				break;
-				case 'title':
-					$sortby = 'p.title';
-				break;
-
-				case 'mostview':
-					$sortby = 'p.views';
-				break;
-
-				case 'mostrated':
-					$sortby = 'p.totalratings';
-				break;
-
-				case 'mostdowns':
-					$sortby = 'p.totaldownloads';
-				break;
-				case 'filesize':
-					$sortby = 'p.filesize';
-				break;
-				case 'membername':
-					$sortby = 'm.real_name';
-				break;
-
-				default:
-					$sortby = 'p.ID_FILE';
-				break;
-			}
-
-		}
-		else
-		{
-			$sortby = 'p.ID_FILE';
-		}
-
-
-		if (isset($_REQUEST['orderby']))
-		{
-			switch ($_REQUEST['orderby'])
-			{
-				case 'asc':
-					$orderby = 'ASC';
-
-				break;
-				case 'desc':
-					$orderby = 'DESC';
-				break;
-
-				default:
-					$orderby = 'DESC';
-				break;
-			}
-		}
-		else
-		{
-			$orderby = 'DESC';
-		}
-	require_once($sourcedir . '/Subs-Tema2.php');
-	EditCategory2($title,$description,$catid,$image,$boardselect,$parent,$locktopic,$disablerating,$sortby,$orderby);		
-	redirectexit('action=tema;sa=admincat');
-
-}
-function Downloads_DeleteCategory()
-{
-	global $context, $mbname, $txt, $sourcedir;
-	isAllowedTo('themes_manage');
-	$catid = (int) $_REQUEST['cat'];
-	if (empty($catid))
-		fatal_error($txt['tema_error_no_cat']);
-	require_once($sourcedir . '/Subs-Tema2.php');
-	DeleteCategory($catid);
-	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_text_delcategory'];
-	$context['sub_template']  = 'delete_category';
-}
-
-function Downloads_DeleteCategory2()
-{
-	global $sourcedir;
-	isAllowedTo('themes_manage');
-	$catid = (int) $_REQUEST['catid'];
-	require_once($sourcedir . '/Subs-Tema2.php');
-	DeleteCategory2($catid);
-	Downloads_RecountFileQuotaTotals(false);
-	redirectexit('action=tema;sa=admincat');
-}
-
-function Downloads_ViewDownload()
-{
-	global $context, $mbname, $modSettings, $txt, $sourcedir;
-	isAllowedTo('themes_view');
-	TopDownloadTabs();
-	if (isset($_REQUEST['down']))
-		$id = (int) $_REQUEST['down'];
-	if (isset($_REQUEST['id']))
-		$id = (int) $_REQUEST['id'];
-	if (empty($id))
-		fatal_error($txt['tema_error_no_file_selected'], false);
-	require_once($sourcedir . '/Subs-Tema2.php');
-	ViewDownload($id);
-	$context['show_spellchecking'] = !empty($modSettings['enableSpellChecking']) && function_exists('pspell_new');
-	$context['sub_template']  = 'view_download';
-	$context['page_title'] = $mbname . ' - ' . $context['downloads_file']['title'];
-}
-
-function Downloads_AddDownload()
-{
-	global $context, $mbname, $txt, $modSettings, $sourcedir;
-	isAllowedTo('themes_add');
-	if (isset($_REQUEST['cat']))
-		$cat = (int) $_REQUEST['cat'];
-	else
-		$cat = 0;
-	require_once($sourcedir . '/Subs-Tema2.php');
-	AddDownload($cat);
-	$context['sub_template']  = 'add_download';
-	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_form_adddownload'];
-	$context['show_spellchecking'] = !empty($modSettings['enableSpellChecking']) && function_exists('pspell_new');
-	require_once($sourcedir . '/Subs-Editor.php');
-	$editorOptions = array(
-		'id' => 'descript',
-		'value' => '',
-		'width' => '90%',
-		'form' => 'picform',
-		'labels' => array(
-			'post_button' => '',
-		),
-	);
-	create_control_richedit($editorOptions);
-	$context['post_box_name'] = $editorOptions['id'];
-}
-
-function Downloads_AddDownload2()
-{
-	global $txt, $modSettings, $sourcedir, $user_info, $smcFunc;
-	isAllowedTo('themes_add');
-	if (!empty($_REQUEST['descript_mode']) && isset($_REQUEST['descript']))
-	{
-		require_once($sourcedir . '/Subs-Editor.php');
-		$_REQUEST['descript'] = html_to_bbc($_REQUEST['descript']);
-		$_REQUEST['descript'] = un_htmlspecialchars($_REQUEST['descript']);
-	}
-	if (!is_writable($modSettings['tema_path']))
-		fatal_error($txt['tema_write_error'] . $modSettings['tema_path']);
-	$title = $smcFunc['htmlspecialchars']($_REQUEST['title'],ENT_QUOTES);
-	$description = $smcFunc['htmlspecialchars']($_REQUEST['descript'],ENT_QUOTES);
-	$keywords = $smcFunc['htmlspecialchars']($_REQUEST['keywords'],ENT_QUOTES);
-	$cat = (int) $_REQUEST['cat'];
-	$fileurl = $smcFunc['htmlspecialchars']($_REQUEST['fileurl'],ENT_QUOTES);
-	$demourl = $smcFunc['htmlspecialchars']($_REQUEST['demourl'],ENT_QUOTES);
-	$pictureurl = $smcFunc['htmlspecialchars']($_REQUEST['pictureurl'],ENT_QUOTES);
-	$filesize = 0;
-	$approved = (allowedTo('themes_autoapprove') ? 1 : 0);
-	if ($title == '')
-		fatal_error($txt['tema_error_no_title'],false);
-	if ($cat == '')
-		fatal_error($txt['tema_error_no_cat'],false);
-	require_once($sourcedir . '/Subs-Tema2.php');
-	AddDownload2($title,$description,$keywords,$cat,$fileurl,$demourl,$pictureurl,$filesize,$approved );
-		if ($user_info['id'] != 0)
-			redirectexit('action=tema;sa=myfiles;u=' . $user_info['id']);
-		else
-			redirectexit('action=tema;cat=' . $cat);
-}
-
-function Downloads_EditDownload()
-{
-	global $context, $txt, $user_info,$mbname,$modSettings, $sourcedir;
-	is_not_guest();
-	$id = (int) $_REQUEST['id'];
-	if (empty($id))
-		fatal_error($txt['tema_error_no_file_selected']);
-		if ($user_info['is_guest'])
-			$groupid = -1;
-		else
-			$groupid =  $user_info['groups'][0];
-	require_once($sourcedir . '/Subs-Tema2.php');
-	EditDownload($id,$groupid);
-	require_once($sourcedir . '/Subs-Editor.php');
-	$editorOptions = array(
-		'id' => 'descript',
-		'value' => $context['downloads_file']['description'],
-		'width' => '90%',
-		'form' => 'picform',
-		'labels' => array(
-			'post_button' => '',
-		),
-	);
-	create_control_richedit($editorOptions);
-	$context['post_box_name'] = $editorOptions['id'];
-	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_form_editdownload'];
-	$context['sub_template']  = 'edit_download';
-	$context['show_spellchecking'] = !empty($modSettings['enableSpellChecking']) && function_exists('pspell_new');
-}
-
-function Downloads_EditDownload2()
-{
-	global $txt, $modSettings, $sourcedir, $smcFunc, $user_info;
-
-	is_not_guest();
-	$id = (int) $_REQUEST['id'];
-	if (empty($id))
-		fatal_error($txt['tema_error_no_file_selected']);
-	if (!empty($_REQUEST['descript_mode']) && isset($_REQUEST['descript']))
-	{
-		require_once($sourcedir . '/Subs-Editor.php');
-		$_REQUEST['descript'] = html_to_bbc($_REQUEST['descript']);
-		$_REQUEST['descript'] = un_htmlspecialchars($_REQUEST['descript']);
-
-	}
-		$title = $smcFunc['htmlspecialchars']($_REQUEST['title'],ENT_QUOTES);
-		$description = $smcFunc['htmlspecialchars']($_REQUEST['descript'],ENT_QUOTES);
-		$keywords = $smcFunc['htmlspecialchars']($_REQUEST['keywords'],ENT_QUOTES);
-		$cat = (int) $_REQUEST['cat'];
-		$fileurl = htmlspecialchars($_REQUEST['fileurl'],ENT_QUOTES);
-		$pictureurl = htmlspecialchars($_REQUEST['pictureurl'],ENT_QUOTES);
-		$demourl = htmlspecialchars($_REQUEST['demourl'],ENT_QUOTES);
-		$filesize = 0;
-		$approved = (allowedTo('themes_autoapprove') ? 1 : 0);
-
-
-		if ($title == '')
-			fatal_error($txt['tema_error_no_title'],false);
-		if ($cat == '')
-			fatal_error($txt['tema_error_no_cat'],false);
-		require_once($sourcedir . '/Subs-Tema2.php');
-	EditDownload2($id,$title,$description,$keywords,$cat,$fileurl,$pictureurl,$demourl,$filesize,$approved);
-}
-
-function Downloads_DeleteDownload()
-{
-	global $context, $mbname, $txt, $sourcedir, $user_info;
-	is_not_guest();
-	$id = (int) $_REQUEST['id'];
-	if (empty($id))
-		fatal_error($txt['tema_error_no_file_selected']);
-		require_once($sourcedir . '/Subs-Tema2.php');
-		DeleteDownload($id);
-	if (allowedTo('themes_manage') || (allowedTo('themes_delete') && $user_info['id'] == $context['downloads_file']['id_member']))
-	{
-		$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_form_deldownload'];
-		$context['sub_template']  = 'delete_download';
-	}
-	else
-		fatal_error($txt['tema_error_nodelete_permission']);
-}
-
-function Downloads_DeleteDownload2()
-{
-	global $txt, $user_info,$sourcedir;
-	$id = (int) $_REQUEST['id'];
-	if (empty($id))
-		fatal_error($txt['tema_error_no_file_selected']);
-		require_once($sourcedir . '/Subs-Tema2.php');
-		DeleteDownload2($id);
-	if (allowedTo('themes_manage') || (allowedTo('themes_delete') && $user_info['id'] == $memID))
-	{
-		DeleteFileByID($id);
-		Downloads_UpdateCategoryTotals($row['ID_CAT']);
-		redirectexit('action=tema;sa=myfiles;u=' . $user_info['id']);
-	}
-	else
-		fatal_error($txt['tema_error_nodelete_permission']);
-}
-function Downloads_ReportDownload()
-{
-	global $context, $mbname, $txt;
-	isAllowedTo('themes_report');
-	is_not_guest();
-	$id = (int) $_REQUEST['id'];
-	if (empty($id))
-		fatal_error($txt['tema_error_no_file_selected']);
-     TopDownloadTabs();
-	$context['downloads_file_id'] = $id;
-	$context['sub_template']  = 'report_download';
-	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_form_reportdownload'];
-}
-
-function Downloads_ReportDownload2()
-{
-	global $txt, $smcFunc, $user_info,$sourcedir;
-	isAllowedTo('themes_report');
-	$comment = $smcFunc['htmlspecialchars']($_REQUEST['comment'],ENT_QUOTES);
-	$id = (int) $_REQUEST['id'];
-	if (empty($id))
-		fatal_error($txt['tema_error_no_file_selected']);
-	if ($comment == '')
-		fatal_error($txt['tema_error_no_comment'],false);
-	$commentdate = time();
-	$memid = $user_info['id'];
-	require_once($sourcedir . '/Subs-Tema2.php');
-	ReportDownload2($comment,$id,$commentdate,$memid);
-	redirectexit('action=tema;sa=view;down=' . $id);
-}
-
-function Downloads_CatUp()
-{
-	global  $sourcedir;
-	isAllowedTo('themes_manage');
-	$cat = (int) $_REQUEST['cat'];
-	Downloads_ReOrderCats($cat);
-	require_once($sourcedir . '/Subs-Tema2.php');
-	CatUp($cat);
-}
-
-function Downloads_CatDown()
-{
-	global  $sourcedir;
-	isAllowedTo('themes_manage');
-	$cat = (int) $_REQUEST['cat'];
-	Downloads_ReOrderCats($cat);
-	require_once($sourcedir . '/Subs-Tema2.php');
-	CatDown($cat);
-}
-
-function Downloads_MyFiles()
-{
-	global $context, $mbname, $txt, $sourcedir,$scripturl,$modSettings;
-	isAllowedTo('themes_view');
-	TopDownloadTabs();
-	$u = (int) $_REQUEST['u'];
-	if (empty($u))
-		fatal_error($txt['tema_error_no_user_selected']);
-	require_once($sourcedir . '/Subs-Tema2.php');
-	MyFiles($u);
-	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $context['downloads_userdownloads_name'];
-	$context['sub_template']  = 'myfiles';
-	$context['page_index'] = constructPageIndex($scripturl . '?action=tema;sa=myfiles;u=' . $context['downloads_userid'], $_REQUEST['start'], $context['downloads_total'], $modSettings['tema_set_files_per_page']);
-}
-
-function Downloads_ApproveList()
+function ApproveList()
 {
 	global $context, $mbname, $txt, $scripturl, $smcFunc;
+
 	isAllowedTo('themes_manage');
+
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_form_approvedownloads'];
+
+
+
 	$context['sub_template']  = 'approvelist';
+
+
 	$context['start'] = (int) $_REQUEST['start'];
 
 	// Get Total Pages
@@ -936,7 +1293,7 @@ function Downloads_ApproveList()
 
 }
 
-function Downloads_ApproveDownload()
+function ApproveDownload()
 {
 	global $txt;
 	isAllowedTo('themes_manage');
@@ -946,14 +1303,14 @@ function Downloads_ApproveDownload()
 		fatal_error($txt['tema_error_no_file_selected']);
 
 	// Approve the download
-	Downloads_ApproveFileByID($id);
+	ApproveFileByID($id);
 
 	// Redirect to approval list
 	redirectexit('action=admin;area=tema;sa=approvelist');
 
 }
 
-function Downloads_ApproveFileByID($id)
+function ApproveFileByID($id)
 {
 	global $scripturl, $sourcedir, $user_info, $smcFunc;
 
@@ -1008,11 +1365,11 @@ function Downloads_ApproveFileByID($id)
 	$smcFunc['db_query']('', "UPDATE {db_prefix}tema_file SET approved = 1 WHERE ID_FILE = $id LIMIT 1");
 
 
-	Downloads_UpdateCategoryTotals($rowcat['ID_CAT']);
+	UpdateCategoryTotals($rowcat['ID_CAT']);
 
 }
 
-function Downloads_UnApproveDownload()
+function UnApproveDownload()
 {
 	global $txt;
 	isAllowedTo('themes_manage');
@@ -1021,23 +1378,23 @@ function Downloads_UnApproveDownload()
 	if (empty($id))
 		fatal_error($txt['tema_error_no_file_selected']);
 
-	Downloads_UnApproveFileByID($id);
+	UnApproveFileByID($id);
 
 	// Redirect to approval list
 	redirectexit('action=admin;area=tema;sa=approvelist');
 }
 
-function Downloads_UnApproveFileByID($id)
+function UnApproveFileByID($id)
 {
 	global $smcFunc;
 
 	// Update the approval
 	$smcFunc['db_query']('', "UPDATE {db_prefix}tema_file SET approved = 0 WHERE ID_FILE = $id LIMIT 1");
 
-	Downloads_UpdateCategoryTotalByFileID($id);
+	UpdateCategoryTotalByFileID($id);
 }
 
-function Downloads_ReportList()
+function ReportList()
 {
 	global $context, $mbname, $txt, $smcFunc;
 
@@ -1074,7 +1431,7 @@ function Downloads_ReportList()
 
 }
 
-function Downloads_DeleteReport()
+function DeleteReport()
 {
 	global $txt, $smcFunc;
 	// Check the permission
@@ -1091,7 +1448,7 @@ function Downloads_DeleteReport()
 }
 
 
-function Downloads_Search()
+function Search()
 {
 	global $context, $mbname, $txt, $user_info, $smcFunc;
 
@@ -1130,7 +1487,7 @@ function Downloads_Search()
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_search'];
 }
 
-function Downloads_Search2()
+function Search2()
 {
 	global $context, $mbname, $txt, $smcFunc;
 
@@ -1341,7 +1698,7 @@ function Downloads_Search2()
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_searchresults'];
 }
 
-function Downloads_RateDownload()
+function RateDownload()
 {
 	global $txt, $smcFunc, $user_info;
 
@@ -1400,7 +1757,7 @@ function Downloads_RateDownload()
 
 }
 
-function Downloads_ViewRating()
+function ViewRating()
 {
 	global $context, $mbname, $txt, $smcFunc;
 
@@ -1439,7 +1796,7 @@ function Downloads_ViewRating()
 
 }
 
-function Downloads_DeleteRating()
+function DeleteRating()
 {
 	global $scripturl, $txt, $smcFunc;
 	isAllowedTo('themes_manage');
@@ -1467,7 +1824,7 @@ function Downloads_DeleteRating()
 	redirectexit('action=tema;sa=viewrating&id=' .  $fileid);
 }
 
-function Downloads_Stats()
+function Stats()
 {
 	global $context, $mbname,$txt, $context, $scripturl, $smcFunc;
 
@@ -1494,7 +1851,7 @@ function Downloads_Stats()
 
 	$context['total_files'] = $row2['filetotal'];
 	$context['total_views'] = $row['views'];
-	$context['total_filesize'] =  Downloads_format_size($row['filesize'], 2) ;
+	$context['total_filesize'] =  format_size($row['filesize'], 2) ;
 	$context['total_downloads'] = $row['totaldownloads'];
 
 
@@ -1602,7 +1959,7 @@ function Downloads_Stats()
 
 }
 
-function Downloads_UpdateUserFileSizeTable($memberid, $filesize)
+function UpdateUserFileSizeTable($memberid, $filesize)
 {
 	global $smcFunc;
 
@@ -1630,7 +1987,7 @@ function Downloads_UpdateUserFileSizeTable($memberid, $filesize)
 	}
 }
 
-function Downloads_FileSpaceAdmin()
+function FileSpaceAdmin()
 {
 	global $mbname, $txt, $context, $scripturl, $smcFunc;
 	// Check if they are allowed to manage the downloads
@@ -1733,7 +2090,7 @@ function Downloads_FileSpaceAdmin()
 
 }
 
-function Downloads_FileSpaceList()
+function FileSpaceList()
 {
 	global $mbname, $txt, $context, $scripturl, $smcFunc;
 	// Check if they are allowed to manage the downloads
@@ -1800,7 +2157,7 @@ function Downloads_FileSpaceList()
 
 }
 
-function Downloads_RecountFileQuotaTotals($redirect = true)
+function RecountFileQuotaTotals($redirect = true)
 {
 	global $smcFunc;
 
@@ -1838,7 +2195,7 @@ function Downloads_RecountFileQuotaTotals($redirect = true)
 		redirectexit('action=admin;area=tema;sa=filespace');
 }
 
-function Downloads_GetQuotaGroupLimit($memberid)
+function GetQuotaGroupLimit($memberid)
 {
 	global $smcFunc;
 
@@ -1862,7 +2219,7 @@ function Downloads_GetQuotaGroupLimit($memberid)
 
 }
 
-function Downloads_GetUserSpaceUsed($memberid)
+function GetUserSpaceUsed($memberid)
 {
 	global $smcFunc;
 
@@ -1886,7 +2243,7 @@ function Downloads_GetUserSpaceUsed($memberid)
 
 }
 
-function Downloads_AddQuota()
+function AddQuota()
 {
 	global $txt, $smcFunc;
 
@@ -1921,7 +2278,7 @@ function Downloads_AddQuota()
 	redirectexit('action=admin;area=tema;sa=filespace');
 }
 
-function Downloads_DeleteQuota()
+function DeleteQuota()
 {
 	global $smcFunc;
 
@@ -1933,7 +2290,7 @@ function Downloads_DeleteQuota()
 	redirectexit('action=admin;area=tema;sa=filespace');
 }
 
-function Downloads_CatPerm()
+function CatPerm()
 {
 	global $mbname, $txt, $context, $smcFunc;
 	isAllowedTo('themes_manage');
@@ -2051,7 +2408,7 @@ function Downloads_CatPerm()
 
 }
 
-function Downloads_CatPerm2()
+function CatPerm2()
 {
 	global $txt, $smcFunc;
 	isAllowedTo('themes_manage');
@@ -2087,7 +2444,7 @@ function Downloads_CatPerm2()
 	redirectexit('action=tema;sa=catperm;cat=' . $cat);
 }
 
-function Downloads_CatPermList()
+function CatPermList()
 {
 	global $mbname, $txt, $context, $smcFunc;
 	isAllowedTo('themes_manage');
@@ -2170,7 +2527,7 @@ function Downloads_CatPermList()
 
 }
 
-function Downloads_CatPermDelete()
+function CatPermDelete()
 {
 	global $smcFunc;
 
@@ -2185,7 +2542,7 @@ function Downloads_CatPermDelete()
 
 }
 
-function Downloads_GetCatPermission($cat,$perm)
+function GetCatPermission($cat,$perm)
 {
 	global $txt, $user_info, $smcFunc;
 	$cat = (int) $cat;
@@ -2233,7 +2590,7 @@ function Downloads_GetCatPermission($cat,$perm)
 
 }
 
-function Downloads_PreviousDownload()
+function PreviousDownload()
 {
 	global $txt, $smcFunc;
 
@@ -2271,7 +2628,7 @@ function Downloads_PreviousDownload()
 	redirectexit('action=tema;sa=view;down=' . $ID_FILE);
 }
 
-function Downloads_NextDownload()
+function NextDownload()
 {
 	global $txt, $smcFunc;
 
@@ -2309,7 +2666,7 @@ function Downloads_NextDownload()
 	redirectexit('action=tema;sa=view;down=' . $ID_FILE);
 }
 
-function Downloads_CatImageDelete()
+function CatImageDelete()
 {
 	global $smcFunc;
 
@@ -2324,7 +2681,7 @@ function Downloads_CatImageDelete()
 
 	redirectexit('action=tema;sa=editcat;cat=' . $id);
 }
-function Downloads_FileImageDelete()
+function FileImageDelete()
 {
 	global $smcFunc;
 
@@ -2340,7 +2697,7 @@ function Downloads_FileImageDelete()
 	redirectexit('action=tema;sa=edit&id=' . $id);
 }
 
-function Downloads_ReOrderCats($cat)
+function ReOrderCats($cat)
 {
 	global $smcFunc;
 
@@ -2372,7 +2729,7 @@ function Downloads_ReOrderCats($cat)
 	$smcFunc['db_free_result']($dbresult);
 }
 
-function Downloads_BulkActions()
+function BulkActions()
 {
 	isAllowedTo('themes_manage');
 
@@ -2384,7 +2741,7 @@ function Downloads_BulkActions()
 		{
 
 			if ($baction == 'approve')
-				Downloads_ApproveFileByID($value);
+				ApproveFileByID($value);
 			if ($baction == 'delete')
 				DeleteFileByID($value);
 
@@ -2395,7 +2752,7 @@ function Downloads_BulkActions()
 	redirectexit('action=admin;area=tema;sa=approvelist');
 }
 
-function Downloads_UpdateCategoryTotals($ID_CAT)
+function UpdateCategoryTotals($ID_CAT)
 {
 	global $smcFunc;
 	
@@ -2416,7 +2773,7 @@ function Downloads_UpdateCategoryTotals($ID_CAT)
 
 }
 
-function Downloads_UpdateCategoryTotalByFileID($id)
+function UpdateCategoryTotalByFileID($id)
 {
 	global $smcFunc;
 
@@ -2427,11 +2784,11 @@ function Downloads_UpdateCategoryTotalByFileID($id)
 	$row = $smcFunc['db_fetch_assoc']($dbresult);
 	$smcFunc['db_free_result']($dbresult);
 
-	Downloads_UpdateCategoryTotals($row['ID_CAT']);
+	UpdateCategoryTotals($row['ID_CAT']);
 
 }
 
-function Downloads_CustomUp()
+function CustomUp()
 {
 	global $txt, $smcFunc;
 
@@ -2440,7 +2797,7 @@ function Downloads_CustomUp()
 	// Get the id
 	$id = (int) $_REQUEST['id'];
 
-	Downloads_ReOrderCustom($id);
+	ReOrderCustom($id);
 
 	// Check if there is a category above it
 	// First get our row order
@@ -2483,7 +2840,7 @@ function Downloads_CustomUp()
 
 }
 
-function Downloads_CustomDown()
+function CustomDown()
 {
 	global $txt, $smcFunc;
 
@@ -2492,7 +2849,7 @@ function Downloads_CustomDown()
 	// Get the id
 	$id = (int) $_REQUEST['id'];
 
-	Downloads_ReOrderCustom($id);
+	ReOrderCustom($id);
 
 	// Check if there is a category below it
 	// First get our row order
@@ -2534,7 +2891,7 @@ function Downloads_CustomDown()
 
 }
 
-function Downloads_CustomAdd()
+function CustomAdd()
 {
 	global $txt, $smcFunc;
 
@@ -2562,7 +2919,7 @@ function Downloads_CustomAdd()
 
 }
 
-function Downloads_CustomDelete()
+function CustomDelete()
 {
 	global $smcFunc;
 
@@ -2595,7 +2952,7 @@ function Downloads_CustomDelete()
 
 }
 
-function Downloads_ReOrderCustom($id)
+function ReOrderCustom($id)
 {
 	global $smcFunc;
 
@@ -2628,7 +2985,7 @@ function Downloads_ReOrderCustom($id)
 }
 
 
-function Downloads_ComputeNextFolderID($ID_FILE)
+function ComputeNextFolderID($ID_FILE)
 {
 	global $modSettings;
 
@@ -2641,7 +2998,7 @@ function Downloads_ComputeNextFolderID($ID_FILE)
 
 }
 
-function Downloads_CreateDownloadFolder()
+function CreateDownloadFolder()
 {
 	global $modSettings;
 
@@ -2658,13 +3015,13 @@ function Downloads_CreateDownloadFolder()
 
 }
 
-function Downloads_GetFileTotals($ID_CAT)
+function GetFileTotals($ID_CAT)
 {
 	global $modSettings, $subcats_linktree, $scripturl, $smcFunc;
 
 	$total = 0;
 
-	$total += Downloads_GetTotalByCATID($ID_CAT);
+	$total += GetTotalByCATID($ID_CAT);
 	$subcats_linktree = '';
 
 	// Get the child categories to this category
@@ -2719,7 +3076,7 @@ function Downloads_GetFileTotals($ID_CAT)
 			$childArray[] = $row3;
 		}
 	
-		$total += Downloads_GetFileTotalsByParent($ID_CAT,$childArray);
+		$total += GetFileTotalsByParent($ID_CAT,$childArray);
 
 	}
 
@@ -2727,7 +3084,7 @@ function Downloads_GetFileTotals($ID_CAT)
 	return $total;
 }
 
-function Downloads_GetFileTotalsByParent($ID_PARENT,$data)
+function GetFileTotalsByParent($ID_PARENT,$data)
 {
 	$total = 0;
 	foreach($data as $row)
@@ -2735,7 +3092,7 @@ function Downloads_GetFileTotalsByParent($ID_PARENT,$data)
 		if ($row['ID_PARENT'] == $ID_PARENT)
 		{
 			$total += $row['total'];
-			$total += Downloads_GetFileTotalsByParent($row['ID_CAT'],$data);
+			$total += GetFileTotalsByParent($row['ID_CAT'],$data);
 		}
 	}
 	
@@ -2745,7 +3102,7 @@ function Downloads_GetFileTotalsByParent($ID_PARENT,$data)
 
 
 
-function Downloads_GetTotalByCATID($ID_CAT)
+function GetTotalByCATID($ID_CAT)
 {
 	global $smcFunc;
 
@@ -2780,7 +3137,7 @@ function Downloads_GetTotalByCATID($ID_CAT)
 
 }
 
-function Downloads_DownloadFile()
+function DownloadFile()
 {
 	global $modSettings, $txt, $context, $smcFunc, $user_info;
 
@@ -2811,7 +3168,7 @@ function Downloads_DownloadFile()
 	}
 
 	// Check if they can download from this category
-	Downloads_GetCatPermission($row['ID_CAT'],'viewdownload');
+	GetCatPermission($row['ID_CAT'],'viewdownload');
 
 	// Check credits
 
@@ -2981,7 +3338,7 @@ function Downloads_DownloadFile()
 
 }
 
-function Downloads_ShowSubCats($cat,$g_manage)
+function ShowSubCats($cat,$g_manage)
 {
 	global $txt, $scripturl, $modSettings, $subcats_linktree, $smcFunc, $user_info, $context;
 
@@ -3046,7 +3403,7 @@ function Downloads_ShowSubCats($cat,$g_manage)
 				if ($row['view'] == '0')
 					continue;
 
-				$totalfiles = Downloads_GetFileTotals($row['ID_CAT']);
+				$totalfiles = GetFileTotals($row['ID_CAT']);
 
 				echo '<tr>';
 
@@ -3107,148 +3464,8 @@ function Downloads_ShowSubCats($cat,$g_manage)
 		}
 }
 
-function MainPageBlock($title, $type = 'recent')
-{
-	global $scripturl, $txt, $modSettings, $context, $user_info, $smcFunc;
 
-
-	if (!$user_info['is_guest'])
-		$groupsdata = implode($user_info['groups'],',');
-	else
-		$groupsdata = -1;
-
-
-	$maxrowlevel = 4;
-	echo '
-    <div class="cat_bar">
-		<h3 class="catbg centertext">
-        ', $title, '
-        </h3>
-</div>';
-
- if ($context['downloads21beta'] == false)
-   echo '<table class="table_list">';
-  else
-    echo '<table class="table_grid">'; 
-                
-			//Check what type it is
-			$query = ' ';
-			$query_type = 'p.ID_FILE';
-			switch($type)
-			{
-				case 'recent':
-					$query_type = 'p.ID_FILE';
-				break;
-
-				case 'viewed':
-
-					$query_type = 'p.views';
-				break;
-
-				break;
-				case 'mostdownloaded':
-					$query_type = 'p.totaldownloads';
-				break;
-
-				case 'toprated':
-					$query_type = 'p.rating';
-				break;
-			}
-
-				$query = "SELECT p.ID_FILE, p.totalratings, p.rating, p.filesize, p.views, p.title, p.id_member, m.real_name, p.date, p.description,
-				p.totaldownloads, picture, pictureurl
-					FROM {db_prefix}tema_file as p
-					LEFT JOIN {db_prefix}members AS m  ON (m.id_member = p.id_member)
-					LEFT JOIN {db_prefix}tema_catperm AS c ON (c.ID_GROUP IN ($groupsdata) AND c.ID_CAT = p.ID_CAT)
-					WHERE p.approved = 1 AND (c.view IS NULL || c.view =1) GROUP by p.ID_FILE ORDER BY $query_type DESC LIMIT 8";
-
-			// Execute the SQL query
-			$dbresult = $smcFunc['db_query']('', $query);
-			$rowlevel = 0;
-		while($row = $smcFunc['db_fetch_assoc']($dbresult))
-		{
-			if ($rowlevel == 0)
-				echo '<tr class="windowbg2">';
-
-			echo '<td align="center"><a href="' . $scripturl . '?action=tema;sa=view;down=' . $row['ID_FILE'] . '">',$row['title'],'</a><br />';
-			echo '<div style="height:280px;overflow:hidden;">
-				<a href="' . $scripturl . '?action=tema;sa=view;down=' . $row['ID_FILE'] . '"><img style="width:auto;max-width:100%;" src="',$row['picture'] == '' ? $row['pictureurl'] : $modSettings['tema_url'].'temaresim/'.$row['picture'],'" alt="">
-				</a>
-			</div>'; 
-
-			echo '<span class="smalltext">';
-			if (!empty($modSettings['tema_set_t_rating']))
-				echo $txt['tema_form_rating'] . Downloads_GetStarsByPrecent(($row['totalratings'] != 0) ? ($row['rating'] / ($row['totalratings']* 5) * 100) : 0) . '<br />';
-			if (!empty($modSettings['tema_set_t_downloads']))
-				echo $txt['tema_text_downloads'] . $row['totaldownloads'] . '<br />';
-			if (!empty($modSettings['tema_set_t_views']))
-				echo $txt['tema_text_views'] . $row['views'] . '<br />';
-			if (!empty($modSettings['tema_set_t_filesize']))
-				echo $txt['tema_text_filesize'] . Downloads_format_size($row['filesize'], 2) . '<br />';
-			if (!empty($modSettings['tema_set_t_date']))
-				echo $txt['tema_text_date'] . timeformat($row['date']) . '<br />';
-			if (!empty($modSettings['tema_set_t_username']))
-			{
-				if ($row['real_name'] != '')
-					echo $txt['tema_text_by'] . ' <a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">'  . $row['real_name'] . '</a><br />';
-				else
-					echo $txt['tema_text_by'] . ' ' . $txt['tema_guest'] . '<br />';
-			}
-			echo '</span></td>';
-
-
-			if ($rowlevel < ($maxrowlevel-1))
-				$rowlevel++;
-			else
-			{
-				echo '</tr>';
-				$rowlevel = 0;
-			}
-		}
-		if ($rowlevel !=0)
-		{
-			echo '</tr>';
-		}
-
-	echo '
-	      </table><br />';
-
-	$smcFunc['db_free_result']($dbresult);
-
-}
-
-
-function TopDownloadTabs()
-{
-	global $context, $txt, $scripturl, $user_info;
-
-	$g_add = allowedTo('themes_add');
-
-	// MyFiles
-	if ($g_add && !($user_info['is_guest']))
-		$context['downloads']['buttons']['myfiles'] =  array(
-			'text' => 'tema_text_myfiles2',
-			'url' =>$scripturl . '?action=tema;sa=myfiles;u=' . $user_info['id'],
-			'lang' => true,
-
-		);
-
-	// Search
-	$context['downloads']['buttons']['search'] =  array(
-		'text' => 'tema_text_search2',
-		'url' => $scripturl . '?action=tema;sa=search',
-		'lang' => true,
-
-	);
-
-	// Setup Intial Link Tree
-	$context['linktree'][] = array(
-					'url' => $scripturl . '?action=tema',
-					'name' => $txt['tema_text_title']
-				);
-}
-
-function Downloads_GetParentLink($ID_CAT)
+function GetParentLink($ID_CAT)
 {
 	global $context, $scripturl, $smcFunc;
 	if ($ID_CAT == 0)
@@ -3263,7 +3480,7 @@ function Downloads_GetParentLink($ID_CAT)
 
 		$smcFunc['db_free_result']($dbresult1);
 
-		Downloads_GetParentLink($row1['ID_PARENT']);
+		GetParentLink($row1['ID_PARENT']);
 
 		$context['linktree'][] = array(
 					'url' => $scripturl . '?action=tema;cat=' . $ID_CAT ,
@@ -3271,7 +3488,7 @@ function Downloads_GetParentLink($ID_CAT)
 				);
 }
 
-function Downloads_DoToolBarStrip($button_strip, $direction )
+function DoToolBarStrip($button_strip, $direction )
 {
 	global $settings, $txt;
 
@@ -3302,7 +3519,7 @@ function Downloads_DoToolBarStrip($button_strip, $direction )
 
 }
 
-function Downloads_format_size($size, $round = 0)
+function format_size($size, $round = 0)
 {
     //Size must be bytes!
     $sizes = array('B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB');
@@ -3310,7 +3527,7 @@ function Downloads_format_size($size, $round = 0)
     return round($size,$round).$sizes[$i];
 }
 
-function Downloads_ImportTinyPortalDownloads()
+function ImportTinyPortalDownloads()
 {
 	global $txt, $smcFunc, $boarddir, $context, $modSettings, $sourcedir, $downloadSettings;
 	isAllowedTo('themes_manage');
@@ -3361,7 +3578,7 @@ function Downloads_ImportTinyPortalDownloads()
 
 		// Get the Category ID
 		$cat_id = $smcFunc['db_insert_id']('{db_prefix}tema_cat', 'id_cat');
-		Downloads_ReOrderCats($cat_id);
+		ReOrderCats($cat_id);
 
 		$catArray[$catRow['id']] = $cat_id;
 
@@ -3485,9 +3702,9 @@ function Downloads_ImportTinyPortalDownloads()
 		}
 
 		if ($fileRow['filesize'] != 0)
-			Downloads_UpdateUserFileSizeTable($fileRow['authorid'],$fileRow['filesize']);
+			UpdateUserFileSizeTable($fileRow['authorid'],$fileRow['filesize']);
 
-		Downloads_UpdateCategoryTotals($category);
+		UpdateCategoryTotals($category);
 		//UpdateMemberTotalFiles($fileRow['authorid']);
 
 		$fileCount++;
@@ -3503,7 +3720,7 @@ function Downloads_ImportTinyPortalDownloads()
 
 }
 
-function Downloads_ImportDownloads()
+function ImportDownloads()
 {
 	global $txt, $context;
 
@@ -3518,30 +3735,9 @@ function Downloads_ImportDownloads()
 }
 
 
-function ShowTopDownloadBar($title = '&nbsp;')
-{
-	global $txt, $context;
-		echo '
-	<div class="cat_bar">
-		<h3 class="catbg centertext">
-        ', $title, '
-        </h3>
-</div>
-    
-				<table border="0" cellpadding="0" cellspacing="0" align="center" width="90%">
-						<tr>
-							<td style="padding-right: 1ex;" align="right" width="100%">
 
-						', Downloads_DoToolBarStrip($context['downloads']['buttons'], 'top'), '
-		
-						</td>
-						</tr>
-					</table>
 
-<br />';
-}
-
-function Downloads_ShowUserBox($memCommID, $online_color = '')
+function ShowUserBox($memCommID, $online_color = '')
 {
 	global $memberContext, $settings, $modSettings, $txt, $context, $scripturl, $options, $downloadSettings;
 
@@ -3660,7 +3856,7 @@ function Downloads_ShowUserBox($memCommID, $online_color = '')
 							</div>';
 }
 
-function Downloads_GetStarsByPrecent($percent)
+function GetStarsByPrecent($percent)
 {
 	global $settings, $txt, $context;
 
@@ -3696,58 +3892,6 @@ function Downloads_GetStarsByPrecent($percent)
     		return str_repeat('<img src="' . $settings['images_url'] . '/membericons/icon.png" alt="*" border="0" />', 5);
     }
 
-}
-
-function resmikclt($max_width, $max_height, $source_file, $dst_dir, $quality = 80){
-    $imgsize = getimagesize($source_file);
-    $width = $imgsize[0];
-    $height = $imgsize[1];
-    $mime = $imgsize['mime'];
- 
-    switch($mime){
-        case 'image/gif':
-            $image_create = "imagecreatefromgif";
-            $image = "imagegif";
-            break;
- 
-        case 'image/png':
-            $image_create = "imagecreatefrompng";
-            $image = "imagepng";
-            $quality = 7;
-            break;
- 
-        case 'image/jpeg':
-            $image_create = "imagecreatefromjpeg";
-            $image = "imagejpeg";
-            $quality = 80;
-            break;
- 
-        default:
-            return false;
-            break;
-    }
-     
-    $dst_img = imagecreatetruecolor($max_width, $max_height);
-    $src_img = $image_create($source_file);
-     
-    $width_new = $height * $max_width / $max_height;
-    $height_new = $width * $max_height / $max_width;
-    //if the new width is greater than the actual width of the image, then the height is too large and the rest cut off, or vice versa
-    if($width_new > $width){
-        //cut point by height
-        $h_point = (($height - $height_new) / 2);
-        //copy image
-        imagecopyresampled($dst_img, $src_img, 0, 0, 0, $h_point, $max_width, $max_height, $width, $height_new);
-    }else{
-        //cut point by width
-        $w_point = (($width - $width_new) / 2);
-        imagecopyresampled($dst_img, $src_img, 0, 0, $w_point, 0, $max_width, $max_height, $width_new, $height);
-    }
-     
-    $image($dst_img, $dst_dir, $quality);
- 
-    if($dst_img)imagedestroy($dst_img);
-    if($src_img)imagedestroy($src_img);
 }
 
 

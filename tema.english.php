@@ -1,23 +1,4 @@
 <?php
-/*
-Theme System
-Version 1.5
-by:vbgamer45
-http://www.smfhacks.com
-Copyright 2008-2012 SMFHacks.com
-
-############################################
-License Information:
-
-Links to http://www.smfhacks.com must remain unless
-branding free option is purchased.
-#############################################
-
-Theme English Text Strings
-*/
-
-// Themes.template.php Themes
-
 
 $txt['clos'] = "Close";
 $txt['purchade'] = "Purchase";
@@ -29,6 +10,28 @@ $txt['mobileportrait'] = "Mobile (320x480)";
 
 // Title string
 $txt['tema_text_title'] = 'Themes';
+$txt['tema_max_filesize'] = 'Max Theme filesize: ';
+$txt['tema_path'] = 'Theme Path: ';
+$txt['tema_url'] = 'Theme Url: ';
+$txt['tema_who_viewing'] = 'Display who is viewing a Theme';
+$txt['tema_show_ratings'] = 'Show Theme ratings';
+$txt['tema_max_file'] = 'PHP Max Filesize ';
+$txt['tema_set_t_title'] = 'Show title';
+$txt['tema_set_file_views'] = 'Show views';
+$txt['themesizinlerbaslik'] = 'Theme System permission';
+$txt['themes_view'] = 'View Themes';
+$txt['themes_viewdownload'] = 'View Link Themes';
+$txt['themes_add'] = 'Add Theme';
+$txt['themes_edit'] = 'Edit own Theme';
+$txt['themes_delete'] = 'Delete own Theme';
+$txt['themes_ratefile'] = 'Rate Themes';
+$txt['themes_report'] = 'Report Pictures/Comments';
+$txt['themes_autoapprove'] = 'Auto Approve Themes';
+$txt['themes_manage'] = 'Admin Theme System';
+
+
+
+
 
 // Main Theme strings
 $txt['tema_text_categoryname'] = 'Category Name';
@@ -469,7 +472,6 @@ $txt['tema_txt_import_note'] = 'If you have installed another Theme system in th
 $txt['tema_txt_categories_imported'] = 'Categories Imported: ';
 $txt['tema_txt_files_imported'] = 'Files Imported: ';
 
-
 $txt['tema_upload_max_filesize'] = 'PHP: Upload Max Filesize ';
 $txt['tema_post_max_size'] = 'PHP: Post Max Filesize ';
 $txt['tema_upload_limits_notes'] = 'The above PHP settings control how large a file will be accepted. These are settings are controlled by the php.ini or your webhost';
@@ -495,53 +497,88 @@ $txt['tema_text_catpermlist2'] = 'Category Permissions';
 $txt['tema_txt_import'] = 'Import';
 
 // Permissions
+
 $txt['permissiongroup_themes'] = 'Theme System';
 $txt['permissiongroup_simple_themes'] = 'Theme System';
 
 $txt['permissionname_themes_view'] = 'View Themes';
 $txt['permissionname_themes_viewdownload'] = 'View Link Themes';
-$txt['permissionhelp_downloads_view'] = 'Allows the user to view the Themes';
+$txt['permissionhelp_themes_viewdownload'] = 'Allows the user to view Link Themes';
+$txt['permissionhelp_themes_view'] = 'Allows the user to view the Themes';
 $txt['cannot_downloads_view'] = 'You are not allowed to view the Themes';
 $txt['cannot_downloads_viewdownload'] = 'You are not allowed to link the Themes';
 
 $txt['permissionname_themes_add'] = 'Add Theme';
-$txt['permissionhelp_downloads_add'] = 'Allows the user to add a Theme.';
+$txt['permissionhelp_themes_add'] = 'Allows the user to add a Theme.';
 $txt['cannot_downloads_add'] = 'You are not allowed to add a Theme.';
 
 $txt['permissionname_themes_edit'] = 'Edit own Theme';
-$txt['permissionhelp_downloads_edit'] = 'Allows the user to edit their own Theme.';
+$txt['permissionhelp_themes_edit'] = 'Allows the user to edit their own Theme.';
 $txt['cannot_downloads_edit'] = 'You are not allowed to edit that Theme';
 
 $txt['permissionname_themes_delete'] = 'Delete own Theme';
-$txt['permissionhelp_downloads_delete'] = 'Allows the user to delete their own Theme.';
+$txt['permissionhelp_themes_delete'] = 'Allows the user to delete their own Theme.';
 $txt['cannot_downloads_delete'] = 'You are not allowed to delete that Theme.';
 
 $txt['permissionname_themes_ratefile'] = 'Rate Themes';
-$txt['permissionhelp_downloads_ratefile'] = 'Allows the user to rate a file.';
+$txt['permissionhelp_themes_ratefile'] = 'Allows the user to rate a file.';
 $txt['cannot_downloads_ratefile'] = 'You are not allowed to rate that file.';
 
 $txt['permissionname_themes_editcomment'] = 'Edit own Comment';
-$txt['permissionhelp_downloads_editcomment'] = 'Allows the user to edit their own comments.';
+$txt['permissionhelp_themes_editcomment'] = 'Allows the user to edit their own comments.';
 $txt['cannot_downloads_editcomment'] = 'You are not allowed to edit that comment.';
 
 $txt['permissionname_themes_comment'] = 'Leave Comments';
-$txt['permissionhelp_downloads_comment'] = 'Allows the user to leave comments on a Theme.';
+$txt['permissionhelp_themes_comment'] = 'Allows the user to leave comments on a Theme.';
 $txt['cannot_downloads_comment'] = 'You are not allowed to leave comments.';
 
 $txt['permissionname_themes_report'] = 'Report Pictures/Comments';
-$txt['permissionhelp_downloads_report'] = 'Allows the user to report Theme and comments.';
+$txt['permissionhelp_themes_report'] = 'Allows the user to report Theme and comments.';
 $txt['cannot_downloads_report'] = 'You are not allowed to report content.';
 
 $txt['permissionname_themes_autocomment'] = 'Auto Approve Comments';
-$txt['permissionhelp_downloads_autocomment'] = 'Comments do not need to wait for approval.';
+$txt['permissionhelp_themes_autocomment'] = 'Comments do not need to wait for approval.';
 
 $txt['permissionname_themes_autoapprove'] = 'Auto Approve Themes';
-$txt['permissionhelp_downloads_autoapprove'] = 'Theme do not need to wait for approval.';
+$txt['permissionhelp_themes_autoapprove'] = 'Theme do not need to wait for approval.';
 
 
 $txt['permissionname_themes_manage'] = 'Admin Theme System';
-$txt['permissionhelp_downloads_manage'] = 'Allows the user to add/delete/edit all catagories. Delete Comments, Delete Themes, Approve Themes';
+$txt['permissionhelp_themes_manage'] = 'Allows the user to add/delete/edit all catagories. Delete Comments, Delete Themes, Approve Themes';
 $txt['cannot_downloads_manage'] = 'You are not allowed to manage the Themes.';
 
 // END Theme System Text Strings
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ?>

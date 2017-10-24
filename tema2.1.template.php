@@ -1,18 +1,5 @@
 <?php
-/*
-Download System
-Version 2.5
-by:vbgamer45
-http://www.smfhacks.com
-Copyright 2009-2014 SMFHacks.com
 
-############################################
-License Information:
-
-Links to http://www.smfhacks.com must remain unless
-branding free option is purchased.
-#############################################
-*/
 function template_mainview()
 {
 	global $scripturl, $txt, $context, $modSettings, $subcats_linktree, $user_info;
@@ -233,7 +220,7 @@ function template_mainview()
 
 
 		// Show the index page blocks
-		if ($modSettings['tema_index_showtop'])
+		if (!empty($modSettings['tema_index_showtop']))
 		{
 			// Recent
 			if (!empty($modSettings['tema_index_recent']))
@@ -250,8 +237,7 @@ function template_mainview()
 				';
 		if	($g_manage)
 			echo '
-				<th  class="lefttext">', $txt['tema_text_reorder'], '</th>
-				<th  class="lefttext last_th">', $txt['tema_text_options'], '</th>';
+				<th  class="lefttext">', $txt['tema_text_reorder'], '</th>';
 
 		echo '</tr>
 		</thead>';
@@ -365,7 +351,6 @@ function template_mainview()
 		}
 	}
 
-downloads_copyright();
 }
 
 function template_add_category()
@@ -490,7 +475,6 @@ echo '</select>
 			echo '<form action="', $scripturl, '?action=spellcheck" method="post" accept-charset="', $context['character_set'], '" name="spell_form" id="spell_form" target="spellWindow"><input type="hidden" name="spellstring" value="" /></form>';
 
 
-	downloads_copyright();
 
 }
 
@@ -740,7 +724,6 @@ echo '</table>
 	if ($context['show_spellchecking'])
 			echo '<form action="', $scripturl, '?action=spellcheck" method="post" accept-charset="', $context['character_set'], '" name="spell_form" id="spell_form" target="spellWindow"><input type="hidden" name="spellstring" value="" /></form>';
 
-	downloads_copyright();
 
 }
 
@@ -767,7 +750,6 @@ function template_delete_category()
 </table>
 </form>';
 
-	downloads_copyright();
 }
 
 function template_add_download()
@@ -1372,7 +1354,7 @@ function template_view_download()
 
 				// Show linking codes
 
-				if ($modSettings['tema_set_showcode_directlink'] || $modSettings['tema_set_showcode_htmllink'])
+				if (!empty($modSettings['tema_set_showcode_directlink']) || !empty($modSettings['tema_set_showcode_htmllink']))
 				{
 					echo '<br /><b>',$txt['tema_txt_download_linking'],'</b><br />
 					<table border="0">
@@ -1438,7 +1420,6 @@ echo '
         </div>';
 
 
-	downloads_copyright();
 }
 
 function template_delete_download()
@@ -1503,96 +1484,8 @@ function template_report_download()
 </table>
 </form>';
 
-	downloads_copyright();
 }
 
-function template_settings()
-{
-	global $scripturl, $modSettings, $txt;
-
-echo '
-			<div class="cat_bar">
-								<h3 class="catbg">' . $txt['tema_text_settings'] . '</h3>
-            </div>
-	<table border="0" width="100%" cellspacing="0" align="center" cellpadding="4" class="tborder">
-		<tr class="windowbg">
-			<td>
-
-			<form method="post" action="' . $scripturl . '?action=tema;sa=adminset2">
-				<table border="0" width="100%" cellspacing="0" align="center" cellpadding="4">
-					<tr><td width="30%">' . $txt['tema_set_filesize'] . '</td><td><input type="text" name="tema_max_filesize" value="' .  $modSettings['tema_max_filesize'] . '" /> (bytes)</td></tr>
-				<tr><td width="30%">' . $txt['tema_set_path'] . '</td><td><input type="text" name="tema_path" value="' .  $modSettings['tema_path'] . '" size="50" /></td></tr>
-				<tr><td width="30%">' . $txt['tema_set_url'] . '</td><td><input type="text" name="tema_url" value="' .  $modSettings['tema_url'] . '" size="50" /></td></tr>
-
-				<tr><td width="30%">' . $txt['tema_upload_max_filesize'] . '</td><td><a href="http://www.php.net/manual/en/ini.core.php#ini.upload-max-filesize" target="_blank">' . @ini_get("upload_max_filesize") . '</a></td></tr>
-				<tr><td width="30%">' . $txt['tema_post_max_size'] . '</td><td><a href="http://www.php.net/manual/en/ini.core.php#ini.post-max-size" target="_blank">' . @ini_get("post_max_size") . '</a></td></tr>
-				<tr><td colspan="2">',$txt['tema_upload_limits_notes'] ,'</td></tr>
-
-
-
-				<tr><td width="30%">' . $txt['tema_set_files_per_page'] . '</td><td><input type="text" name="tema_set_files_per_page" value="' .  $modSettings['tema_set_files_per_page'] . '" /></td></tr>
-				<tr><td width="30%">' . $txt['tema_set_cat_width'] . '</td><td><input type="text" name="tema_set_cat_width" value="' .  $modSettings['tema_set_cat_width'] . '" /></td></tr>
-				<tr><td width="30%">' . $txt['tema_set_cat_height'] . '</td><td><input type="text" name="tema_set_cat_height" value="' .  $modSettings['tema_set_cat_height'] . '" /></td></tr>
-
-				<tr><td></td></tr>
-				<tr><td width="30%">' . $txt['tema_set_file_image_width'] . '</td><td><input type="text" name="tema_set_file_image_width" value="' .  $modSettings['tema_set_file_image_width'] . '" /></td></tr>
-				<tr><td width="30%">' . $txt['tema_set_file_image_height'] . '</td><td><input type="text" name="tema_set_file_image_height" value="' .  $modSettings['tema_set_file_image_height'] . '" /></td></tr>
-				</table>
-				<input type="checkbox" name="tema_who_viewing" ' . ($modSettings['tema_who_viewing'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_whoonline'] . '<br />
-				<input type="checkbox" name="tema_set_count_child" ' . ($modSettings['tema_set_count_child'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_count_child'] . '<br />
-				<input type="checkbox" name="tema_set_commentsnewest" ' . ($modSettings['tema_set_commentsnewest'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_commentsnewest'] . '<br />
-				<input type="checkbox" name="tema_set_show_quickreply" ' . ($modSettings['tema_set_show_quickreply'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_show_quickreply'] . '<br />
-				<input type="checkbox" name="tema_show_ratings" ' . ($modSettings['tema_show_ratings'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_showratings'] . '<br />
-				<input type="checkbox" name="tema_set_enable_multifolder" ' . ($modSettings['tema_set_enable_multifolder'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_enable_multifolder'] . '<br />
-				<input type="checkbox" name="tema_index_recent" ' . ($modSettings['tema_index_recent'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_index_recent'] . '<br />
-				<input type="checkbox" name="tema_index_showtop" ' . ($modSettings['tema_index_showtop'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_index_showtop'] . '<br />
-				<b>' . $txt['tema_catthumb_settings'] . '</b><br />
-				<input type="checkbox" name="tema_set_t_title" ' . ($modSettings['tema_set_t_title'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_title'] . '<br />
-				<input type="checkbox" name="tema_set_t_downloads" ' . ($modSettings['tema_set_t_downloads'] ? ' checked="checked" ' : '') . ' />' .$txt['tema_set_t_downloads'] . '<br />
-				<input type="checkbox" name="tema_set_t_views" ' . ($modSettings['tema_set_t_views'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_t_views'] . '<br />
-				<input type="checkbox" name="tema_set_t_filesize" ' . ($modSettings['tema_set_t_filesize'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_t_filesize'] . '<br />
-				<input type="checkbox" name="tema_set_t_date" ' . ($modSettings['tema_set_t_date'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_t_date'] . '<br />
-				<input type="checkbox" name="tema_set_t_comment" ' . ($modSettings['tema_set_t_comment'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_t_comment'] . '<br />
-				<input type="checkbox" name="tema_set_t_username" ' . ($modSettings['tema_set_t_username'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_t_username'] . '<br />
-				<input type="checkbox" name="tema_set_t_rating" ' . ($modSettings['tema_set_t_rating'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_t_rating'] . '<br />
-
-				<b>' . $txt['tema_files_settings'] . '</b><br />
-
-				<input type="checkbox" name="tema_set_file_thumb" ' . ($modSettings['tema_set_file_thumb'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_thumb'] . '<br />
-				<input type="checkbox" name="tema_set_file_prevnext" ' . ($modSettings['tema_set_file_prevnext'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_prevnext'] . '<br />
-				<input type="checkbox" name="tema_set_file_desc" ' . ($modSettings['tema_set_file_desc'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_desc'] . '<br />
-				<input type="checkbox" name="tema_set_file_title" ' . ($modSettings['tema_set_file_title'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_title'] . '<br />
-				<input type="checkbox" name="tema_set_file_views" ' . ($modSettings['tema_set_file_views'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_views'] . '<br />
-				<input type="checkbox" name="tema_set_file_downloads" ' . ($modSettings['tema_set_file_downloads'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_downloads'] . '<br />
-				<input type="checkbox" name="tema_set_file_lastdownload" ' . ($modSettings['tema_set_file_lastdownload'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_lastdownload'] . '<br />
-				<input type="checkbox" name="tema_set_file_poster" ' . ($modSettings['tema_set_file_poster'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_poster'] . '<br />
-				<input type="checkbox" name="tema_set_file_date" ' . ($modSettings['tema_set_file_date'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_date'] . '<br />
-				<input type="checkbox" name="tema_set_file_showfilesize" ' . ($modSettings['tema_set_file_showfilesize'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_showfilesize'] . '<br />
-				<input type="checkbox" name="tema_set_file_showrating" ' . ($modSettings['tema_set_file_showrating'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_showrating'] . '<br />
-				<input type="checkbox" name="tema_set_file_keywords" ' . ($modSettings['tema_set_file_keywords'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_keywords'] . '<br />
-
-				<br /><b>' . $txt['tema_txt_download_linking'] . '</b><br />
-				<input type="checkbox" name="tema_set_showcode_directlink" ' . ($modSettings['tema_set_showcode_directlink'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_showcode_directlink'] . '<br />
-				<input type="checkbox" name="tema_set_showcode_htmllink" ' . ($modSettings['tema_set_showcode_htmllink'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_showcode_htmllink'] . '<br />
-
-				';
-
-				if (!is_writable($modSettings['tema_path']))
-					echo '<font color="#FF0000"><b>' . $txt['tema_write_error']  . $modSettings['tema_path'] . '</b></font>';
-
-				echo '
-
-				<input type="submit" name="savesettings" value="' . $txt['tema_save_settings'] . '" />
-			</form>
-			<br />
-			<b>' . $txt['tema_text_permissions'] . '</b><br/><span class="smalltext">' . $txt['tema_set_permissionnotice'] . '</span>
-			<br /><a href="' . $scripturl . '?action=admin;area=permissions">' . $txt['tema_set_editpermissions']  . '</a>
-
-			</td>
-		</tr>
-</table>';
-
-}
 
 function template_approvelist()
 {
@@ -1817,7 +1710,6 @@ function template_search()
 <br />
 
 ';
-	downloads_copyright();
 }
 
 function template_search_results()
@@ -1994,7 +1886,6 @@ function template_search_results()
 
 
 
-	downloads_copyright();
 }
 
 function template_myfiles()
@@ -2184,7 +2075,6 @@ function template_myfiles()
         
 
 
-	downloads_copyright();
 }
 
 function template_view_rating()
@@ -2764,16 +2654,7 @@ function template_catperm()
 </table>';
 }
 
-function downloads_copyright()
-{
 
-	// Do NOT CHANGE THIS CODE UNLESS you have COPYRIGHT Link Removal
-	//http://www.smfhacks.com/downloads-linkremoval.php
-
-	//Copyright link must remain. To remove you need to purchase link removal at smfhacks.com
-	echo '<div align="center"><!--Link must remain or contact me to pay to remove.--><span class="smalltext">Powered by: <a href="http://www.smfhacks.com" target="_blank">Download System</a></span><!--End Copyright link--></div>';
-
-}
 
 
 function template_import_results()
@@ -2801,7 +2682,6 @@ function template_import_results()
 </table>';
 
 
-	downloads_copyright();
 }
 
 function template_import()
@@ -2828,7 +2708,6 @@ echo '
 
 </table>';
 
-	downloads_copyright();
 }
 
 

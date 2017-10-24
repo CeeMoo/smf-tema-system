@@ -12,6 +12,7 @@
 		<readme>ReadMe.txt</readme>
 		<modification type="file" reverse="true">temabeta21.xml</modification>
 		<require-file name="tema2.php" destination="$sourcedir" />
+		<require-file name="Subs-tema2.php" destination="$sourcedir" />
 		<require-file name="tema2.1.template.php" destination="$themedir" />
 		<require-dir name="tema" destination="$boarddir" />
 		<require-dir name="demo" destination="$boarddir" />
@@ -22,14 +23,14 @@
 		<require-file name="temaicon2.png" destination="$imagesdir/admin" />
 		<require-file name="temaicon2.png" destination="$imagesdir" />
 		<require-file name="temaHooks.php" destination="$sourcedir" />
-		<code>dohooks.php</code>
-		<code>temainstall2.php</code>
+		<code>temainstall.php</code>
 	</install>
 	
 	<upgrade for="2.1 - 2.1.99,2.1 Beta 1,2.1 Beta 2">
 		<redirect url="?action=admin;area=tema;sa=adminset">redirect.txt</redirect>
 		<readme>ReadMe.txt</readme>
 		<require-file name="tema2.php" destination="$sourcedir" />
+		<require-file name="Subs-tema2.php" destination="$sourcedir" />
 		<require-file name="tema2.1.template.php" destination="$themedir" />
 		<require-dir name="tema" destination="$boarddir" />
 		<require-dir name="demo" destination="$boarddir" />
@@ -40,13 +41,13 @@
 		<require-file name="temaicon2.png" destination="$imagesdir/admin" />
 		<require-file name="temaicon2.png" destination="$imagesdir" />
 		<require-file name="temaHooks.php" destination="$sourcedir" />
-		<code>dohooks.php</code>
-		<code>temainstall2.php</code>
+		<code>temainstall.php</code>
 	
 	</upgrade>
 	<uninstall for="2.1 - 2.1.99,2.1 Beta 1,2.1 Beta 2">
 		<modification type="file" reverse="true">temabeta21.xml</modification>
 		<remove-file name="$sourcedir/tema2.php" />
+		<remove-file name="$sourcedir/Subs-tema2.php" />
 		<remove-file name="$themedir/tema2.1.template.php" />
 		<remove-file name="$themedir/languages/tema.english.php" />
 		<remove-file name="$themedir/languages/tema.turkish.php" />
@@ -55,7 +56,6 @@
 		<remove-file name="$imagesdir/admin/temaicon2.png" />
 		<remove-file name="$imagesdir/temaicon2.png" />
 		<remove-file name="$sourcedir/temaHooks.php" />
-		<code>dohooks.php</code>
 		<code>temaUnInstall.php</code>
 	</uninstall>
 	
