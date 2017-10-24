@@ -123,9 +123,8 @@ function Downloads_MainView()
 
 	if (!empty($cat))
 	{
-
-		// Check the permission
-		Downloads_GetCatPermission($cat,'view');
+		require_once($sourcedir . '/Subs-Tema2.php');
+		GetCatPermission($cat,'view');
 
 		// Get category name used for the page title
 		$dbresult1 = $smcFunc['db_query']('', "
@@ -815,7 +814,7 @@ function Downloads_DeleteDownload2()
 	if (allowedTo('themes_manage') || (allowedTo('themes_delete') && $user_info['id'] == $memID))
 	{
 		DeleteFileByID($id);
-		Downloads_UpdateCategoryTotals($row['ID_CAT']);
+		UpdateCategoryTotals($row['ID_CAT']);
 		redirectexit('action=tema;sa=myfiles;u=' . $user_info['id']);
 	}
 	else
@@ -857,8 +856,8 @@ function Downloads_CatUp()
 	global  $sourcedir;
 	isAllowedTo('themes_manage');
 	$cat = (int) $_REQUEST['cat'];
-	Downloads_ReOrderCats($cat);
 	require_once($sourcedir . '/Subs-Tema2.php');
+	ReOrderCats($cat);
 	CatUp($cat);
 }
 
@@ -867,8 +866,8 @@ function Downloads_CatDown()
 	global  $sourcedir;
 	isAllowedTo('themes_manage');
 	$cat = (int) $_REQUEST['cat'];
-	Downloads_ReOrderCats($cat);
 	require_once($sourcedir . '/Subs-Tema2.php');
+	ReOrderCats($cat);
 	CatDown($cat);
 }
 
@@ -889,244 +888,74 @@ function Downloads_MyFiles()
 
 function Downloads_ApproveList()
 {
-	global $context, $mbname, $txt, $scripturl, $smcFunc;
+	global $context, $mbname, $txt, $scripturl, $sourcedir;
 	isAllowedTo('themes_manage');
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_form_approvedownloads'];
 	$context['sub_template']  = 'approvelist';
-	$context['start'] = (int) $_REQUEST['start'];
-
-	// Get Total Pages
-		$dbresult = $smcFunc['db_query']('', "
-		SELECT
-			COUNT(*) AS total
-		FROM {db_prefix}tema_file as p
-		WHERE p.approved = 0 ORDER BY ID_FILE DESC");
-		$row = $smcFunc['db_fetch_assoc']($dbresult);
-		$total = $row['total'];
-		$smcFunc['db_free_result']($dbresult);
-	$context['downloads_total'] = $total;
-
-	// List all the unapproved downloads
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		p.ID_FILE, p.ID_CAT, p.title, p.id_member, m.real_name, p.date, p.description, c.title catname
-	FROM {db_prefix}tema_file AS p
-		LEFT JOIN {db_prefix}members AS m ON (m.id_member = p.id_member)
-		LEFT JOIN {db_prefix}tema_cat AS c ON (c.ID_CAT = p.ID_CAT)
-	WHERE p.approved = 0
-	ORDER BY p.ID_FILE DESC LIMIT $context[start],10");
-	$context['downloads_file'] = array();
-	 while($row = $smcFunc['db_fetch_assoc']($dbresult))
-		{
-			$context['downloads_file'][] = array(
-			'ID_FILE' => $row['ID_FILE'],
-			'ID_CAT' => $row['ID_CAT'],
-			'title' => $row['title'],
-			'id_member' => $row['id_member'],
-			'real_name' => $row['real_name'],
-			'date' => $row['date'],
-			'description' => $row['description'],
-			'catname' => $row['catname'],
-			);
-		}
-	$smcFunc['db_free_result']($dbresult);
-
-	$context['page_index'] = constructPageIndex($scripturl . '?action=admin;area=tema;sa=approvelist', $_REQUEST['start'], $total, 10);
-
-
+	$al = (int) $_REQUEST['start'];
+	require_once($sourcedir . '/Subs-Tema2.php');
+	ApproveList($al);
+	$context['page_index'] = constructPageIndex($scripturl . '?action=admin;area=tema;sa=approvelist', $_REQUEST['start'], $context['downloads_total'], 10);
 }
 
 function Downloads_ApproveDownload()
 {
-	global $txt;
+	global $txt,$sourcedir;
 	isAllowedTo('themes_manage');
-
 	$id = (int) $_REQUEST['id'];
 	if (empty($id))
 		fatal_error($txt['tema_error_no_file_selected']);
-
-	// Approve the download
-	Downloads_ApproveFileByID($id);
-
-	// Redirect to approval list
+	require_once($sourcedir . '/Subs-Tema2.php');
+	ApproveFileByID($id);
 	redirectexit('action=admin;area=tema;sa=approvelist');
-
-}
-
-function Downloads_ApproveFileByID($id)
-{
-	global $scripturl, $sourcedir, $user_info, $smcFunc;
-
-	// Look up the download and get the category
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		p.ID_FILE, p.id_member, p.filename, p.title, p.description, c.ID_BOARD,
-		p.ID_CAT, c.locktopic
-	FROM {db_prefix}tema_file AS p
-	LEFT JOIN {db_prefix}tema_cat AS c ON (c.ID_CAT = p.ID_CAT)
-	WHERE p.ID_FILE = $id LIMIT 1");
-	$rowcat = $smcFunc['db_fetch_assoc']($dbresult);
-	$smcFunc['db_free_result']($dbresult);
-
-	if ($rowcat['ID_BOARD'] != 0  && $rowcat['ID_BOARD'] != '' )
-	{
-
-		$showpostlink = '[url]' . $scripturl . '?action=tema;sa=view;down=' . $id . '[/url]';
-
-
-					// Create the post
-					require_once($sourcedir . '/Subs-Post.php');
-					$msgOptions = array(
-						'id' => 0,
-						'subject' => $rowcat['title'],
-						'body' => '[b]' . $rowcat['title'] . "[/b]\n\n$showpostlink\n\n" . $rowcat['description'],
-						'icon' => 'xx',
-						'smileys_enabled' => 1,
-						'attachments' => array(),
-					);
-					$topicOptions = array(
-						'id' => 0,
-						'board' => $rowcat['ID_BOARD'],
-						'poll' => null,
-						'lock_mode' => $rowcat['locktopic'],
-						'sticky_mode' => null,
-						'mark_as_read' => true,
-					);
-					$posterOptions = array(
-						'id' => $rowcat['id_member'],
-						'update_post_count' => !$user_info['is_guest'] && !isset($_REQUEST['msg']),
-					);
-
-
-					preparsecode($msgOptions['body']);
-					createPost($msgOptions, $topicOptions, $posterOptions);
-
-				}
-
-
-	// Update the approval
-	$smcFunc['db_query']('', "UPDATE {db_prefix}tema_file SET approved = 1 WHERE ID_FILE = $id LIMIT 1");
-
-
-	Downloads_UpdateCategoryTotals($rowcat['ID_CAT']);
-
 }
 
 function Downloads_UnApproveDownload()
 {
-	global $txt;
+	global $txt,$sourcedir;
 	isAllowedTo('themes_manage');
-
 	$id = (int) $_REQUEST['id'];
 	if (empty($id))
 		fatal_error($txt['tema_error_no_file_selected']);
-
-	Downloads_UnApproveFileByID($id);
-
-	// Redirect to approval list
+	require_once($sourcedir . '/Subs-Tema2.php');
+	UnApproveFileByID($id);
 	redirectexit('action=admin;area=tema;sa=approvelist');
-}
-
-function Downloads_UnApproveFileByID($id)
-{
-	global $smcFunc;
-
-	// Update the approval
-	$smcFunc['db_query']('', "UPDATE {db_prefix}tema_file SET approved = 0 WHERE ID_FILE = $id LIMIT 1");
-
-	Downloads_UpdateCategoryTotalByFileID($id);
 }
 
 function Downloads_ReportList()
 {
-	global $context, $mbname, $txt, $smcFunc;
-
+	global $context, $mbname, $txt, $sourcedir;
 	isAllowedTo('themes_manage');
-
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_form_reportdownloads'];
-
-
 	$context['sub_template']  = 'reportlist';
-
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		r.ID, r.ID_FILE, r.id_member, m.real_name, r.date, r.comment
-	FROM {db_prefix}tema_report as r
-		  LEFT JOIN {db_prefix}members AS m ON  (m.id_member = r.id_member)
-	ORDER BY r.ID_FILE DESC");
-
-	$context['downloads_reports'] = array();
-	while ($row = $smcFunc['db_fetch_assoc']($dbresult))
-	{
-			$context['downloads_reports'][] = array(
-			'ID' => $row['ID'],
-			'ID_FILE' => $row['ID_FILE'],
-			'comment' => $row['comment'],
-			'id_member' => $row['id_member'],
-			'real_name' => $row['real_name'],
-			'date' => $row['date'],
-
-
-			);
-	}
-	$smcFunc['db_free_result']($dbresult);
-
-
+	require_once($sourcedir . '/Subs-Tema2.php');
+	ReportList();
 }
 
 function Downloads_DeleteReport()
 {
-	global $txt, $smcFunc;
-	// Check the permission
+	global $txt, $sourcedir;
 	isAllowedTo('themes_manage');
-
 	$id = (int) $_REQUEST['id'];
 	if (empty($id))
 		fatal_error($txt['tema_error_no_report_selected']);
-
-	$smcFunc['db_query']('', "DELETE FROM {db_prefix}tema_report WHERE ID = $id LIMIT 1");
-
-	// Redirect to redirect list
+	require_once($sourcedir . '/Subs-Tema2.php');
+	DeleteReport($id);
 	redirectexit('action=admin;area=tema;sa=reportlist');
 }
 
-
 function Downloads_Search()
 {
-	global $context, $mbname, $txt, $user_info, $smcFunc;
-
+	global $context, $mbname, $txt, $user_info, $sourcedir;
 	TopDownloadTabs();
-
-	// Is the user allowed to view the downloads?
 	isAllowedTo('themes_view');
-
 	if ($user_info['is_guest'])
 		$groupid = -1;
 	else
 		$groupid =  $user_info['groups'][0];
-
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		c.ID_CAT, c.title, p.view
-	FROM {db_prefix}tema_cat as c
-	LEFT JOIN {db_prefix}tema_catperm AS p ON (p.ID_GROUP = $groupid AND c.ID_CAT = p.ID_CAT)
-	ORDER BY c.roworder ASC");
-	$context['downloads_cat'] = array();
-	 while($row = $smcFunc['db_fetch_assoc']($dbresult))
-		{
-			// Check if they have permission to search these categories
-			if ($row['view'] == '0')
-					continue;
-
-			$context['downloads_cat'][] = array(
-			'ID_CAT' => $row['ID_CAT'],
-			'title' => $row['title']
-			);
-		}
-	$smcFunc['db_free_result']($dbresult);
-
+	require_once($sourcedir . '/Subs-Tema2.php');
+	Search($groupid);
 	$context['sub_template']  = 'search';
-
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_search'];
 }
 
@@ -1343,1092 +1172,232 @@ function Downloads_Search2()
 
 function Downloads_RateDownload()
 {
-	global $txt, $smcFunc, $user_info;
-
+	global $txt, $sourcedir, $user_info;
 	is_not_guest();
-
-	// Check if they are allowed to rate download
 	isAllowedTo('themes_ratefile');
-
 	$id = (int) $_REQUEST['id'];
 	if (empty($id))
 		fatal_error($txt['tema_error_no_file_selected']);
 	$rating = (int) $_REQUEST['rating'];
 	if (empty($rating))
 		fatal_error($txt['tema_error_no_rating_selected']);
-
-	// Check if they rated this download?
-    $dbresult = $smcFunc['db_query']('', "
-    SELECT
-    	id_member, ID_FILE
-    FROM {db_prefix}tema_rating
-    WHERE id_member = " . $user_info['id'] . " AND ID_FILE = $id");
-
-    $found = $smcFunc['db_affected_rows']();
- 	$smcFunc['db_free_result']($dbresult);
-
-	// Get the download owner
-    $dbresult = $smcFunc['db_query']('', "
-    SELECT
-    	id_member
-    FROM {db_prefix}tema_file
-    WHERE ID_FILE = $id LIMIT 1");
-    $row = $smcFunc['db_fetch_assoc']($dbresult);
-	$smcFunc['db_free_result']($dbresult);
-	// Check if they are rating their own download.
-	if ($user_info['id'] == $row['id_member'])
-		fatal_error($txt['tema_error_norate_own'],false);
-
-	if ($found != 0)
-		fatal_error($txt['tema_error_already_rated'],false);
-
-	// Check the Rating
-	if ($rating < 1 || $rating > 5)
-		$rating = 3;
-
-	// Add the Rating
-	$smcFunc['db_query']('', "INSERT INTO {db_prefix}tema_rating (id_member, ID_FILE, value) VALUES (" . $user_info['id'] . ", $id,$rating)");
-
-	// Add rating information to the download
-	$smcFunc['db_query']('', "
-	UPDATE {db_prefix}tema_file
-		SET totalratings = totalratings + 1, rating = rating + $rating
-	WHERE ID_FILE = $id LIMIT 1");
-
-	// Redirect to the download
+	$memid = $user_info['id'];
+	require_once($sourcedir . '/Subs-Tema2.php');
+	RateDownload($id,$rating,$memid);
 	redirectexit('action=tema;sa=view;down=' . $id);
-
 }
 
 function Downloads_ViewRating()
 {
-	global $context, $mbname, $txt, $smcFunc;
-
-	// Get the download ID for the ratings
+	global $context, $mbname, $txt, $sourcedir;
+	isAllowedTo('themes_manage');
 	$id = (int) $_REQUEST['id'];
 	if (empty($id))
 		fatal_error($txt['tema_error_no_file_selected']);
-
 	$context['downloads_id'] = $id;
-
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		r.ID, r.value, r.ID_FILE, r.id_member, m.real_name
-	FROM {db_prefix}tema_rating as r, {db_prefix}members AS m
-	WHERE r.ID_FILE = $id AND r.id_member = m.id_member");
-	$context['downloads_rating'] = array();
-		while($row = $smcFunc['db_fetch_assoc']($dbresult))
-		{
-			$context['downloads_rating'][] = array(
-			'ID_FILE' => $row['ID_FILE'],
-			'ID' => $row['ID'],
-			'value' => $row['value'],
-			'id_member' => $row['id_member'],
-			'real_name' => $row['real_name'],
-
-			);
-
-		}
-	$smcFunc['db_free_result']($dbresult);
-
-	isAllowedTo('themes_manage');
-
+	require_once($sourcedir . '/Subs-Tema2.php');
+	ViewRating($id);
 	$context['sub_template']  = 'view_rating';
-
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_form_viewratings'];
-
 }
 
 function Downloads_DeleteRating()
 {
-	global $scripturl, $txt, $smcFunc;
+	global $sourcedir, $txt, $smcFunc;
 	isAllowedTo('themes_manage');
-
 	$id = (int) $_REQUEST['id'];
 	if (empty($id))
 		fatal_error($txt['tema_error_no_rating_selected']);
-
-	// First lookup the ID to get the download id and value of rating
-	 $dbresult = $smcFunc['db_query']('', "
-	 SELECT
-	 	ID, ID_FILE, value
-	 FROM {db_prefix}tema_rating
-	 WHERE ID = $id LIMIT 1");
-	 $row = $smcFunc['db_fetch_assoc']($dbresult);
-	 $value = $row['value'];
-	 $fileid = $row['ID_FILE'];
-	 $smcFunc['db_free_result']($dbresult);
-	// Delete the Rating
-	$smcFunc['db_query']('', "DELETE FROM {db_prefix}tema_rating
-	WHERE ID = " . $id . ' LIMIT 1');
-	// Update the download rating information
-	$dbresult = $smcFunc['db_query']('', "UPDATE {db_prefix}tema_file SET totalratings = totalratings - 1, rating = rating - $value WHERE ID_FILE = $fileid LIMIT 1");
-	// Redirect to the ratings
-	redirectexit('action=tema;sa=viewrating&id=' .  $fileid);
+	require_once($sourcedir . '/Subs-Tema2.php');
+	DeleteRating($id);
 }
 
 function Downloads_Stats()
 {
-	global $context, $mbname,$txt, $context, $scripturl, $smcFunc;
-
-	// Is the user allowed to view the downloads?
+	global $context, $mbname,$txt, $sourcedir;
 	isAllowedTo('themes_view');
-
 	TopDownloadTabs();
-
-	// Get views total and comments total and total filesize
-	$result = $smcFunc['db_query']('', "
-	SELECT
-		SUM(views) AS views, SUM(filesize) AS filesize, SUM(totaldownloads) AS totaldownloads,
-	 	COUNT(*) AS filetotal
-	FROM {db_prefix}tema_file");
-	$row = $smcFunc['db_fetch_assoc']($result);
-	$smcFunc['db_free_result']($result);
-
-	$result2 = $smcFunc['db_query']('', "
-	SELECT
-		COUNT(*) AS filetotal
-	FROM {db_prefix}tema_file");
-	$row2 = $smcFunc['db_fetch_assoc']($result2);
-	$smcFunc['db_free_result']($result2);
-
-	$context['total_files'] = $row2['filetotal'];
-	$context['total_views'] = $row['views'];
-	$context['total_filesize'] =  Downloads_format_size($row['filesize'], 2) ;
-	$context['total_downloads'] = $row['totaldownloads'];
-
-
-	// Top Viewed Downloads
-	$result = $smcFunc['db_query']('', "
-	SELECT
-		ID_FILE, title,views
-	FROM {db_prefix}tema_file
-	WHERE approved = 1 AND views > 0
-	ORDER BY views DESC LIMIT 10");
-	$context['top_viewed'] = array();
-	$max_views = 1;
-	while ($row = $smcFunc['db_fetch_assoc']($result))
-	{
-		$context['top_viewed'][] = array(
-			'ID_FILE' => $row['ID_FILE'],
-			'title' => $row['title'],
-			'views' => $row['views'],
-			'link' => '<a href="' . $scripturl . '?action=tema;sa=view;down=' . $row['ID_FILE'] . '">' . $row['title'] . '</a>',
-		);
-
-		if ($max_views < $row['views'])
-			$max_views = $row['views'];
-	}
-	$smcFunc['db_free_result']($result);
-
-	foreach ($context['top_viewed'] as $i => $file)
-		$context['top_viewed'][$i]['percent'] = round(($file['views'] * 100) / $max_views);
-
-	// Top Rated
-	$result = $smcFunc['db_query']('', "
-	SELECT
-		ID_FILE, title,rating
-	FROM {db_prefix}tema_file
-	WHERE approved = 1 AND totalratings > 0
-	ORDER BY rating DESC LIMIT 10");
-	$context['top_rating'] = array();
-	$max_rating = 1;
-	while ($row = $smcFunc['db_fetch_assoc']($result))
-	{
-		$context['top_rating'][] = array(
-			'ID_FILE' => $row['ID_FILE'],
-			'title' => $row['title'],
-			'rating' => $row['rating'],
-			'link' => '<a href="' . $scripturl . '?action=tema;sa=view;down=' . $row['ID_FILE'] . '">' . $row['title'] . '</a>',
-		);
-
-		if ($max_rating < $row['rating'])
-			$max_rating = $row['rating'];
-	}
-	$smcFunc['db_free_result']($result);
-
-	foreach ($context['top_rating'] as $i => $file)
-		$context['top_rating'][$i]['percent'] = round(($file['rating'] * 100) / $max_rating);
-
-	// Top download list
-	$result = $smcFunc['db_query']('', "
-	SELECT
-		ID_FILE, title, totaldownloads
-	FROM {db_prefix}tema_file
-	WHERE approved = 1
-	ORDER BY totaldownloads DESC LIMIT 10");
-	$context['totaldownloads'] = array();
-	$max_totaldownloads = 1;
-	while ($row = $smcFunc['db_fetch_assoc']($result))
-	{
-		$context['totaldownloads'][] = array(
-			'ID_FILE' => $row['ID_FILE'],
-			'title' => $row['title'],
-			'totaldownloads' => $row['totaldownloads'],
-			'link' => '<a href="' . $scripturl . '?action=tema;sa=view;down=' . $row['ID_FILE'] . '">' . $row['title'] . '</a>',
-		);
-
-		if ($max_totaldownloads < $row['totaldownloads'])
-			$max_totaldownloads = $row['totaldownloads'];
-	}
-	$smcFunc['db_free_result']($result);
-
-	foreach ($context['totaldownloads'] as $i => $file)
-		$context['totaldownloads'][$i]['percent'] = round(($file['totaldownloads'] * 100) / $max_totaldownloads);
-
-	// Last 10 downloads uploaded
-	$result = $smcFunc['db_query']('', "
-	SELECT
-		ID_FILE, title
-	FROM {db_prefix}tema_file
-	WHERE approved = 1
-	ORDER BY ID_FILE DESC LIMIT 10");
-	$context['last_upload'] = array();
-	while ($row = $smcFunc['db_fetch_assoc']($result))
-	{
-		$context['last_upload'][] = array(
-			'ID_FILE' => $row['ID_FILE'],
-			'title' => $row['title'],
-			'link' => '<a href="' . $scripturl . '?action=tema;sa=view;down=' . $row['ID_FILE'] . '">' . $row['title'] . '</a>',
-		);
-	}
-	$smcFunc['db_free_result']($result);
-
-
-	// Load the template
 	$context['sub_template']  = 'stats';
-	// Set the page title
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_text_stats'];
-
+	require_once($sourcedir . '/Subs-Tema2.php');
+	Stats();
 }
 
-function Downloads_UpdateUserFileSizeTable($memberid, $filesize)
-{
-	global $smcFunc;
-
-	// Check if a record exits
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		id_member,totalfilesize
-	FROM {db_prefix}tema_userquota
-	WHERE id_member = $memberid LIMIT 1");
-	$count = $smcFunc['db_affected_rows']();
-	$smcFunc['db_free_result']($dbresult);
-
-	if ($count == 0)
-	{
-		// Create the record
-		$smcFunc['db_query']('', "INSERT INTO {db_prefix}tema_userquota (id_member, totalfilesize) VALUES ($memberid, $filesize)");
-	}
-	else
-	{
-		// Update the record
-		if ($filesize >= 0)
-			$smcFunc['db_query']('', "UPDATE {db_prefix}tema_userquota SET totalfilesize = totalfilesize + $filesize WHERE id_member = $memberid LIMIT 1");
-		else
-			$smcFunc['db_query']('', "UPDATE {db_prefix}tema_userquota SET totalfilesize = totalfilesize + $filesize WHERE id_member = $memberid LIMIT 1");
-	}
-}
 
 function Downloads_FileSpaceAdmin()
 {
-	global $mbname, $txt, $context, $scripturl, $smcFunc;
-	// Check if they are allowed to manage the downloads
+	global $mbname, $txt, $context, $scripturl, $sourcedir;
 	isAllowedTo('themes_manage');
-
 	loadLanguage('Admin');
-
-	// Set the page tile
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_filespace'];
-	// Load the subtemplate for the file manager
 	$context['sub_template']  = 'filespace';
-
-	// Load the membergroups
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		ID_GROUP, group_name
-	FROM {db_prefix}membergroups
-	WHERE min_posts = -1 ORDER BY group_name");
-	while ($row = $smcFunc['db_fetch_assoc']($dbresult))
-	{
-		$context['groups'][$row['ID_GROUP']] = array(
-			'ID_GROUP' => $row['ID_GROUP'],
-			'group_name' => $row['group_name'],
-			);
-	}
-	$smcFunc['db_free_result']($dbresult);
-
-
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		q.totalfilesize,  q.ID_GROUP, m.group_name
-	FROM {db_prefix}tema_groupquota as q, {db_prefix}membergroups AS m
-	WHERE  q.ID_GROUP = m.ID_GROUP ORDER BY q.totalfilesize");
-	$context['downloads_membergroups'] = array();
-		while($row = $smcFunc['db_fetch_assoc']($dbresult))
-		{
-			$context['downloads_membergroups'][] = array(
-			'ID_GROUP' => $row['ID_GROUP'],
-			'totalfilesize' => $row['totalfilesize'],
-			'group_name' => $row['group_name'],
-
-
-			);
-
-		}
-	$smcFunc['db_free_result']($dbresult);
-
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		q.totalfilesize, q.ID_GROUP
-	FROM {db_prefix}tema_groupquota as q
-	WHERE  q.ID_GROUP = 0 LIMIT 1");
-	$context['downloads_reggroup'] = array();
-		while($row = $smcFunc['db_fetch_assoc']($dbresult))
-		{
-			$context['downloads_reggroup'][] = array(
-			'ID_GROUP' => $row['ID_GROUP'],
-			'totalfilesize' => $row['totalfilesize'],
-			);
-
-		}
-	$smcFunc['db_free_result']($dbresult);
-
-
-	$context['start'] = (int) $_REQUEST['start'];
-
-	// Get Total Pages
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		COUNT(*) AS total
-	FROM {db_prefix}tema_userquota as q");
-	$row = $smcFunc['db_fetch_assoc']($dbresult);
-	$total = $row['total'];
-	$smcFunc['db_free_result']($dbresult);
-	$context['downloads_total'] = $total;
-
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		q.totalfilesize,  q.id_member, m.real_name
-	FROM {db_prefix}tema_userquota as q, {db_prefix}members AS m
-	WHERE  q.id_member = m.id_member
-	ORDER BY q.totalfilesize DESC  LIMIT $context[start],20");
-	$context['downloads_members'] = array();
-		while($row = $smcFunc['db_fetch_assoc']($dbresult))
-		{
-			$context['downloads_members'][] = array(
-			'id_member' => $row['id_member'],
-			'totalfilesize' => $row['totalfilesize'],
-			'real_name' => $row['real_name'],
-
-
-			);
-
-		}
-	$smcFunc['db_free_result']($dbresult);
-
-
+	$al = (int) $_REQUEST['start'];
+	require_once($sourcedir . '/Subs-Tema2.php');
+	FileSpaceAdmin($al);
 	$context['page_index'] = constructPageIndex($scripturl . '?action=admin;area=tema;sa=filespace', $_REQUEST['start'], $total, 20);
-
-
 }
 
 function Downloads_FileSpaceList()
 {
-	global $mbname, $txt, $context, $scripturl, $smcFunc;
-	// Check if they are allowed to manage the downloads
+	global $mbname, $txt, $context, $scripturl, $sourcedir;
 	isAllowedTo('themes_manage');
-
-
 	$id = (int) $_REQUEST['id'];
 	if (empty($id))
 		fatal_error($txt['tema_error_no_user_selected']);
-
-    $dbresult = $smcFunc['db_query']('', "
-    SELECT
-    	m.real_name
-    FROM {db_prefix}members AS m
-    WHERE m.id_member = $id  LIMIT 1");
-	$row = $smcFunc['db_fetch_assoc']($dbresult);
-	$context['downloads_filelist_real_name'] = $row['real_name'];
-	$context['downloads_filelist_userid'] = $id;
-	$smcFunc['db_free_result']($dbresult);
-
-	// Set the page tile
+	$al = (int) $_REQUEST['start'];
+	require_once($sourcedir . '/Subs-Tema2.php');
+	FileSpaceList($id,$al);
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_filespace'] . ' - ' . $context['downloads_filelist_real_name'];
-	// Load the subtemplate for the file manager
 	$context['sub_template']  = 'filelist';
-
-	$context['start'] = (int) $_REQUEST['start'];
-
-	// Get Total Pages
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		COUNT(*) AS total
-	FROM {db_prefix}tema_file
-	WHERE id_member = " . $context['downloads_filelist_userid']);
-	$row = $smcFunc['db_fetch_assoc']($dbresult);
-	$total = $row['total'];
-	$smcFunc['db_free_result']($dbresult);
-	$context['downloads_total'] = $total;
-
-
-
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		p.ID_FILE,p.title, p.filesize,p.id_member
-	FROM {db_prefix}tema_file as p
-	WHERE p.id_member = " . $context['downloads_filelist_userid'] . "
-	ORDER BY p.filesize DESC  LIMIT $context[start],20");
-	$context['downloads_files'] = array();
-		while($row = $smcFunc['db_fetch_assoc']($dbresult))
-		{
-			$context['downloads_files'][] = array(
-			'ID_FILE' => $row['ID_FILE'],
-			'title' => $row['title'],
-			'filesize' => $row['filesize'],
-			'id_member' => $row['id_member'],
-
-
-			);
-
-		}
-	$smcFunc['db_free_result']($dbresult);
-
-
-	$context['page_index'] = constructPageIndex($scripturl . '?action=admin;area=tema;sa=filelist&id=' . $context['downloads_filelist_userid'], $_REQUEST['start'], $total, 20);
-
+	$context['page_index'] = constructPageIndex($scripturl . '?action=admin;area=tema;sa=filelist&id=' . $context['downloads_filelist_userid'], $_REQUEST['start'], $context['downloads_total'], 20);
 }
 
 function Downloads_RecountFileQuotaTotals($redirect = true)
 {
-	global $smcFunc;
-
+	global $sourcedir;
 	if ($redirect == true)
 		isAllowedTo('themes_manage');
-
-	// Show all the user's with quota information
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		id_member
-	FROM {db_prefix}tema_userquota");
-	while($row = $smcFunc['db_fetch_assoc']($dbresult))
-	{
-		// Loop though the all the files for the member and get the total
-		$dbresult2 = $smcFunc['db_query']('', "
-		SELECT
-			SUM(filesize) as total
-		FROM {db_prefix}tema_file
-		WHERE id_member = " . $row['id_member']);
-
-		$row2 = $smcFunc['db_fetch_assoc']($dbresult2);
-		$total = $row2['total'];
-
-		if ($total == '')
-			$total = 0;
-
-		$smcFunc['db_free_result']($dbresult2);
-		// Update the quota
-		$smcFunc['db_query']('', "UPDATE {db_prefix}tema_userquota SET totalfilesize = $total WHERE id_member = " . $row['id_member'] . " LIMIT 1");
-
-	}
-	$smcFunc['db_free_result']($dbresult);
-
+	require_once($sourcedir . '/Subs-Tema2.php');
+	RecountFileQuotaTotals();
 	if ($redirect == true)
 		redirectexit('action=admin;area=tema;sa=filespace');
 }
-
-function Downloads_GetQuotaGroupLimit($memberid)
-{
-	global $smcFunc;
-
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		m.id_member, q.ID_GROUP, q.totalfilesize
-	FROM {db_prefix}tema_groupquota as q, {db_prefix}members as m
-	WHERE m.id_member = $memberid AND q.ID_GROUP = m.ID_GROUP LIMIT 1");
-	$row = $smcFunc['db_fetch_assoc']($dbresult);
-	if ($smcFunc['db_affected_rows']() == 0)
-	{
-		$smcFunc['db_free_result']($dbresult);
-		return 0;
-	}
-	else
-	{
-		$smcFunc['db_free_result']($dbresult);
-
-		return $row['totalfilesize'];
-	}
-
-}
-
-function Downloads_GetUserSpaceUsed($memberid)
-{
-	global $smcFunc;
-
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		id_member,totalfilesize
-	FROM {db_prefix}tema_userquota
-	WHERE id_member = $memberid LIMIT 1");
-	$row = $smcFunc['db_fetch_assoc']($dbresult);
-	if ($smcFunc['db_affected_rows']()== 0)
-	{
-		$smcFunc['db_free_result']($dbresult);
-		return 0;
-	}
-	else
-	{
-		$smcFunc['db_free_result']($dbresult);
-
-		return $row['totalfilesize'];
-	}
-
-}
-
 function Downloads_AddQuota()
 {
-	global $txt, $smcFunc;
-
+	global $txt, $sourcedir;
 	isAllowedTo('themes_manage');
-
 	$groupid = (int) $_REQUEST['groupname'];
-
 	$filelimit = (double) $_REQUEST['filelimit'];
 	if (empty($filelimit))
 	{
 		fatal_error($txt['tema_error_noquota'],false);
 	}
-
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		ID_GROUP
-	FROM {db_prefix}tema_groupquota
-	WHERE ID_GROUP = $groupid LIMIT 1");
-	$count = $smcFunc['db_affected_rows']();
-	$smcFunc['db_free_result']($dbresult);
-
-	if ($count == 0)
-	{
-		// Create the record
-		$smcFunc['db_query']('', "INSERT INTO {db_prefix}tema_groupquota (ID_GROUP, totalfilesize) VALUES ($groupid, $filelimit)");
-	}
-	else
-	{
-		fatal_error($txt['tema_error_quotaexist'],false);
-	}
-
+	require_once($sourcedir . '/Subs-Tema2.php');
+	AddQuota($groupid,$filelimit);
 	redirectexit('action=admin;area=tema;sa=filespace');
 }
 
 function Downloads_DeleteQuota()
 {
-	global $smcFunc;
-
+	global $sourcedir;
 	isAllowedTo('themes_manage');
 	$id = (int) $_REQUEST['id'];
-
-	$smcFunc['db_query']('', "DELETE FROM {db_prefix}tema_groupquota WHERE ID_GROUP = " . $id . ' LIMIT 1');
-
+	require_once($sourcedir . '/Subs-Tema2.php');
+	DeleteQuota($id);
 	redirectexit('action=admin;area=tema;sa=filespace');
 }
 
 function Downloads_CatPerm()
 {
-	global $mbname, $txt, $context, $smcFunc;
+	global $mbname, $txt, $context, $sourcedir;
 	isAllowedTo('themes_manage');
-
 	$cat = (int) $_REQUEST['cat'];
 	if (empty($cat))
 		fatal_error($txt['tema_error_no_cat']);
-
-	$dbresult1 = $smcFunc['db_query']('', "
-	SELECT
-		ID_CAT, title
-	FROM {db_prefix}tema_cat
-	WHERE ID_CAT = $cat LIMIT 1");
-	$row1 = $smcFunc['db_fetch_assoc']($dbresult1);
-	$context['downloads_cat_name'] = $row1['title'];
-	$smcFunc['db_free_result']($dbresult1);
-
 	loadLanguage('Admin');
-
-	$context['downloads_cat'] = $cat;
-
-	// Load the template
+	require_once($sourcedir . '/Subs-Tema2.php');
+	CatPerm($cat);
 	$context['sub_template']  = 'catperm';
-	// Set the page title
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_text_catperm'] . ' -' . $context['downloads_cat_name'];
-
-	// Load the membergroups
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		ID_GROUP, group_name
-	FROM {db_prefix}membergroups
-	WHERE min_posts = -1 ORDER BY group_name");
-	while ($row = $smcFunc['db_fetch_assoc']($dbresult))
-	{
-		$context['groups'][$row['ID_GROUP']] = array(
-			'ID_GROUP' => $row['ID_GROUP'],
-			'group_name' => $row['group_name'],
-			);
-	}
-	$smcFunc['db_free_result']($dbresult);
-
-
-	// Membergroups
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		c.ID_CAT, c.ID, c.view, c.viewdownload, c.addfile, c.editfile, c.delfile, c.ID_GROUP, m.group_name,a.title catname
-	FROM ({db_prefix}tema_catperm as c, {db_prefix}membergroups AS m,{db_prefix}tema_cat as a)
-	WHERE  c.ID_CAT = " . $context['downloads_cat'] . " AND c.ID_GROUP = m.ID_GROUP AND a.ID_CAT = c.ID_CAT");
-	$context['downloads_membergroups'] = array();
-	while($row = $smcFunc['db_fetch_assoc']($dbresult))
-		{
-			$context['downloads_membergroups'][] = array(
-			'ID_CAT' => $row['ID_CAT'],
-			'ID' => $row['ID'],
-			'view' => $row['view'],
-			'viewdownload' => $row['viewdownload'],
-			'addfile' => $row['addfile'],
-			'editfile' => $row['editfile'],
-			'delfile' => $row['delfile'],
-			'ID_GROUP' => $row['ID_GROUP'],
-			'group_name' => $row['group_name'],
-			'catname' => $row['catname'],
-			);
-
-		}
-	$smcFunc['db_free_result']($dbresult);
-
-
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		c.ID_CAT, c.ID, c.view, c.viewdownload, c.addfile, c.editfile, c.delfile, c.ID_GROUP,a.title catname
-	FROM {db_prefix}tema_catperm as c,{db_prefix}tema_cat as a
-	WHERE c.ID_CAT = " . $context['downloads_cat'] . " AND c.ID_GROUP = 0 AND a.ID_CAT = c.ID_CAT LIMIT 1");
-	$context['downloads_reggroup'] = array();
-	while($row = $smcFunc['db_fetch_assoc']($dbresult))
-		{
-			$context['downloads_reggroup'][] = array(
-			'ID_CAT' => $row['ID_CAT'],
-			'ID' => $row['ID'],
-			'view' => $row['view'],
-			'viewdownload' => $row['viewdownload'],
-			'addfile' => $row['addfile'],
-			'editfile' => $row['editfile'],
-			'delfile' => $row['delfile'],
-			'ID_GROUP' => $row['ID_GROUP'],
-			'catname' => $row['catname'],
-			);
-
-		}
-	$smcFunc['db_free_result']($dbresult);
-
-
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		c.ID_CAT, c.ID, c.view, c.viewdownload, c.addfile, c.editfile, c.delfile, c.ID_GROUP,a.title catname
-	FROM {db_prefix}tema_catperm as c,{db_prefix}tema_cat as a
-	WHERE c.ID_CAT = " . $context['downloads_cat'] . " AND c.ID_GROUP = -1 AND a.ID_CAT = c.ID_CAT LIMIT 1");
-	$context['downloads_guestgroup'] = array();
-	while($row = $smcFunc['db_fetch_assoc']($dbresult))
-		{
-			$context['downloads_guestgroup'][] = array(
-			'ID_CAT' => $row['ID_CAT'],
-			'ID' => $row['ID'],
-			'view' => $row['view'],
-			'viewdownload' => $row['viewdownload'],
-			'addfile' => $row['addfile'],
-			'editfile' => $row['editfile'],
-			'delfile' => $row['delfile'],
-			'ID_GROUP' => $row['ID_GROUP'],
-			'catname' => $row['catname'],
-			);
-
-		}
-	$smcFunc['db_free_result']($dbresult);
-
 }
 
 function Downloads_CatPerm2()
 {
-	global $txt, $smcFunc;
+	global $sourcedir;
 	isAllowedTo('themes_manage');
-
 	$groupname = (int) $_REQUEST['groupname'];
 	$cat = (int) $_REQUEST['cat'];
-
-	// Check if permission exits
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		ID_GROUP,ID_CAT
-	FROM {db_prefix}tema_catperm
-	WHERE ID_GROUP = $groupname AND ID_CAT = $cat");
-	if ($smcFunc['db_affected_rows']()!= 0)
-	{
-		$smcFunc['db_free_result']($dbresult);
-		fatal_error($txt['tema_permerr_permexist'],false);
-	}
-	$smcFunc['db_free_result']($dbresult);
-
-	// Permissions
 	$view = isset($_REQUEST['view']) ? 1 : 0;
 	$viewdownload = isset($_REQUEST['viewdownload']) ? 1 : 0;
 	$add = isset($_REQUEST['add']) ? 1 : 0;
 	$edit = isset($_REQUEST['edit']) ? 1 : 0;
 	$delete = isset($_REQUEST['delete']) ? 1 : 0;
-
-	// Insert into database
-	$smcFunc['db_query']('', "INSERT INTO {db_prefix}tema_catperm
-			(ID_GROUP,ID_CAT,view,addfile,editfile,delfile,viewdownload)
-		VALUES ($groupname,$cat,$view,$add,$edit,$delete,$viewdownload)");
-
+	require_once($sourcedir . '/Subs-Tema2.php');
+	CatPerm2($groupname,$cat,$view,$viewdownload,$add,$edit,$delete);
 	redirectexit('action=tema;sa=catperm;cat=' . $cat);
 }
 
 function Downloads_CatPermList()
 {
-	global $mbname, $txt, $context, $smcFunc;
+	global $mbname, $txt, $context, $sourcedir;
 	isAllowedTo('themes_manage');
-
-
-	// Load the template
 	$context['sub_template']  = 'catpermlist';
-
-	// Set the page title
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_text_catpermlist'];
-
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		c.ID_CAT, c.ID, c.view, c.addfile, c.editfile, c.delfile,
-		c.ID_GROUP, m.group_name,a.title catname
-	FROM ({db_prefix}tema_catperm as c, {db_prefix}membergroups AS m,{db_prefix}tema_cat as a)
-	WHERE  c.ID_GROUP = m.ID_GROUP AND a.ID_CAT = c.ID_CAT");
-	$context['downloads_membergroups'] = array();
-	while($row = $smcFunc['db_fetch_assoc']($dbresult))
-		{
-			$context['downloads_membergroups'][] = array(
-			'ID_CAT' => $row['ID_CAT'],
-			'ID' => $row['ID'],
-			'view' => $row['view'],
-			'addfile' => $row['addfile'],
-			'editfile' => $row['editfile'],
-			'delfile' => $row['delfile'],
-			'ID_GROUP' => $row['ID_GROUP'],
-			'group_name' => $row['group_name'],
-			'catname' => $row['catname'],
-			);
-
-		}
-	$smcFunc['db_free_result']($dbresult);
-
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		c.ID_CAT, c.ID, c.view, c.addfile, c.editfile, c.delfile,  c.ID_GROUP,a.title catname
-	FROM {db_prefix}tema_catperm as c,{db_prefix}tema_cat as a
-	WHERE  c.ID_GROUP = 0 AND a.ID_CAT = c.ID_CAT LIMIT 1");
-	$context['downloads_regmem'] = array();
-	while($row = $smcFunc['db_fetch_assoc']($dbresult))
-		{
-			$context['downloads_regmem'][] = array(
-			'ID_CAT' => $row['ID_CAT'],
-			'ID' => $row['ID'],
-			'view' => $row['view'],
-			'addfile' => $row['addfile'],
-			'editfile' => $row['editfile'],
-			'delfile' => $row['delfile'],
-			'ID_GROUP' => $row['ID_GROUP'],
-			'catname' => $row['catname'],
-			);
-
-		}
-	$smcFunc['db_free_result']($dbresult);
-
-
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		c.ID_CAT, c.ID, c.view, c.addfile, c.editfile, c.delfile,  c.ID_GROUP,a.title catname
-	FROM {db_prefix}tema_catperm as c,{db_prefix}tema_cat as a
-	WHERE  c.ID_GROUP = -1 AND a.ID_CAT = c.ID_CAT LIMIT 1");
-	$context['downloads_guestmem'] = array();
-	while($row = $smcFunc['db_fetch_assoc']($dbresult))
-		{
-			$context['downloads_guestmem'][] = array(
-			'ID_CAT' => $row['ID_CAT'],
-			'ID' => $row['ID'],
-			'view' => $row['view'],
-			'addfile' => $row['addfile'],
-			'editfile' => $row['editfile'],
-			'delfile' => $row['delfile'],
-			'ID_GROUP' => $row['ID_GROUP'],
-			'catname' => $row['catname'],
-			);
-
-		}
-	$smcFunc['db_free_result']($dbresult);
-
+	require_once($sourcedir . '/Subs-Tema2.php');
+	CatPermList();
 }
 
 function Downloads_CatPermDelete()
 {
-	global $smcFunc;
-
+	global $sourcedir;
 	isAllowedTo('themes_manage');
-
 	$id = (int) $_REQUEST['id'];
-
-	// Delete the Permission
-	$smcFunc['db_query']('', "DELETE FROM {db_prefix}tema_catperm WHERE ID = " . $id . ' LIMIT 1');
-	// Redirect to the ratings
+	require_once($sourcedir . '/Subs-Tema2.php');
+	CatPermDelete($id);
 	redirectexit('action=admin;area=tema;sa=catpermlist');
-
-}
-
-function Downloads_GetCatPermission($cat,$perm)
-{
-	global $txt, $user_info, $smcFunc;
-	$cat = (int) $cat;
-	if (!$user_info['is_guest'])
-	{
-		$dbresult = $smcFunc['db_query']('', "
-		SELECT
-			m.id_member, c.view, c.viewdownload, c.addfile, c.editfile, c.delfile,c.ratefile, c.report
-		FROM {db_prefix}tema_catperm as c, {db_prefix}members as m
-		WHERE m.id_member = " . $user_info['id'] . " AND c.ID_GROUP = m.ID_GROUP AND c.ID_CAT = $cat LIMIT 1");
-	}
-	else
-		$dbresult = $smcFunc['db_query']('', "
-		SELECT
-			c.view, c.viewdownload, c.addfile, c.editfile, c.delfile,c.ratefile, c.report
-		FROM {db_prefix}tema_catperm as c
-		WHERE c.ID_GROUP = -1 AND c.ID_CAT = $cat LIMIT 1");
-
-	if ($smcFunc['db_affected_rows']()== 0)
-	{
-		$smcFunc['db_free_result']($dbresult);
-	}
-	else
-	{
-		$row = $smcFunc['db_fetch_assoc']($dbresult);
-
-		$smcFunc['db_free_result']($dbresult);
-		if ($perm == 'view' && $row['view'] == 0)
-			fatal_error($txt['tema_perm_no_view'],false);
-		else if ($perm == 'viewdownload' && $row['viewdownload'] == 0)
-			fatal_error($txt['tema_perm_no_viewdownload'],false);
-		else if ($perm == 'addfile' && $row['addfile'] == 0)
-			fatal_error($txt['tema_perm_no_add'],false);
-		else if ($perm == 'editfile' && $row['editfile'] == 0)
-			fatal_error($txt['tema_perm_no_edit'],false);
-		else if ($perm == 'delfile' && $row['delfile'] == 0)
-			fatal_error($txt['tema_perm_no_delete'],false);
-		else if ($perm == 'ratefile' && $row['ratefile'] == 0)
-			fatal_error($txt['tema_perm_no_ratefile'],false);
-		else if ($perm == 'report' && $row['report'] == 0)
-			fatal_error($txt['tema_perm_no_report'],false);
-
-	}
-
-
 }
 
 function Downloads_PreviousDownload()
 {
-	global $txt, $smcFunc;
-
+	global $txt, $sourcedir;
 	$id = (int) $_REQUEST['id'];
 	if (empty($id))
 		fatal_error($txt['tema_error_no_file_selected']);
-
-	// Get the category
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		ID_FILE, ID_CAT
-	FROM {db_prefix}tema_file
-	WHERE ID_FILE = $id  LIMIT 1");
-	$row = $smcFunc['db_fetch_assoc']($dbresult);
-	$ID_CAT = $row['ID_CAT'];
-
-	$smcFunc['db_free_result']($dbresult);
-
-	// Get previous download
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		ID_FILE
-	FROM {db_prefix}tema_file
-	WHERE ID_CAT = $ID_CAT AND approved = 1 AND ID_FILE > $id  LIMIT 1");
-	if ($smcFunc['db_affected_rows']() != 0)
-	{
-		$row = $smcFunc['db_fetch_assoc']($dbresult);
-		$ID_FILE = $row['ID_FILE'];
-	}
-	else
-		$ID_FILE = $id;
-
-	$smcFunc['db_free_result']($dbresult);
-
-	redirectexit('action=tema;sa=view;down=' . $ID_FILE);
+	require_once($sourcedir . '/Subs-Tema2.php');
+	PreviousDownload($id);
 }
 
 function Downloads_NextDownload()
 {
-	global $txt, $smcFunc;
-
+	global $txt, $sourcedir;
 	$id = (int) $_REQUEST['id'];
 	if (empty($id))
 		fatal_error($txt['tema_error_no_file_selected']);
-
-	// Get the category
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		ID_FILE, ID_CAT
-	FROM {db_prefix}tema_file
-	WHERE ID_FILE = $id  LIMIT 1");
-	$row = $smcFunc['db_fetch_assoc']($dbresult);
-	$ID_CAT = $row['ID_CAT'];
-
-	$smcFunc['db_free_result']($dbresult);
-
-	// Get next download
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		ID_FILE
-	FROM {db_prefix}tema_file
-	WHERE ID_CAT = $ID_CAT AND approved = 1 AND ID_FILE < $id
-	ORDER BY ID_FILE DESC LIMIT 1");
-	if ($smcFunc['db_affected_rows']() != 0)
-	{
-		$row = $smcFunc['db_fetch_assoc']($dbresult);
-		$ID_FILE = $row['ID_FILE'];
-	}
-	else
-		$ID_FILE = $id;
-	$smcFunc['db_free_result']($dbresult);
-
-	redirectexit('action=tema;sa=view;down=' . $ID_FILE);
+	require_once($sourcedir . '/Subs-Tema2.php');
+	NextDownload($id);
 }
 
 function Downloads_CatImageDelete()
 {
-	global $smcFunc;
-
+	global $sourcedir;
 	isAllowedTo('themes_manage');
-
 	$id = (int) $_REQUEST['id'];
 	if (empty($id))
 		exit;
-
-		$smcFunc['db_query']('', "UPDATE {db_prefix}tema_cat
-		SET filename = '' WHERE ID_CAT = $id LIMIT 1");
-
+	require_once($sourcedir . '/Subs-Tema2.php');
+	CatImageDelete($id);
 	redirectexit('action=tema;sa=editcat;cat=' . $id);
 }
 function Downloads_FileImageDelete()
 {
-	global $smcFunc;
-
+	global $sourcedir;
 	isAllowedTo('themes_manage');
-
 	$id = (int) $_REQUEST['id'];
 	if (empty($id))
 		exit;
-
-		$smcFunc['db_query']('', "UPDATE {db_prefix}tema_file
-		SET picture = '' WHERE id_file = $id LIMIT 1");
-
+	require_once($sourcedir . '/Subs-Tema2.php');
+	FileImageDelete($id);
 	redirectexit('action=tema;sa=edit&id=' . $id);
 }
-
-function Downloads_ReOrderCats($cat)
-{
-	global $smcFunc;
-
-	$dbresult1 = $smcFunc['db_query']('', "
-	SELECT
-		roworder,ID_PARENT
-	FROM {db_prefix}tema_cat
-	WHERE ID_CAT = $cat");
-	$row = $smcFunc['db_fetch_assoc']($dbresult1);
-	$ID_PARENT = $row['ID_PARENT'];
-	$smcFunc['db_free_result']($dbresult1);
-
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		ID_CAT, roworder
-	FROM {db_prefix}tema_cat
-	WHERE ID_PARENT = $ID_PARENT
-	ORDER BY roworder ASC");
-	if ($smcFunc['db_affected_rows']() != 0)
-	{
-		$count = 1;
-		while($row2 = $smcFunc['db_fetch_assoc']($dbresult))
-		{
-			$smcFunc['db_query']('', "UPDATE {db_prefix}tema_cat
-			SET roworder = $count WHERE ID_CAT = " . $row2['ID_CAT']);
-			$count++;
-		}
-	}
-	$smcFunc['db_free_result']($dbresult);
-}
-
 function Downloads_BulkActions()
 {
-	isAllowedTo('themes_manage');
-
+	global $sourcedir;
+		isAllowedTo('themes_manage');
 	if (isset($_REQUEST['files']))
 	{
 		$baction = $_REQUEST['doaction'];
-
+		require_once($sourcedir . '/Subs-Tema2.php');
 		foreach ($_REQUEST['files'] as $value)
 		{
 
 			if ($baction == 'approve')
-				Downloads_ApproveFileByID($value);
+				ApproveFileByID($value);
 			if ($baction == 'delete')
 				DeleteFileByID($value);
 
 		}
 	}
-
-	// Redirect to approval list
 	redirectexit('action=admin;area=tema;sa=approvelist');
-}
-
-function Downloads_UpdateCategoryTotals($ID_CAT)
-{
-	global $smcFunc;
-	
-	if (empty($ID_CAT))
-		return;
-
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		COUNT(*) AS total
-	FROM {db_prefix}tema_file
-	WHERE ID_CAT = $ID_CAT AND approved = 1");
-	$row = $smcFunc['db_fetch_assoc']($dbresult);
-	$total = $row['total'];
-	$smcFunc['db_free_result']($dbresult);
-
-	// Update the count
-	$dbresult = $smcFunc['db_query']('', "UPDATE {db_prefix}tema_cat SET total = $total WHERE ID_CAT = $ID_CAT LIMIT 1");
-
-}
-
-function Downloads_UpdateCategoryTotalByFileID($id)
-{
-	global $smcFunc;
-
-	$dbresult = $smcFunc['db_query']('', "
-	SELECT
-		ID_CAT FROM {db_prefix}tema_file
-	WHERE ID_FILE = $id");
-	$row = $smcFunc['db_fetch_assoc']($dbresult);
-	$smcFunc['db_free_result']($dbresult);
-
-	Downloads_UpdateCategoryTotals($row['ID_CAT']);
-
 }
 
 function Downloads_CustomUp()
@@ -2810,8 +1779,8 @@ function Downloads_DownloadFile()
 			fatal_error($txt['tema_error_file_notapproved'],false);
 	}
 
-	// Check if they can download from this category
-	Downloads_GetCatPermission($row['ID_CAT'],'viewdownload');
+	require_once($sourcedir . '/Subs-Tema2.php');
+	GetCatPermission($row['ID_CAT'],'viewdownload');
 
 	// Check credits
 
@@ -3361,7 +2330,7 @@ function Downloads_ImportTinyPortalDownloads()
 
 		// Get the Category ID
 		$cat_id = $smcFunc['db_insert_id']('{db_prefix}tema_cat', 'id_cat');
-		Downloads_ReOrderCats($cat_id);
+		ReOrderCats($cat_id);
 
 		$catArray[$catRow['id']] = $cat_id;
 
@@ -3485,9 +2454,9 @@ function Downloads_ImportTinyPortalDownloads()
 		}
 
 		if ($fileRow['filesize'] != 0)
-			Downloads_UpdateUserFileSizeTable($fileRow['authorid'],$fileRow['filesize']);
+			UpdateUserFileSizeTable($fileRow['authorid'],$fileRow['filesize']);
 
-		Downloads_UpdateCategoryTotals($category);
+		UpdateCategoryTotals($category);
 		//UpdateMemberTotalFiles($fileRow['authorid']);
 
 		$fileCount++;

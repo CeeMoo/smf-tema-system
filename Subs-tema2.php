@@ -1237,22 +1237,10 @@ function MyFiles($u)
 		$smcFunc['db_free_result']($dbresult);
 }
 
-function ApproveList()
+function ApproveList($al)
 {
-	global $context, $mbname, $txt, $scripturl, $smcFunc;
-
-	isAllowedTo('themes_manage');
-
-	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_form_approvedownloads'];
-
-
-
-	$context['sub_template']  = 'approvelist';
-
-
-	$context['start'] = (int) $_REQUEST['start'];
-
-	// Get Total Pages
+	global $context, $smcFunc;
+		$context['start']=$al;
 		$dbresult = $smcFunc['db_query']('', "
 		SELECT
 			COUNT(*) AS total
@@ -1262,8 +1250,6 @@ function ApproveList()
 		$total = $row['total'];
 		$smcFunc['db_free_result']($dbresult);
 	$context['downloads_total'] = $total;
-
-	// List all the unapproved downloads
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		p.ID_FILE, p.ID_CAT, p.title, p.id_member, m.real_name, p.date, p.description, c.title catname
@@ -1287,34 +1273,10 @@ function ApproveList()
 			);
 		}
 	$smcFunc['db_free_result']($dbresult);
-
-	$context['page_index'] = constructPageIndex($scripturl . '?action=admin;area=tema;sa=approvelist', $_REQUEST['start'], $total, 10);
-
-
 }
-
-function ApproveDownload()
-{
-	global $txt;
-	isAllowedTo('themes_manage');
-
-	$id = (int) $_REQUEST['id'];
-	if (empty($id))
-		fatal_error($txt['tema_error_no_file_selected']);
-
-	// Approve the download
-	ApproveFileByID($id);
-
-	// Redirect to approval list
-	redirectexit('action=admin;area=tema;sa=approvelist');
-
-}
-
 function ApproveFileByID($id)
 {
 	global $scripturl, $sourcedir, $user_info, $smcFunc;
-
-	// Look up the download and get the category
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		p.ID_FILE, p.id_member, p.filename, p.title, p.description, c.ID_BOARD,
@@ -1324,14 +1286,10 @@ function ApproveFileByID($id)
 	WHERE p.ID_FILE = $id LIMIT 1");
 	$rowcat = $smcFunc['db_fetch_assoc']($dbresult);
 	$smcFunc['db_free_result']($dbresult);
-
 	if ($rowcat['ID_BOARD'] != 0  && $rowcat['ID_BOARD'] != '' )
 	{
 
 		$showpostlink = '[url]' . $scripturl . '?action=tema;sa=view;down=' . $id . '[/url]';
-
-
-					// Create the post
 					require_once($sourcedir . '/Subs-Post.php');
 					$msgOptions = array(
 						'id' => 0,
@@ -1353,58 +1311,23 @@ function ApproveFileByID($id)
 						'id' => $rowcat['id_member'],
 						'update_post_count' => !$user_info['is_guest'] && !isset($_REQUEST['msg']),
 					);
-
-
 					preparsecode($msgOptions['body']);
 					createPost($msgOptions, $topicOptions, $posterOptions);
-
 				}
 
-
-	// Update the approval
 	$smcFunc['db_query']('', "UPDATE {db_prefix}tema_file SET approved = 1 WHERE ID_FILE = $id LIMIT 1");
-
-
 	UpdateCategoryTotals($rowcat['ID_CAT']);
-
 }
-
-function UnApproveDownload()
-{
-	global $txt;
-	isAllowedTo('themes_manage');
-
-	$id = (int) $_REQUEST['id'];
-	if (empty($id))
-		fatal_error($txt['tema_error_no_file_selected']);
-
-	UnApproveFileByID($id);
-
-	// Redirect to approval list
-	redirectexit('action=admin;area=tema;sa=approvelist');
-}
-
 function UnApproveFileByID($id)
 {
 	global $smcFunc;
-
-	// Update the approval
 	$smcFunc['db_query']('', "UPDATE {db_prefix}tema_file SET approved = 0 WHERE ID_FILE = $id LIMIT 1");
-
 	UpdateCategoryTotalByFileID($id);
 }
 
 function ReportList()
 {
-	global $context, $mbname, $txt, $smcFunc;
-
-	isAllowedTo('themes_manage');
-
-	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_form_reportdownloads'];
-
-
-	$context['sub_template']  = 'reportlist';
-
+	global $context, $smcFunc;
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		r.ID, r.ID_FILE, r.id_member, m.real_name, r.date, r.comment
@@ -1427,41 +1350,16 @@ function ReportList()
 			);
 	}
 	$smcFunc['db_free_result']($dbresult);
-
-
 }
 
-function DeleteReport()
+function DeleteReport($id)
 {
-	global $txt, $smcFunc;
-	// Check the permission
-	isAllowedTo('themes_manage');
-
-	$id = (int) $_REQUEST['id'];
-	if (empty($id))
-		fatal_error($txt['tema_error_no_report_selected']);
-
+	global $smcFunc;
 	$smcFunc['db_query']('', "DELETE FROM {db_prefix}tema_report WHERE ID = $id LIMIT 1");
-
-	// Redirect to redirect list
-	redirectexit('action=admin;area=tema;sa=reportlist');
 }
-
-
-function Search()
+function Search($groupid)
 {
-	global $context, $mbname, $txt, $user_info, $smcFunc;
-
-	TopDownloadTabs();
-
-	// Is the user allowed to view the downloads?
-	isAllowedTo('themes_view');
-
-	if ($user_info['is_guest'])
-		$groupid = -1;
-	else
-		$groupid =  $user_info['groups'][0];
-
+	global $context, $smcFunc;
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		c.ID_CAT, c.title, p.view
@@ -1471,20 +1369,14 @@ function Search()
 	$context['downloads_cat'] = array();
 	 while($row = $smcFunc['db_fetch_assoc']($dbresult))
 		{
-			// Check if they have permission to search these categories
 			if ($row['view'] == '0')
 					continue;
-
 			$context['downloads_cat'][] = array(
 			'ID_CAT' => $row['ID_CAT'],
 			'title' => $row['title']
 			);
 		}
 	$smcFunc['db_free_result']($dbresult);
-
-	$context['sub_template']  = 'search';
-
-	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_search'];
 }
 
 function Search2()
@@ -1698,33 +1590,16 @@ function Search2()
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_searchresults'];
 }
 
-function RateDownload()
+function RateDownload($id,$rating,$memid)
 {
-	global $txt, $smcFunc, $user_info;
-
-	is_not_guest();
-
-	// Check if they are allowed to rate download
-	isAllowedTo('themes_ratefile');
-
-	$id = (int) $_REQUEST['id'];
-	if (empty($id))
-		fatal_error($txt['tema_error_no_file_selected']);
-	$rating = (int) $_REQUEST['rating'];
-	if (empty($rating))
-		fatal_error($txt['tema_error_no_rating_selected']);
-
-	// Check if they rated this download?
+	global $txt, $smcFunc;
     $dbresult = $smcFunc['db_query']('', "
     SELECT
     	id_member, ID_FILE
     FROM {db_prefix}tema_rating
-    WHERE id_member = " . $user_info['id'] . " AND ID_FILE = $id");
-
+    WHERE id_member = " . $memid . " AND ID_FILE = $id");
     $found = $smcFunc['db_affected_rows']();
  	$smcFunc['db_free_result']($dbresult);
-
-	// Get the download owner
     $dbresult = $smcFunc['db_query']('', "
     SELECT
     	id_member
@@ -1732,42 +1607,23 @@ function RateDownload()
     WHERE ID_FILE = $id LIMIT 1");
     $row = $smcFunc['db_fetch_assoc']($dbresult);
 	$smcFunc['db_free_result']($dbresult);
-	// Check if they are rating their own download.
-	if ($user_info['id'] == $row['id_member'])
+	if ($memid == $row['id_member'])
 		fatal_error($txt['tema_error_norate_own'],false);
-
 	if ($found != 0)
 		fatal_error($txt['tema_error_already_rated'],false);
-
-	// Check the Rating
 	if ($rating < 1 || $rating > 5)
 		$rating = 3;
-
-	// Add the Rating
-	$smcFunc['db_query']('', "INSERT INTO {db_prefix}tema_rating (id_member, ID_FILE, value) VALUES (" . $user_info['id'] . ", $id,$rating)");
-
-	// Add rating information to the download
+	$smcFunc['db_query']('', "INSERT INTO {db_prefix}tema_rating (id_member, ID_FILE, value) VALUES (" . $memid . ", $id,$rating)");
 	$smcFunc['db_query']('', "
 	UPDATE {db_prefix}tema_file
 		SET totalratings = totalratings + 1, rating = rating + $rating
 	WHERE ID_FILE = $id LIMIT 1");
-
-	// Redirect to the download
 	redirectexit('action=tema;sa=view;down=' . $id);
-
 }
 
-function ViewRating()
+function ViewRating($id)
 {
-	global $context, $mbname, $txt, $smcFunc;
-
-	// Get the download ID for the ratings
-	$id = (int) $_REQUEST['id'];
-	if (empty($id))
-		fatal_error($txt['tema_error_no_file_selected']);
-
-	$context['downloads_id'] = $id;
-
+	global $context,$smcFunc;
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		r.ID, r.value, r.ID_FILE, r.id_member, m.real_name
@@ -1782,30 +1638,14 @@ function ViewRating()
 			'value' => $row['value'],
 			'id_member' => $row['id_member'],
 			'real_name' => $row['real_name'],
-
 			);
-
 		}
 	$smcFunc['db_free_result']($dbresult);
-
-	isAllowedTo('themes_manage');
-
-	$context['sub_template']  = 'view_rating';
-
-	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_form_viewratings'];
-
 }
 
-function DeleteRating()
+function DeleteRating($id)
 {
-	global $scripturl, $txt, $smcFunc;
-	isAllowedTo('themes_manage');
-
-	$id = (int) $_REQUEST['id'];
-	if (empty($id))
-		fatal_error($txt['tema_error_no_rating_selected']);
-
-	// First lookup the ID to get the download id and value of rating
+	global $smcFunc;
 	 $dbresult = $smcFunc['db_query']('', "
 	 SELECT
 	 	ID, ID_FILE, value
@@ -1815,25 +1655,15 @@ function DeleteRating()
 	 $value = $row['value'];
 	 $fileid = $row['ID_FILE'];
 	 $smcFunc['db_free_result']($dbresult);
-	// Delete the Rating
 	$smcFunc['db_query']('', "DELETE FROM {db_prefix}tema_rating
 	WHERE ID = " . $id . ' LIMIT 1');
-	// Update the download rating information
 	$dbresult = $smcFunc['db_query']('', "UPDATE {db_prefix}tema_file SET totalratings = totalratings - 1, rating = rating - $value WHERE ID_FILE = $fileid LIMIT 1");
-	// Redirect to the ratings
 	redirectexit('action=tema;sa=viewrating&id=' .  $fileid);
 }
 
 function Stats()
 {
-	global $context, $mbname,$txt, $context, $scripturl, $smcFunc;
-
-	// Is the user allowed to view the downloads?
-	isAllowedTo('themes_view');
-
-	TopDownloadTabs();
-
-	// Get views total and comments total and total filesize
+	global $context, $scripturl, $smcFunc;
 	$result = $smcFunc['db_query']('', "
 	SELECT
 		SUM(views) AS views, SUM(filesize) AS filesize, SUM(totaldownloads) AS totaldownloads,
@@ -1841,21 +1671,16 @@ function Stats()
 	FROM {db_prefix}tema_file");
 	$row = $smcFunc['db_fetch_assoc']($result);
 	$smcFunc['db_free_result']($result);
-
 	$result2 = $smcFunc['db_query']('', "
 	SELECT
 		COUNT(*) AS filetotal
 	FROM {db_prefix}tema_file");
 	$row2 = $smcFunc['db_fetch_assoc']($result2);
 	$smcFunc['db_free_result']($result2);
-
 	$context['total_files'] = $row2['filetotal'];
 	$context['total_views'] = $row['views'];
 	$context['total_filesize'] =  format_size($row['filesize'], 2) ;
 	$context['total_downloads'] = $row['totaldownloads'];
-
-
-	// Top Viewed Downloads
 	$result = $smcFunc['db_query']('', "
 	SELECT
 		ID_FILE, title,views
@@ -1877,11 +1702,8 @@ function Stats()
 			$max_views = $row['views'];
 	}
 	$smcFunc['db_free_result']($result);
-
 	foreach ($context['top_viewed'] as $i => $file)
 		$context['top_viewed'][$i]['percent'] = round(($file['views'] * 100) / $max_views);
-
-	// Top Rated
 	$result = $smcFunc['db_query']('', "
 	SELECT
 		ID_FILE, title,rating
@@ -1906,8 +1728,6 @@ function Stats()
 
 	foreach ($context['top_rating'] as $i => $file)
 		$context['top_rating'][$i]['percent'] = round(($file['rating'] * 100) / $max_rating);
-
-	// Top download list
 	$result = $smcFunc['db_query']('', "
 	SELECT
 		ID_FILE, title, totaldownloads
@@ -1932,8 +1752,6 @@ function Stats()
 
 	foreach ($context['totaldownloads'] as $i => $file)
 		$context['totaldownloads'][$i]['percent'] = round(($file['totaldownloads'] * 100) / $max_totaldownloads);
-
-	// Last 10 downloads uploaded
 	$result = $smcFunc['db_query']('', "
 	SELECT
 		ID_FILE, title
@@ -1950,20 +1768,11 @@ function Stats()
 		);
 	}
 	$smcFunc['db_free_result']($result);
-
-
-	// Load the template
-	$context['sub_template']  = 'stats';
-	// Set the page title
-	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_text_stats'];
-
 }
 
 function UpdateUserFileSizeTable($memberid, $filesize)
 {
 	global $smcFunc;
-
-	// Check if a record exits
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		id_member,totalfilesize
@@ -1971,15 +1780,12 @@ function UpdateUserFileSizeTable($memberid, $filesize)
 	WHERE id_member = $memberid LIMIT 1");
 	$count = $smcFunc['db_affected_rows']();
 	$smcFunc['db_free_result']($dbresult);
-
 	if ($count == 0)
 	{
-		// Create the record
 		$smcFunc['db_query']('', "INSERT INTO {db_prefix}tema_userquota (id_member, totalfilesize) VALUES ($memberid, $filesize)");
 	}
 	else
 	{
-		// Update the record
 		if ($filesize >= 0)
 			$smcFunc['db_query']('', "UPDATE {db_prefix}tema_userquota SET totalfilesize = totalfilesize + $filesize WHERE id_member = $memberid LIMIT 1");
 		else
@@ -1987,20 +1793,10 @@ function UpdateUserFileSizeTable($memberid, $filesize)
 	}
 }
 
-function FileSpaceAdmin()
+function FileSpaceAdmin($al)
 {
-	global $mbname, $txt, $context, $scripturl, $smcFunc;
-	// Check if they are allowed to manage the downloads
-	isAllowedTo('themes_manage');
-
-	loadLanguage('Admin');
-
-	// Set the page tile
-	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_filespace'];
-	// Load the subtemplate for the file manager
-	$context['sub_template']  = 'filespace';
-
-	// Load the membergroups
+	global $context, $smcFunc;
+	$context['start'] = $al;
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		ID_GROUP, group_name
@@ -2014,8 +1810,6 @@ function FileSpaceAdmin()
 			);
 	}
 	$smcFunc['db_free_result']($dbresult);
-
-
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		q.totalfilesize,  q.ID_GROUP, m.group_name
@@ -2028,13 +1822,10 @@ function FileSpaceAdmin()
 			'ID_GROUP' => $row['ID_GROUP'],
 			'totalfilesize' => $row['totalfilesize'],
 			'group_name' => $row['group_name'],
-
-
 			);
 
 		}
 	$smcFunc['db_free_result']($dbresult);
-
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		q.totalfilesize, q.ID_GROUP
@@ -2050,11 +1841,6 @@ function FileSpaceAdmin()
 
 		}
 	$smcFunc['db_free_result']($dbresult);
-
-
-	$context['start'] = (int) $_REQUEST['start'];
-
-	// Get Total Pages
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		COUNT(*) AS total
@@ -2077,30 +1863,15 @@ function FileSpaceAdmin()
 			'id_member' => $row['id_member'],
 			'totalfilesize' => $row['totalfilesize'],
 			'real_name' => $row['real_name'],
-
-
 			);
 
 		}
 	$smcFunc['db_free_result']($dbresult);
-
-
-	$context['page_index'] = constructPageIndex($scripturl . '?action=admin;area=tema;sa=filespace', $_REQUEST['start'], $total, 20);
-
-
 }
 
-function FileSpaceList()
+function FileSpaceList($id,$al)
 {
 	global $mbname, $txt, $context, $scripturl, $smcFunc;
-	// Check if they are allowed to manage the downloads
-	isAllowedTo('themes_manage');
-
-
-	$id = (int) $_REQUEST['id'];
-	if (empty($id))
-		fatal_error($txt['tema_error_no_user_selected']);
-
     $dbresult = $smcFunc['db_query']('', "
     SELECT
     	m.real_name
@@ -2110,15 +1881,7 @@ function FileSpaceList()
 	$context['downloads_filelist_real_name'] = $row['real_name'];
 	$context['downloads_filelist_userid'] = $id;
 	$smcFunc['db_free_result']($dbresult);
-
-	// Set the page tile
-	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_filespace'] . ' - ' . $context['downloads_filelist_real_name'];
-	// Load the subtemplate for the file manager
-	$context['sub_template']  = 'filelist';
-
-	$context['start'] = (int) $_REQUEST['start'];
-
-	// Get Total Pages
+	$context['start'] = $al;
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		COUNT(*) AS total
@@ -2128,9 +1891,6 @@ function FileSpaceList()
 	$total = $row['total'];
 	$smcFunc['db_free_result']($dbresult);
 	$context['downloads_total'] = $total;
-
-
-
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		p.ID_FILE,p.title, p.filesize,p.id_member
@@ -2145,60 +1905,39 @@ function FileSpaceList()
 			'title' => $row['title'],
 			'filesize' => $row['filesize'],
 			'id_member' => $row['id_member'],
-
-
 			);
-
 		}
 	$smcFunc['db_free_result']($dbresult);
-
-
-	$context['page_index'] = constructPageIndex($scripturl . '?action=admin;area=tema;sa=filelist&id=' . $context['downloads_filelist_userid'], $_REQUEST['start'], $total, 20);
-
 }
 
-function RecountFileQuotaTotals($redirect = true)
+function RecountFileQuotaTotals()
 {
 	global $smcFunc;
-
-	if ($redirect == true)
-		isAllowedTo('themes_manage');
-
-	// Show all the user's with quota information
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		id_member
 	FROM {db_prefix}tema_userquota");
 	while($row = $smcFunc['db_fetch_assoc']($dbresult))
 	{
-		// Loop though the all the files for the member and get the total
 		$dbresult2 = $smcFunc['db_query']('', "
 		SELECT
 			SUM(filesize) as total
 		FROM {db_prefix}tema_file
 		WHERE id_member = " . $row['id_member']);
-
 		$row2 = $smcFunc['db_fetch_assoc']($dbresult2);
 		$total = $row2['total'];
-
 		if ($total == '')
 			$total = 0;
-
 		$smcFunc['db_free_result']($dbresult2);
-		// Update the quota
 		$smcFunc['db_query']('', "UPDATE {db_prefix}tema_userquota SET totalfilesize = $total WHERE id_member = " . $row['id_member'] . " LIMIT 1");
 
 	}
 	$smcFunc['db_free_result']($dbresult);
-
-	if ($redirect == true)
-		redirectexit('action=admin;area=tema;sa=filespace');
 }
 
 function GetQuotaGroupLimit($memberid)
 {
 	global $smcFunc;
-
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		m.id_member, q.ID_GROUP, q.totalfilesize
@@ -2213,16 +1952,13 @@ function GetQuotaGroupLimit($memberid)
 	else
 	{
 		$smcFunc['db_free_result']($dbresult);
-
 		return $row['totalfilesize'];
 	}
-
 }
 
 function GetUserSpaceUsed($memberid)
 {
 	global $smcFunc;
-
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		id_member,totalfilesize
@@ -2237,26 +1973,13 @@ function GetUserSpaceUsed($memberid)
 	else
 	{
 		$smcFunc['db_free_result']($dbresult);
-
 		return $row['totalfilesize'];
 	}
-
 }
 
-function AddQuota()
+function AddQuota($groupid,$filelimit)
 {
 	global $txt, $smcFunc;
-
-	isAllowedTo('themes_manage');
-
-	$groupid = (int) $_REQUEST['groupname'];
-
-	$filelimit = (double) $_REQUEST['filelimit'];
-	if (empty($filelimit))
-	{
-		fatal_error($txt['tema_error_noquota'],false);
-	}
-
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		ID_GROUP
@@ -2264,41 +1987,25 @@ function AddQuota()
 	WHERE ID_GROUP = $groupid LIMIT 1");
 	$count = $smcFunc['db_affected_rows']();
 	$smcFunc['db_free_result']($dbresult);
-
 	if ($count == 0)
 	{
-		// Create the record
 		$smcFunc['db_query']('', "INSERT INTO {db_prefix}tema_groupquota (ID_GROUP, totalfilesize) VALUES ($groupid, $filelimit)");
 	}
 	else
 	{
 		fatal_error($txt['tema_error_quotaexist'],false);
 	}
-
-	redirectexit('action=admin;area=tema;sa=filespace');
 }
 
-function DeleteQuota()
+function DeleteQuota($id)
 {
 	global $smcFunc;
-
-	isAllowedTo('themes_manage');
-	$id = (int) $_REQUEST['id'];
-
 	$smcFunc['db_query']('', "DELETE FROM {db_prefix}tema_groupquota WHERE ID_GROUP = " . $id . ' LIMIT 1');
-
-	redirectexit('action=admin;area=tema;sa=filespace');
 }
 
-function CatPerm()
+function CatPerm($cat)
 {
 	global $mbname, $txt, $context, $smcFunc;
-	isAllowedTo('themes_manage');
-
-	$cat = (int) $_REQUEST['cat'];
-	if (empty($cat))
-		fatal_error($txt['tema_error_no_cat']);
-
 	$dbresult1 = $smcFunc['db_query']('', "
 	SELECT
 		ID_CAT, title
@@ -2307,17 +2014,7 @@ function CatPerm()
 	$row1 = $smcFunc['db_fetch_assoc']($dbresult1);
 	$context['downloads_cat_name'] = $row1['title'];
 	$smcFunc['db_free_result']($dbresult1);
-
-	loadLanguage('Admin');
-
 	$context['downloads_cat'] = $cat;
-
-	// Load the template
-	$context['sub_template']  = 'catperm';
-	// Set the page title
-	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_text_catperm'] . ' -' . $context['downloads_cat_name'];
-
-	// Load the membergroups
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		ID_GROUP, group_name
@@ -2331,9 +2028,6 @@ function CatPerm()
 			);
 	}
 	$smcFunc['db_free_result']($dbresult);
-
-
-	// Membergroups
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		c.ID_CAT, c.ID, c.view, c.viewdownload, c.addfile, c.editfile, c.delfile, c.ID_GROUP, m.group_name,a.title catname
@@ -2357,8 +2051,6 @@ function CatPerm()
 
 		}
 	$smcFunc['db_free_result']($dbresult);
-
-
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		c.ID_CAT, c.ID, c.view, c.viewdownload, c.addfile, c.editfile, c.delfile, c.ID_GROUP,a.title catname
@@ -2381,8 +2073,6 @@ function CatPerm()
 
 		}
 	$smcFunc['db_free_result']($dbresult);
-
-
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		c.ID_CAT, c.ID, c.view, c.viewdownload, c.addfile, c.editfile, c.delfile, c.ID_GROUP,a.title catname
@@ -2405,18 +2095,11 @@ function CatPerm()
 
 		}
 	$smcFunc['db_free_result']($dbresult);
-
 }
 
-function CatPerm2()
+function CatPerm2($groupname,$cat,$view,$viewdownload,$add,$edit,$delete)
 {
 	global $txt, $smcFunc;
-	isAllowedTo('themes_manage');
-
-	$groupname = (int) $_REQUEST['groupname'];
-	$cat = (int) $_REQUEST['cat'];
-
-	// Check if permission exits
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		ID_GROUP,ID_CAT
@@ -2428,34 +2111,14 @@ function CatPerm2()
 		fatal_error($txt['tema_permerr_permexist'],false);
 	}
 	$smcFunc['db_free_result']($dbresult);
-
-	// Permissions
-	$view = isset($_REQUEST['view']) ? 1 : 0;
-	$viewdownload = isset($_REQUEST['viewdownload']) ? 1 : 0;
-	$add = isset($_REQUEST['add']) ? 1 : 0;
-	$edit = isset($_REQUEST['edit']) ? 1 : 0;
-	$delete = isset($_REQUEST['delete']) ? 1 : 0;
-
-	// Insert into database
 	$smcFunc['db_query']('', "INSERT INTO {db_prefix}tema_catperm
 			(ID_GROUP,ID_CAT,view,addfile,editfile,delfile,viewdownload)
 		VALUES ($groupname,$cat,$view,$add,$edit,$delete,$viewdownload)");
-
-	redirectexit('action=tema;sa=catperm;cat=' . $cat);
 }
 
 function CatPermList()
 {
-	global $mbname, $txt, $context, $smcFunc;
-	isAllowedTo('themes_manage');
-
-
-	// Load the template
-	$context['sub_template']  = 'catpermlist';
-
-	// Set the page title
-	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_text_catpermlist'];
-
+	global $context, $smcFunc;
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		c.ID_CAT, c.ID, c.view, c.addfile, c.editfile, c.delfile,
@@ -2479,7 +2142,6 @@ function CatPermList()
 
 		}
 	$smcFunc['db_free_result']($dbresult);
-
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		c.ID_CAT, c.ID, c.view, c.addfile, c.editfile, c.delfile,  c.ID_GROUP,a.title catname
@@ -2501,8 +2163,6 @@ function CatPermList()
 
 		}
 	$smcFunc['db_free_result']($dbresult);
-
-
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		c.ID_CAT, c.ID, c.view, c.addfile, c.editfile, c.delfile,  c.ID_GROUP,a.title catname
@@ -2524,22 +2184,12 @@ function CatPermList()
 
 		}
 	$smcFunc['db_free_result']($dbresult);
-
 }
 
-function CatPermDelete()
+function CatPermDelete($id)
 {
 	global $smcFunc;
-
-	isAllowedTo('themes_manage');
-
-	$id = (int) $_REQUEST['id'];
-
-	// Delete the Permission
 	$smcFunc['db_query']('', "DELETE FROM {db_prefix}tema_catperm WHERE ID = " . $id . ' LIMIT 1');
-	// Redirect to the ratings
-	redirectexit('action=admin;area=tema;sa=catpermlist');
-
 }
 
 function GetCatPermission($cat,$perm)
@@ -2590,15 +2240,9 @@ function GetCatPermission($cat,$perm)
 
 }
 
-function PreviousDownload()
+function PreviousDownload($id)
 {
-	global $txt, $smcFunc;
-
-	$id = (int) $_REQUEST['id'];
-	if (empty($id))
-		fatal_error($txt['tema_error_no_file_selected']);
-
-	// Get the category
+	global  $smcFunc;
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		ID_FILE, ID_CAT
@@ -2609,7 +2253,6 @@ function PreviousDownload()
 
 	$smcFunc['db_free_result']($dbresult);
 
-	// Get previous download
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		ID_FILE
@@ -2624,19 +2267,12 @@ function PreviousDownload()
 		$ID_FILE = $id;
 
 	$smcFunc['db_free_result']($dbresult);
-
 	redirectexit('action=tema;sa=view;down=' . $ID_FILE);
 }
 
-function NextDownload()
+function NextDownload($id)
 {
 	global $txt, $smcFunc;
-
-	$id = (int) $_REQUEST['id'];
-	if (empty($id))
-		fatal_error($txt['tema_error_no_file_selected']);
-
-	// Get the category
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		ID_FILE, ID_CAT
@@ -2644,10 +2280,7 @@ function NextDownload()
 	WHERE ID_FILE = $id  LIMIT 1");
 	$row = $smcFunc['db_fetch_assoc']($dbresult);
 	$ID_CAT = $row['ID_CAT'];
-
 	$smcFunc['db_free_result']($dbresult);
-
-	// Get next download
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		ID_FILE
@@ -2666,35 +2299,17 @@ function NextDownload()
 	redirectexit('action=tema;sa=view;down=' . $ID_FILE);
 }
 
-function CatImageDelete()
+function CatImageDelete($id)
 {
 	global $smcFunc;
-
-	isAllowedTo('themes_manage');
-
-	$id = (int) $_REQUEST['id'];
-	if (empty($id))
-		exit;
-
 		$smcFunc['db_query']('', "UPDATE {db_prefix}tema_cat
 		SET filename = '' WHERE ID_CAT = $id LIMIT 1");
-
-	redirectexit('action=tema;sa=editcat;cat=' . $id);
 }
-function FileImageDelete()
+function FileImageDelete($id)
 {
 	global $smcFunc;
-
-	isAllowedTo('themes_manage');
-
-	$id = (int) $_REQUEST['id'];
-	if (empty($id))
-		exit;
-
-		$smcFunc['db_query']('', "UPDATE {db_prefix}tema_file
+	$smcFunc['db_query']('', "UPDATE {db_prefix}tema_file
 		SET picture = '' WHERE id_file = $id LIMIT 1");
-
-	redirectexit('action=tema;sa=edit&id=' . $id);
 }
 
 function ReOrderCats($cat)
@@ -2729,36 +2344,11 @@ function ReOrderCats($cat)
 	$smcFunc['db_free_result']($dbresult);
 }
 
-function BulkActions()
-{
-	isAllowedTo('themes_manage');
-
-	if (isset($_REQUEST['files']))
-	{
-		$baction = $_REQUEST['doaction'];
-
-		foreach ($_REQUEST['files'] as $value)
-		{
-
-			if ($baction == 'approve')
-				ApproveFileByID($value);
-			if ($baction == 'delete')
-				DeleteFileByID($value);
-
-		}
-	}
-
-	// Redirect to approval list
-	redirectexit('action=admin;area=tema;sa=approvelist');
-}
-
 function UpdateCategoryTotals($ID_CAT)
 {
 	global $smcFunc;
-	
 	if (empty($ID_CAT))
 		return;
-
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		COUNT(*) AS total
@@ -2767,25 +2357,19 @@ function UpdateCategoryTotals($ID_CAT)
 	$row = $smcFunc['db_fetch_assoc']($dbresult);
 	$total = $row['total'];
 	$smcFunc['db_free_result']($dbresult);
-
-	// Update the count
 	$dbresult = $smcFunc['db_query']('', "UPDATE {db_prefix}tema_cat SET total = $total WHERE ID_CAT = $ID_CAT LIMIT 1");
-
 }
 
 function UpdateCategoryTotalByFileID($id)
 {
 	global $smcFunc;
-
 	$dbresult = $smcFunc['db_query']('', "
 	SELECT
 		ID_CAT FROM {db_prefix}tema_file
 	WHERE ID_FILE = $id");
 	$row = $smcFunc['db_fetch_assoc']($dbresult);
 	$smcFunc['db_free_result']($dbresult);
-
 	UpdateCategoryTotals($row['ID_CAT']);
-
 }
 
 function CustomUp()
