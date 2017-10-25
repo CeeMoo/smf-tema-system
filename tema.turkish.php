@@ -1,24 +1,10 @@
 <?php
 /*
 Theme System
-Version 1.5
-by:vbgamer45
-http://www.smfhacks.com
-Copyright 2008-2012 SMFHacks.com
-
-############################################
-License Information:
-
-Links to http://www.smfhacks.com must remain unless
-branding free option is purchased.
-#############################################
-
-Theme English Text Strings
+Version 1
+by:ceemoo
+http://www.smf.konusal.com
 */
-
-// Themes.template.php Themes
-
-
 $txt['clos'] = "Kapat";
 $txt['purchade'] = "Satın al";
 $txt['desktop'] = "Masaüstü Görünümünde Göster";
@@ -29,6 +15,24 @@ $txt['mobileportrait'] = "Dikey Mobil Görünümünde Göster (320x480)";
 
 // Title string
 $txt['tema_text_title'] = 'Temalar';
+$txt['tema_max_filesize'] = 'Max Theme filesize: ';
+$txt['tema_path'] = 'Theme Path: ';
+$txt['tema_url'] = 'Theme Url: ';
+$txt['tema_who_viewing'] = 'Display who is viewing a Theme';
+$txt['tema_show_ratings'] = 'Show Theme ratings';
+$txt['tema_max_file'] = 'PHP Max Filesize ';
+$txt['tema_set_t_title'] = 'Show title';
+$txt['tema_set_file_views'] = 'Show views';
+$txt['themesizinlerbaslik'] = 'Theme System permission';
+$txt['themes_view'] = 'View Themes';
+$txt['themes_viewdownload'] = 'View Link Themes';
+$txt['themes_add'] = 'Add Theme';
+$txt['themes_edit'] = 'Edit own Theme';
+$txt['themes_delete'] = 'Delete own Theme';
+$txt['themes_ratefile'] = 'Rate Themes';
+$txt['themes_report'] = 'Report Pictures/Comments';
+$txt['themes_autoapprove'] = 'Auto Approve Themes';
+$txt['themes_manage'] = 'Admin Theme System';
 
 // Main Theme strings
 $txt['tema_text_categoryname'] = 'Category İsim';
@@ -57,16 +61,16 @@ $txt['tema_text_filereported'] = 'Tema şikayet: ';
 $txt['tema_text_filecheckreported'] = 'Şikayetleri gör';
 
 $txt['tema_write_error'] = 'Tema yolunu yazamıyoruz! ';
-$txt['tema_text_myfiles'] = '[Temalarım]';
-$txt['tema_text_search'] = '[Arama]';
+$txt['tema_text_myfiles'] = 'Temalarım';
+$txt['tema_text_search'] = 'Arama';
 $txt['tema_text_myfiles2'] = 'Temalarım';
 $txt['tema_text_search2'] = 'Arama';
-$txt['tema_text_edit'] = '[Düzenle]';
-$txt['tema_text_delete'] = '[Sil]';
-$txt['tema_text_unapprove'] = '[Onay kaldır]';
-$txt['tema_text_approve'] = '[Onayla]';
-$txt['tema_text_up'] = '[Yukarı]';
-$txt['tema_text_down'] = '[Aşağıya]';
+$txt['tema_text_edit'] = 'Düzenle';
+$txt['tema_text_delete'] = 'Sil';
+$txt['tema_text_unapprove'] = 'Onay kaldır';
+$txt['tema_text_approve'] = 'Onayla';
+$txt['tema_text_up'] = 'Yukarı';
+$txt['tema_text_down'] = 'Aşağıya';
 
 $txt['tema_text_prev'] = 'Önceki Tema';
 $txt['tema_text_next'] = 'Sonraki Tema';

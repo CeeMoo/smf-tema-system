@@ -1,5 +1,10 @@
 <?php
-
+/*
+Theme System
+Version 1
+by:ceemoo
+http://www.smf.konusal.com
+*/
 $txt['clos'] = "Close";
 $txt['purchade'] = "Purchase";
 $txt['desktop'] = "Desktop";
@@ -28,10 +33,6 @@ $txt['themes_ratefile'] = 'Rate Themes';
 $txt['themes_report'] = 'Report Pictures/Comments';
 $txt['themes_autoapprove'] = 'Auto Approve Themes';
 $txt['themes_manage'] = 'Admin Theme System';
-
-
-
-
 
 // Main Theme strings
 $txt['tema_text_categoryname'] = 'Category Name';
@@ -461,17 +462,6 @@ $txt['tema_cat_options'] = 'Options';
 $txt['tema_text_lastdownload'] = 'Last Theme: ';
 $txt['tema_text_lastdownload2'] =	'Never';
 
-// TP Theme Convertor
-$txt['tema_txt_import_tiny_portal'] = 'Import Tiny Portal Themes';
-$txt['tema_txt_import'] = 'Import';
-$txt['tema_txt_importtp_results'] = 'Tiny Portal Theme Import Results';
-$txt['tema_txt_import_downloads'] = 'Import Themes';
-
-$txt['tema_txt_import_note'] = 'If you have installed another Theme system in the past you will be able to import those Theme into the Theme System';
-
-$txt['tema_txt_categories_imported'] = 'Categories Imported: ';
-$txt['tema_txt_files_imported'] = 'Files Imported: ';
-
 $txt['tema_upload_max_filesize'] = 'PHP: Upload Max Filesize ';
 $txt['tema_post_max_size'] = 'PHP: Post Max Filesize ';
 $txt['tema_upload_limits_notes'] = 'The above PHP settings control how large a file will be accepted. These are settings are controlled by the php.ini or your webhost';
@@ -494,7 +484,6 @@ $txt['tema_form_reportthemess'] = 'Reported Themes';
 $txt['tema_form_approvecomments'] = 'Approve Comments';
 $txt['tema_filespace'] = 'File Space Manager';
 $txt['tema_text_catpermlist2'] = 'Category Permissions';
-$txt['tema_txt_import'] = 'Import';
 
 // Permissions
 
@@ -546,39 +535,5 @@ $txt['permissionhelp_themes_autoapprove'] = 'Theme do not need to wait for appro
 $txt['permissionname_themes_manage'] = 'Admin Theme System';
 $txt['permissionhelp_themes_manage'] = 'Allows the user to add/delete/edit all catagories. Delete Comments, Delete Themes, Approve Themes';
 $txt['cannot_downloads_manage'] = 'You are not allowed to manage the Themes.';
-
-// END Theme System Text Strings
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ?>

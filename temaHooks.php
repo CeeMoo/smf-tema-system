@@ -4,12 +4,6 @@ Theme System
 Version 1
 by:ceemoo
 http://www.smf.konusal.com
-
-############################################
-License Information:
-
-Smf themes System Edit - www.smfhack.com
-#############################################
 */
 
 if (!defined('SMF'))
@@ -86,15 +80,6 @@ function themes_admin_areas(&$admin_areas)
 									'file' => 'tema2.php',
 									'function' => 'Downloads_CatPermList',
 									'custom_url' => $scripturl . '?action=admin;area=tema;sa=catpermlist',
-									'icon' => 'temaicon.png',
-									'subsections' => array(
-									),
-								),
-								'import' => array(
-									'label' => $txt['tema_txt_import'],
-									'file' => 'tema2.php',
-									'function' => 'Downloads_ImportDownloads',
-									'custom_url' => $scripturl . '?action=admin;area=tema;sa=import',
 									'icon' => 'temaicon.png',
 									'subsections' => array(
 									),

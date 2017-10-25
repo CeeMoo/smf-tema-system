@@ -1,120 +1,91 @@
 <?php
-
+/*
+Theme System
+Version 1
+by:ceemoo
+http://www.smf.konusal.com
+*/
 function template_mainview()
 {
 	global $scripturl, $txt, $context, $modSettings, $subcats_linktree, $user_info;
-
-
-	// Permissions
-	$g_manage = allowedTo('themes_manage');
-	$g_add = allowedTo('themes_add');
-
-
-	if ($g_manage)
+	if (allowedTo('themes_manage'))
 	{
-		// Warn the user if they are managing the downloads that the path it is not writable
 		if (!is_writable($modSettings['tema_path']))
-			echo '<font color="#FF0000"><b>', $txt['tema_write_error'], $modSettings['tema_path'], '</b></font>';
+			echo '<div class="noticebox"><span class="alert">!</span> ', $txt['tema_write_error'], $modSettings['tema_path'], '</div>';
 	}
 
-
-	// Get the Category if present
 	@$cat = (int) $_REQUEST['cat'];
 
-	// Check if a category is selected
 	if (!empty($cat))
 	{
-		// Show the items in the category
-
-		// Permissions if they are allowed to edit or delete their own downloads.
-		$g_edit_own = allowedTo('themes_edit');
-		$g_delete_own = allowedTo('themes_delete');
-
-
-
-
-		// Show sub catigories
-		Downloads_ShowSubCats($cat,$g_manage);
-
-
+		Downloads_ShowSubCats($cat,allowedTo('themes_manage'));
+		
 		if (!isset($context['downloads_cat_norate']))
 			$context['downloads_cat_norate'] = 0;
 
-		// Show table header
-		$count = 0;
+		if (!empty($modSettings['tema_who_viewing']))
+		{
+			echo '<div id="description_board" class="generic_list_wrapper">';
+			echo empty($context['view_members_list']) ? '0 ' . $txt['tema_who_members'] : implode(', ', $context['view_members_list']) . (empty($context['view_num_hidden']) || $context['can_moderate_forum'] ? '' : ' (+ ' . $context['view_num_hidden'] . ' ' . $txt['tema_who_hidden'] . ')');
 
-		echo '<br /><table cellspacing="0" cellpadding="10" border="0" align="center" width="90%" class="table_grid">
+			echo $txt['who_and'], @$context['view_num_guests'], ' ', @$context['view_num_guests'] == 1 ? $txt['guest'] : $txt['guests'], $txt['tema_who_viewdownload'], '</span>';
+			echo '</div>';
+		}
+		echo '<table class="table_grid">
+				<thead>
+				<tr class="title_bar">';
+					if ($context['downloads_orderby2'] == 'asc')
+						$neworder = 'desc';
+					else
+						$neworder = 'asc';
+					if (!empty($modSettings['tema_set_t_title']))
+					{
+						echo  '<th  class="lefttext"><a href="' . $scripturl . '?action=tema;cat=' . $cat . ';start=' . $context['start'] . ';sortby=title;orderby=' . $neworder . '">',$txt['tema_cat_title'], '</a></th>';
+					}
 
-		<thead>
-		<tr class="title_bar">';
+					if (!empty($modSettings['tema_set_t_rating']) && $context['downloads_cat_norate'] != 1)
+					{
+						echo '<th  class="lefttext"><a href="' . $scripturl . '?action=tema;cat=' . $cat . ';start=' . $context['start'] . ';sortby=mostrated;orderby=' . $neworder . '">', $txt['tema_cat_rating'], '</a></th>';
+					}
 
-			if ($context['downloads_orderby2'] == 'asc')
-				$neworder = 'desc';
-			else
-				$neworder = 'asc';
-
-
-			if (!empty($modSettings['tema_set_t_title']))
-			{
-				echo  '<th  class="lefttext"><a href="' . $scripturl . '?action=tema;cat=' . $cat . ';start=' . $context['start'] . ';sortby=title;orderby=' . $neworder . '">',$txt['tema_cat_title'], '</a></th>';
-				$count++;
-			}
-
-			if (!empty($modSettings['tema_set_t_rating']) && $context['downloads_cat_norate'] != 1)
-			{
-				echo '<th  class="lefttext"><a href="' . $scripturl . '?action=tema;cat=' . $cat . ';start=' . $context['start'] . ';sortby=mostrated;orderby=' . $neworder . '">', $txt['tema_cat_rating'], '</a></th>';
-				$count++;
-			}
-
-			if (!empty($modSettings['tema_set_t_views']))
-			{
-				echo '<th  class="lefttext"><a href="' . $scripturl . '?action=tema;cat=' . $cat . ';start=' . $context['start'] . ';sortby=mostview;orderby=' . $neworder . '">', $txt['tema_cat_views'], '</a></th>';
-				$count++;
-			}
+					if (!empty($modSettings['tema_set_t_views']))
+					{
+						echo '<th  class="lefttext"><a href="' . $scripturl . '?action=tema;cat=' . $cat . ';start=' . $context['start'] . ';sortby=mostview;orderby=' . $neworder . '">', $txt['tema_cat_views'], '</a></th>';
+					}
 
 
-			if (!empty($modSettings['tema_set_t_downloads']))
-			{
-				echo '<th  class="lefttext"><a href="' . $scripturl . '?action=tema;cat=' . $cat . ';start=' . $context['start'] . ';sortby=mostdowns;orderby=' . $neworder . '">', $txt['tema_cat_downloads'] , '</a></th>';
-				$count++;
-			}
+					if (!empty($modSettings['tema_set_t_downloads']))
+					{
+						echo '<th  class="lefttext"><a href="' . $scripturl . '?action=tema;cat=' . $cat . ';start=' . $context['start'] . ';sortby=mostdowns;orderby=' . $neworder . '">', $txt['tema_cat_downloads'] , '</a></th>';
+					}
 
-			if (!empty($modSettings['tema_set_t_filesize']))
-			{
-				echo '<th  class="lefttext"><a href="' . $scripturl . '?action=tema;cat=' . $cat . ';start=' . $context['start'] . 'sortby=filesize;orderby=' . $neworder . '">',$txt['tema_cat_filesize'], '</a></th>';
-				$count++;
-			}
+					if (!empty($modSettings['tema_set_t_filesize']))
+					{
+						echo '<th  class="lefttext"><a href="' . $scripturl . '?action=tema;cat=' . $cat . ';start=' . $context['start'] . 'sortby=filesize;orderby=' . $neworder . '">',$txt['tema_cat_filesize'], '</a></th>';
+					}
 
-			if (!empty($modSettings['tema_set_t_date']))
-			{
-				echo '<th  class="lefttext"><a href="' . $scripturl . '?action=tema;cat=' . $cat . ';start=' . $context['start'] . ';sortby=date;orderby=' . $neworder . '">',$txt['tema_cat_date'], '</a></th>';
-				$count++;
-			}
+					if (!empty($modSettings['tema_set_t_date']))
+					{
+						echo '<th  class="lefttext"><a href="' . $scripturl . '?action=tema;cat=' . $cat . ';start=' . $context['start'] . ';sortby=date;orderby=' . $neworder . '">',$txt['tema_cat_date'], '</a></th>';
+					}
 
-			if (!empty($modSettings['tema_set_t_username']))
-			{
-				echo '<th  class="lefttext"><a href="' . $scripturl . '?action=tema;cat=' . $cat . ';start=' . $context['start'] . ';sortby=membername;orderby=' . $neworder . '">',$txt['tema_cat_membername'],'</a></th>';
-				$count++;
-			}
+					if (!empty($modSettings['tema_set_t_username']))
+					{
+						echo '<th  class="lefttext"><a href="' . $scripturl . '?action=tema;cat=' . $cat . ';start=' . $context['start'] . ';sortby=membername;orderby=' . $neworder . '">',$txt['tema_cat_membername'],'</a></th>';
+					}
 
+					if (allowedTo('themes_manage') ||  (allowedTo('themes_delete')) || (allowedTo('themes_edit')) )
+					{
+						echo '<th  class="lefttext">',$txt['tema_cat_options'],'</th>';
+					}
 
-			// Options
-			if ($g_manage ||  ($g_delete_own) || ($g_edit_own) )
-			{
-				echo '<th  class="lefttext">',$txt['tema_cat_options'],'</th>';
-				$count++;
-			}
-
-		echo '</tr>
-		</thead>
-		';
-
-
-
+				echo '</tr>
+				</thead>
+				<tbody>';
 		foreach ($context['downloads_files'] as $i => $file)
 		{
 
-			echo '<tr  class="windowbg2">';
+			echo '<tr  class="windowbg">';
 
 			if (!empty($modSettings['tema_set_t_title']))
 				echo  '<td><a href="' . $scripturl . '?action=tema;sa=view;down=', $file['ID_FILE'], '">', $file['title'], '</a></td>';
@@ -142,213 +113,152 @@ function template_mainview()
 				else
 					echo '<td>', $txt['tema_guest'], '</td>';
 			}
-
-
-			// Options
-			if ($g_manage ||  ($g_delete_own && $file['id_member'] == $user_info['id']) || ($g_edit_own && $file['id_member'] == $user_info['id']) )
+			if (allowedTo('themes_manage') ||  (allowedTo('themes_delete') && $file['id_member'] == $user_info['id']) || (allowedTo('themes_edit') && $file['id_member'] == $user_info['id']) )
 			{
 				echo '<td>';
-				if ($g_manage)
+				if (allowedTo('themes_manage'))
 					echo '<a href="' . $scripturl . '?action=tema;sa=unapprove&id=' . $file['ID_FILE'] . '">' . $txt['tema_text_unapprove'] . '</a>';
-				if ($g_manage || $g_edit_own && $file['id_member'] == $user_info['id'])
+				if (allowedTo('themes_manage') || allowedTo('themes_edit') && $file['id_member'] == $user_info['id'])
 					echo '&nbsp;<a href="' . $scripturl . '?action=tema;sa=edit&id=' . $file['ID_FILE'] . '">' . $txt['tema_text_edit'] . '</a>';
-				if ($g_manage || $g_delete_own && $file['id_member'] == $user_info['id'])
+				if (allowedTo('themes_manage') || allowedTo('themes_delete') && $file['id_member'] == $user_info['id'])
 					echo '&nbsp;<a href="' . $scripturl . '?action=tema;sa=delete&id=' . $file['ID_FILE'] . '">' . $txt['tema_text_delete'] . '</a>';
 
 				echo '</td>';
 			}
-
-
-
 			echo '</tr>';
 
 		}
-
-
-		// Display who is viewing the downloads.
-		if (!empty($modSettings['tema_who_viewing']))
-		{
-			echo '<tr>
-			<td align="center" colspan="', $count, '"><span class="smalltext">';
-
-			// Show just numbers...?
-			// show the actual people viewing the topic?
-			echo empty($context['view_members_list']) ? '0 ' . $txt['tema_who_members'] : implode(', ', $context['view_members_list']) . (empty($context['view_num_hidden']) || $context['can_moderate_forum'] ? '' : ' (+ ' . $context['view_num_hidden'] . ' ' . $txt['tema_who_hidden'] . ')');
-
-			// Now show how many guests are here too.
-			echo $txt['who_and'], @$context['view_num_guests'], ' ', @$context['view_num_guests'] == 1 ? $txt['guest'] : $txt['guests'], $txt['tema_who_viewdownload'], '</span></td></tr>';
-		}
-
-
-			echo '<tr class="titlebg">
-					<td align="left" colspan="', $count, '">
-					';
-
-					echo $context['page_index'];
-
-
-			echo '
-					</td>
-				</tr>';
-		echo '
+		echo '</tbody>
 			</table>';
-            
-            
-            	// Show return to downloads link and Show add download if they can
-            	echo '
-                    <div class="tborder">
-            <div class="roundframe centertext">';
-    	
-			if ($g_manage)
-					echo '<a href="', $scripturl, '?action=tema;sa=addcat;cat=', $cat, '">', $txt['tema_text_addsubcat'], '</a>&nbsp;&nbsp;';
+			
+            	echo '<div class="pagesection">
+						<div class="buttonlist floatright">';
+						
+							if (allowedTo('themes_manage'))
+								echo '<a class="button" href="', $scripturl, '?action=tema;sa=addcat;cat=', $cat, '">', $txt['tema_text_addsubcat'], '</a>&nbsp;&nbsp;';
 
-				if ($g_add)
-					echo '<a href="', $scripturl, '?action=tema;sa=add;cat=', $cat, '">', $txt['tema_text_adddownload'], '</a> ';
-
-
-				echo '
-				<a href="', $scripturl, '?action=tema">', $txt['tema_text_returndownload'], '</a
-            </div>
-        </div>';
+							if (allowedTo('themes_add'))
+								echo '<a class="button" href="', $scripturl, '?action=tema;sa=add;cat=', $cat, '">', $txt['tema_text_adddownload'], '</a> ';
+						echo '
+								<a class="button" href="', $scripturl, '?action=tema">', $txt['tema_text_returndownload'], '</a>
+								<a class="button" href="', $scripturl, '?action=tema;sa=search">', $txt['tema_text_search2'], '</a>';	
+								if (allowedTo('themes_add') && !($user_info['is_guest']))
+								echo '<a class="button" href="', $scripturl , '?action=tema;sa=myfiles;u=' , $user_info['id'],'">', $txt['tema_text_myfiles2'], '</a>';
+							echo '
+						</div>
+						<div class="pagelinks floatleft">'.$context['page_index'].'</div>
+					</div>';
 
 	}
 	else
 	{
-		// No Category is set then show the main category list
-		ShowTopDownloadBar2($txt['tema_text_title']);
+		echo '
+			<div class="cat_bar">
+				<h3 class="catbg centertext">
+					', $txt['tema_text_title'], '
+				</h3>
+			</div>';
 
-
-
-		// Show the index page blocks
 		if (!empty($modSettings['tema_index_showtop']))
 		{
-			// Recent
 			if (!empty($modSettings['tema_index_recent']))
 				MainPageBlock($txt['tema_main_recent'], 'recent');
 		}
 
-
-		// List all the catagories
-		echo '<table border="0" cellspacing="1" cellpadding="4" class="table_grid"  align="center" width="100%">
-<thead>
-<tr class="title_bar">
-				<th  class="lefttext first_th" colspan="2">', $txt['tema_text_categoryname'], '</th>
-				<th  class="centertext' . ($g_manage ? '' : ' last_th') . '" align="center">', $txt['tema_text_totalfiles'], '</th>
-				';
-		if	($g_manage)
+		echo '
+		<div id="messageindex">';
+		echo '<div class="title_bar" id="topic_header">
+					<div class="board_icon">&nbsp;</div>
+					<div class="info">', $txt['tema_text_categoryname'], '</div>
+					<div class="board_stats centertext">', $txt['tema_text_totalfiles'], '</div>
+						';
+				if	(allowedTo('themes_manage'))
+					echo '
+					<div class="lastpost">', $txt['tema_text_reorder'], '/', $txt['tema_text_options'], '</div>';
 			echo '
-				<th  class="lefttext">', $txt['tema_text_reorder'], '</th>';
-
-		echo '</tr>
-		</thead>';
-
-
+			</div>';
+		echo '
+			<div id="topic_container">';
 		foreach ($context['downloads_cats'] as $i => $cat_info)
 		{
 			$cat_url = '';
-
-			// Check permission to show this category
 			if ($cat_info['view'] == '0')
 				continue;
-
-
 			$totalfiles  = Downloads_GetFileTotals($cat_info['ID_CAT']);
 			$cat_url = $scripturl . '?action=tema;cat=' . $cat_info['ID_CAT'];
-
-			echo '<tr class="windowbg">';
+			echo '<div class="windowbg">';
 
 				if ($cat_info['image'] == '' && $cat_info['filename'] == '')
-					echo '<td ></td><td  class="windowbg2"><b><a href="' . $cat_url . '">' . parse_bbc($cat_info['title']) . '</a></b><br />' . parse_bbc($cat_info['description']) . '</td>';
+					echo '<div class="board_icon"></div>
+							<div class="info">
+								<a class="subject" href="' . $cat_url . '">' . parse_bbc($cat_info['title']) . '</a>
+								<p class="board_description">' . parse_bbc($cat_info['description']) . '</p>
+								',($subcats_linktree != '' ? '<p><strong>' . $txt['tema_sub_cats'] . '</strong>: ' . $subcats_linktree.'</p>' : ''),'
+							</div>';
 				else
 				{
 					if ($cat_info['filename'] == '')
-						echo '<td class="windowbg" width="10%"><a href="' . $cat_url . '"><img src="' . $cat_info['image'] . '" /></a></td>';
+						echo '<div class="board_icon"><a href="' . $cat_url . '"><img src="' . $cat_info['image'] . '" /></a></div>';
 					else
-						echo '<td class="windowbg" width="10%"><a href="' . $cat_url . '"><img src="' . $modSettings['tema_url'] . 'catimgs/' . $cat_info['filename'] . '" /></a></td>';
-
-
-					echo '<td class="windowbg2"><b><a href="' . $cat_url . '">' . parse_bbc($cat_info['title']) . '</a></b><br />' . parse_bbc($cat_info['description']) . '</td>';
+						echo '<div class="board_icon"><a href="' . $cat_url . '"><img src="' . $modSettings['tema_url'] . 'catimgs/' . $cat_info['filename'] . '" /></a></div>';
+					echo '
+						<div class="info">
+							<a class="subject" href="' . $cat_url . '">' . parse_bbc($cat_info['title']) . '</a>
+							<p class="board_description">' . parse_bbc($cat_info['description']) . '</p>
+							',($subcats_linktree != '' ? '<p><strong>' . $txt['tema_sub_cats'] . '</strong>: ' . $subcats_linktree.'</p>' : ''),'
+						</div>';
 				}
 
-
-
-			// Show total downloads in the category
-			echo '<td align="center" valign="middle" class="windowbg">', $totalfiles, '</td>';
-
-			// Show Edit Delete and Order category
-			if ($g_manage)
+			echo '<div class="board_stats centertext">', $totalfiles, '</div>';
+			if (allowedTo('themes_manage'))
 			{
-				echo '<td class="windowbg2"><a href="' . $scripturl . '?action=tema;sa=catup;cat=' . $cat_info['ID_CAT'] . '">' . $txt['tema_text_up'] . '</a>&nbsp;<a href="' . $scripturl . '?action=tema;sa=catdown;cat=' . $cat_info['ID_CAT'] . '">' . $txt['tema_text_down'] . '</a></td>
-				<td class="windowbg"><a href="' . $scripturl . '?action=tema;sa=editcat;cat=' . $cat_info['ID_CAT'] . '">' . $txt['tema_text_edit'] . '</a>&nbsp;
-				<a href="' . $scripturl . '?action=tema;sa=deletecat;cat=' . $cat_info['ID_CAT'] . '">' . $txt['tema_text_delete'] . '</a>
-				<br /><br />
-					<a href="' . $scripturl . '?action=tema;sa=catperm;cat=' . $cat_info['ID_CAT'] . '">[' . $txt['tema_text_permissions'] . ']</a>
-				</td>';
-
+				echo '<div class="lastpost">
+					<div class="buttonlist floatright">
+						<a class="button" href="' . $scripturl . '?action=tema;sa=catup;cat=' . $cat_info['ID_CAT'] . '">' . $txt['tema_text_up'] . '</a>
+						<a class="button" href="' . $scripturl . '?action=tema;sa=catdown;cat=' . $cat_info['ID_CAT'] . '">' . $txt['tema_text_down'] . '</a>
+						<a class="button" href="' . $scripturl . '?action=tema;sa=editcat;cat=' . $cat_info['ID_CAT'] . '">' . $txt['tema_text_edit'] . '</a>
+						<a class="button" href="' . $scripturl . '?action=tema;sa=deletecat;cat=' . $cat_info['ID_CAT'] . '">' . $txt['tema_text_delete'] . '</a>
+						<a class="button" href="' . $scripturl . '?action=tema;sa=catperm;cat=' . $cat_info['ID_CAT'] . '">[' . $txt['tema_text_permissions'] . ']</a>
+					</div>
+				</div>';
 			}
-
-
-			echo '</tr>';
-
-			// Show any subcategory links
-			if ($subcats_linktree != '')
-			echo '
-			<tr class="windowbg2">
-				<td colspan="', ($g_manage ? '5' : '3'),'">&nbsp;<span class="smalltext">',($subcats_linktree != '' ? '<b>' . $txt['tema_sub_cats'] . '</b>' . $subcats_linktree : ''),'</span></td>
-			</tr>';
-
-
-
+			echo '</div>';
 		}
-		echo '</table><br /><br />';
+		echo '</div>
+		</div>';
 
-
-	// Show the index page blocks
-	if (empty($modSettings['tema_index_showtop']))
-	{
-		// Recent
-		if (!empty($modSettings['tema_index_recent']))
-			MainPageBlock($txt['tema_main_recent'], 'recent');
-	}
-
-		// Show stats link
-			echo '<br />
-            <div class="cat_bar">
-		<h3 class="catbg centertext">
-        ', $txt['tema_stats_title'], '
-        </h3>
-</div>
-            <table class="table_grid">
- 					<tr class="windowbg2">
-						<td align="center"><a href="' . $scripturl . '?action=tema;sa=stats">', $txt['tema_stats_viewstats'] ,'</a></td>
-					</tr>
-				</table><br />';
-
-		// See if they are allowed to add catagories Main Index only
-		if ($g_manage)
+		if (empty($modSettings['tema_index_showtop']))
+		{
+			if (!empty($modSettings['tema_index_recent']))
+				MainPageBlock($txt['tema_main_recent'], 'recent');
+		}
+		if (allowedTo('themes_manage'))
 		{
 			echo '
             <div class="cat_bar">
-		<h3 class="catbg centertext">
-        ', $txt['tema_text_adminpanel'], '
-        </h3>
-</div>
-
-            <table class="table_grid">
- 				<tr class="windowbg2">
-			<td align="center"><a href="' . $scripturl . '?action=tema;sa=addcat">' . $txt['tema_text_addcategory'] . '</a>&nbsp;
-			<a href="' . $scripturl . '?action=admin;area=tema;sa=adminset">' . $txt['tema_text_settings'] . '</a>&nbsp;';
-
-
-			if (allowedTo('manage_permissions'))
-				echo '<a href="', $scripturl, '?action=admin;area=permissions">', $txt['tema_text_permissions'], '</a>';
-
-			// Downloads waiting for approval
-			echo '<br />' . $txt['tema_text_fileswaitapproval'] . '<b>',$context['downloads_waitapproval'],'</b>&nbsp;&nbsp;<a href="' . $scripturl . '?action=admin;area=tema;sa=approvelist">' . $txt['tema_text_filecheckapproval'] . '</a>';
-			// Reported Downloads
-			echo '<br />' . $txt['tema_text_filereported'] . '<b>',$context['downloads_totalreport'],'</b>&nbsp;&nbsp;<a href="' . $scripturl . '?action=admin;area=tema;sa=reportlist">' . $txt['tema_text_filecheckreported'] . '</a>';
-			echo '</td></tr></table><br /><br />';
+				<h3 class="catbg centertext">
+				', $txt['tema_text_adminpanel'], '
+				</h3>
+			</div>
+			<div class="information centertext">
+				<a class="button" href="' . $scripturl . '?action=tema;sa=addcat">' . $txt['tema_text_addcategory'] . '</a>
+				<a class="button" href="' . $scripturl . '?action=admin;area=tema;sa=adminset">' . $txt['tema_text_settings'] . '</a>&nbsp;';
+				if (allowedTo('manage_permissions'))
+				echo '<a class="button" href="', $scripturl, '?action=admin;area=permissions">', $txt['tema_text_permissions'], '</a>';
+			echo '<br />' . $txt['tema_text_fileswaitapproval'] . '<strong>',$context['downloads_waitapproval'],'</strong>&nbsp;&nbsp;<a href="' . $scripturl . '?action=admin;area=tema;sa=approvelist">' . $txt['tema_text_filecheckapproval'] . '</a>';
+			echo '<br />' . $txt['tema_text_filereported'] . '<strong>',$context['downloads_totalreport'],'</strong>&nbsp;&nbsp;<a href="' . $scripturl . '?action=admin;area=tema;sa=reportlist">' . $txt['tema_text_filecheckreported'] . '</a>';
+			echo '</div>';
 		}
+			echo '
+		<div class="pagesection">
+			<div class="buttonlist floatright">
+				<a class="button" href="', $scripturl, '?action=tema">', $txt['tema_text_returndownload'], '</a>
+				<a class="button" href="' . $scripturl . '?action=tema;sa=stats">', $txt['tema_stats_viewstats'] ,'</a>
+				<a class="button" href="', $scripturl, '?action=tema;sa=search">', $txt['tema_text_search2'], '</a>';	
+				if (allowedTo('themes_add') && !($user_info['is_guest']))
+				echo '<a class="button" href="', $scripturl , '?action=tema;sa=myfiles;u=' , $user_info['id'],'">', $txt['tema_text_myfiles2'], '</a>';
+			echo'</div>
+		</div>';
 	}
 
 }
@@ -356,126 +266,123 @@ function template_mainview()
 function template_add_category()
 {
 	global $scripturl, $txt, $context, $settings, $modSettings;
-
-	// Load the spell checker?
 	if ($context['show_spellchecking'])
-		echo '
-									<script language="JavaScript" type="text/javascript" src="' . $settings['default_theme_url'] . '/scripts/spellcheck.js"></script>';
-
-
+		echo '<script language="JavaScript" type="text/javascript" src="' . $settings['default_theme_url'] . '/scripts/spellcheck.js"></script>';
 	echo '
-<form method="post" enctype="multipart/form-data" name="catform" id="catform" action="' . $scripturl . '?action=tema;sa=addcat2" onsubmit="submitonce(this);">
-<div class="cat_bar">
-		<h3 class="catbg centertext">
-        ', $txt['tema_text_addcategory'], '
-        </h3>
-</div>
-<table border="0" cellpadding="0" cellspacing="0" width="100%">
-  <tr class="windowbg2">
-    <td width="28%" align="right"><span class="gen"><b>' . $txt['tema_form_title'] .'</b>&nbsp;</span></td>
-    <td width="72%"><input type="text" name="title" size="64" maxlength="100" /></td>
-  </tr>
-  <tr class="windowbg2">
-    <td width="28%" align="right"><span class="gen"><b>' . $txt['tema_text_parentcategory'] .'</b>&nbsp;</span></td>
-    <td width="72%"><select name="parent">
-    <option value="0">',$txt['tema_text_catnone'],'</option>
-    ';
+		<div class="cat_bar">
+			<h3 class="catbg centertext">
+			', $txt['tema_text_addcategory'], '
+			</h3>
+		</div>
+		<form method="post" enctype="multipart/form-data" name="catform" id="catform" action="' . $scripturl . '?action=tema;sa=addcat2" onsubmit="submitonce(this);">
+		<div id="post_area">
+				<div class="roundframe noup">
+		<dl id="post_header">
+			<dt class="clear pf_subject">
+				<span id="caption_subject">' . $txt['tema_form_title'] .'</span>
+			</dt>
+			<dd class="pf_subject">
+				<input type="text" name="title" size="80" maxlength="80" class="input_text"/>
+			</dd>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">' . $txt['tema_text_parentcategory'] .'</span>
+			</dt>
+			<dd class="pf_subject">
+				<select name="parent">
+					<option value="0">',$txt['tema_text_catnone'],'</option>
+					';
 
-	foreach ($context['downloads_cat'] as $i => $category)
-		echo '<option value="' . $category['ID_CAT']  . '" ' . (($context['cat_parent'] == $category['ID_CAT']) ? ' selected="selected"' : '') .'>' . $category['title'] . '</option>';
+					foreach ($context['downloads_cat'] as $i => $category)
+						echo '<option value="' . $category['ID_CAT']  . '" ' . (($context['cat_parent'] == $category['ID_CAT']) ? ' selected="selected"' : '') .'>' . $category['title'] . '</option>';
 
-	echo '</select>
-	</td>
-  </tr>
-  <tr  class="windowbg2">
-    <td width="28%"  valign="top" align="right"><span class="gen"><b>' . $txt['tema_form_description'] . '</b>&nbsp;</span><br />'. $txt['tema_text_bbcsupport'] .'</td>
-    <td width="72%"><textarea rows="6" name="description" cols="54"></textarea>';
+			echo '</select>
+			</dd>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">' . $txt['tema_form_description'] . '&nbsp;</span><br />'. $txt['tema_text_bbcsupport'] .'
+			</dt>
+			<dd class="pf_subject">	
+			<textarea class="editor" rows="6" name="description" cols="54"></textarea></dd>';
+		  
+		if ($context['show_spellchecking'])
+		echo '<br /><input type="button" value="', $txt['spell_check'], '" onclick="spellCheck(\'catform\', \'description\');" />';
+		
+		echo '<dt class="clear pf_subject">
+				<span id="caption_subject">' . $txt['tema_form_icon'] . '</span>
+			</dt>
+			<dd class="pf_subject">	
+				<input type="text" name="image" size="64" maxlength="100" />
+			</dd>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">' . $txt['tema_form_uploadicon'] . '</span>';
 
-   	if ($context['show_spellchecking'])
-   		echo '
-   									<br /><input type="button" value="', $txt['spell_check'], '" onclick="spellCheck(\'catform\', \'description\');" />';
-echo '</td>
-  </tr>
-  <tr class="windowbg2">
-    <td width="28%" align="right"><span class="gen"><b>' . $txt['tema_form_icon'] . '</b>&nbsp;</span></td>
-    <td width="72%"><input type="text" name="image" size="64" maxlength="100" /></td>
-  </tr>
-   <tr  class="windowbg2">
-    <td width="28%" align="right"><span class="gen"><b>' . $txt['tema_form_uploadicon'] . '</b>&nbsp;</span></td>
-    <td width="72%">';
 
-
-		// Warn the user if the category image path is not writable
 		if (!is_writable($modSettings['tema_path'] . 'catimgs'))
 			echo '<font color="#FF0000"><b>' . $txt['tema_write_catpatherror']  . $modSettings['tema_path'] . 'catimgs' . '</b></font>';
 
 
-echo '
-    <input type="file" size="48" name="picture" /></td>
-  </tr>
-  <tr class="windowbg2">
-    <td width="28%"   align="right"><span class="gen"><b>' .   $txt['tema_text_cat_disableratings'] . '</b>&nbsp;</span></td>
-    <td width="72%"><input type="checkbox" name="disablerating" /></td>
-  </tr>
-  <tr  class="windowbg2">
-    <td width="28%"  align="right"><span class="gen"><b>' .   $txt['tema_txt_sortby']  . '</b>&nbsp;</span></td>
-    <td width="72%"><select name="sortby">
-		<option value="date">',$txt['tema_txt_sort_date'],'</option>
-		<option value="title">',$txt['tema_txt_sort_title'],'</option>
-		<option value="mostview">',$txt['tema_txt_sort_mostviewed'],'</option>
-		<option value="mostrated">',$txt['tema_txt_sort_mostrated'],'</option>
-		<option value="mostdowns">',$txt['tema_txt_sort_mostdowns'],'</option>
-		<option value="filesize">',$txt['tema_txt_sort_filesize'],'</option>
-		<option value="membername">',$txt['tema_txt_sort_membername'],'</option>
-		</select></td>
-  </tr>
-  <tr  class="windowbg2">
-    <td width="28%" align="right"><span class="gen"><b>' .   $txt['tema_txt_orderby'] . '</b>&nbsp;</span></td>
-    <td width="72%"><select name="orderby">
-		<option value="desc">',$txt['tema_txt_sort_desc'],'</option>
-		<option value="asc">',$txt['tema_txt_sort_asc'],'</option>
-		</select></td>
-  </tr>
-  <tr class="windowbg2">
-  	<td colspan="2" align="center">
-  	<b>' . $txt['tema_text_postingoptions'] . '</b>
-  	<hr />
-  	' . $txt['tema_postingoptions_info'] . '
-  	</td>
-  </tr>
-  <tr  class="windowbg2">
-    <td width="28%" align="right"><span class="gen"><b>' . $txt['tema_text_boardname'] . '</b>&nbsp;</span></td>
-    <td width="72%">
-  	<select name="boardselect" id="boardselect">
-  ';
+		echo '</dt>
+			<dd class="pf_subject">	
+				<input type="file" size="48" name="picture" />
+			</dd>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">' .   $txt['tema_text_cat_disableratings'] . '</span>
+			</dt>
+			<dd class="pf_subject">	
+				<input type="checkbox" name="disablerating" />
+			</dd>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">' .   $txt['tema_txt_sortby']  . '</span>
+			</dt>
+			<dd class="pf_subject">		
+				<select name="sortby">
+					<option value="date">',$txt['tema_txt_sort_date'],'</option>
+					<option value="title">',$txt['tema_txt_sort_title'],'</option>
+					<option value="mostview">',$txt['tema_txt_sort_mostviewed'],'</option>
+					<option value="mostrated">',$txt['tema_txt_sort_mostrated'],'</option>
+					<option value="mostdowns">',$txt['tema_txt_sort_mostdowns'],'</option>
+					<option value="filesize">',$txt['tema_txt_sort_filesize'],'</option>
+					<option value="membername">',$txt['tema_txt_sort_membername'],'</option>
+				</select>
+			</dd>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">' .   $txt['tema_txt_orderby'] . '</span>
+			</dt>
+			<dd class="pf_subject">	
+				<select name="orderby">
+					<option value="desc">',$txt['tema_txt_sort_desc'],'</option>
+					<option value="asc">',$txt['tema_txt_sort_asc'],'</option>
+				</select>
+			</dd>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">' . $txt['tema_text_postingoptions'] . '</span>
+			</dt>
+			<dd class="pf_subject">
+				' . $txt['tema_postingoptions_info'] . '
+			</dd>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">' . $txt['tema_text_boardname'] . '</span>
+			</dt>
+			<dd class="pf_subject">	
+				<select name="boardselect" id="boardselect">';
 
-	foreach ($context['downloads_boards'] as $key => $option)
-		 echo '<option value="' . $key . '">' . $option . '</option>';
+				foreach ($context['downloads_boards'] as $key => $option)
+					 echo '<option value="' . $key . '">' . $option . '</option>';
 
-echo '</select>
-	</td>
-  </tr>
-   <tr  class="windowbg2">
-    <td colspan="2" align="center">
-    <input type="checkbox" name="locktopic" /><span class="gen"><b>' . $txt['tema_posting_locktopic'] . '</b>&nbsp;</span>
-    </td>
-  </tr>
-   <tr class="windowbg2">
-  	<td colspan="2"><hr /></td>
-  </tr>
-  <tr  class="windowbg2">
-    <td width="28%" colspan="2"  align="center">
-    <input type="submit" value="', $txt['tema_text_addcategory'], '" name="submit" /></td>
-
-  </tr>
-</table>
-</form>';
-
-	if ($context['show_spellchecking'])
-			echo '<form action="', $scripturl, '?action=spellcheck" method="post" accept-charset="', $context['character_set'], '" name="spell_form" id="spell_form" target="spellWindow"><input type="hidden" name="spellstring" value="" /></form>';
-
-
-
+			echo '</select>
+			</dd>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">' . $txt['tema_posting_locktopic'] . '</span>
+			</dt>
+			<dd class="pf_subject">	
+				<input type="checkbox" name="locktopic" />
+			</dd>
+		</dl>
+		<div class="centertext"><input type="submit" value="', $txt['tema_text_addcategory'], '" name="submit" /></div>
+			</div>
+		</div>
+		</form>';
+			if ($context['show_spellchecking'])
+					echo '<form action="', $scripturl, '?action=spellcheck" method="post" accept-charset="', $context['character_set'], '" name="spell_form" id="spell_form" target="spellWindow"><input type="hidden" name="spellstring" value="" /></form>';
 }
 
 function template_edit_category()
@@ -953,7 +860,6 @@ function template_edit_download()
 {
 	global $scripturl, $modSettings, $txt, $context, $settings;
 
-	$g_manage = allowedTo('themes_manage');
 
 
 	// Load the spell checker?
@@ -1117,7 +1023,7 @@ echo '
 
 
   // If the user can manage the downloads give them the option to change the download owner.
-  if ($g_manage == true)
+  if (allowedTo('themes_manage') == true)
   {
 	  echo '<tr class="windowbg2">
 	  <td align="right">', $txt['tema_text_changeowner'], '</td>
@@ -1181,22 +1087,9 @@ function template_view_download()
 {
 	global $scripturl, $context, $txt, $modSettings, $settings, $memberContext, $user_info, $sourcedir, $boardurl;
 
-	// Load permissions
-	$g_manage = allowedTo('themes_manage');
-	$g_viewdownload = allowedTo('themes_viewdownload');
-	$g_edit_own = allowedTo('themes_edit');
-	$g_delete_own = allowedTo('themes_delete');
-	$g_report = allowedTo('themes_report');
-
-
-	// Keywords
 	$keywords = explode(' ',$context['downloads_file']['keywords']);
  	$keywordscount = count($keywords);
 
-
-	ShowTopDownloadBar2($context['downloads_file']['title']);
-    
-    
 	// Show the title of the download
         if ($modSettings['tema_set_file_title'])
         echo '
@@ -1213,7 +1106,6 @@ function template_view_download()
 			<tr class="windowbg2">
 				<td align="center">';
 
-				//if($g_viewdownload){
 					echo '<a href="' . $scripturl . '?action=tema;sa=downfile&id=', $context['downloads_file']['ID_FILE'], '">', ($context['downloads_file']['fileurl'] == '' ? $context['downloads_file']['orginalfilename'] : $txt['tema_app_download']), '</a><br />';
 
 					if($context['downloads_file']['demourl'] != ''){
@@ -1221,7 +1113,6 @@ function template_view_download()
 						echo '<br />';
 					}
 					
-				//}
 
 				if($modSettings['tema_set_file_thumb'] != 0){
 					echo '<img src="',$context['downloads_file']['picture'] == '' ? $context['downloads_file']['pictureurl'] : $modSettings['tema_url'].'temaresim/'.$context['downloads_file']['picture'],'" alt="'.$context['downloads_file']['title'].'">';
@@ -1346,7 +1237,7 @@ function template_view_download()
 						';
 
 						// If the user can manage the downloads let them see who voted for what and option to delete rating
-						if ($g_manage)
+						if (allowedTo('themes_manage'))
 							echo '&nbsp;<a href="' . $scripturl . '?action=tema;sa=viewrating&id=' . $context['downloads_file']['ID_FILE'] . '">' . $txt['tema_form_viewratings'] . '</a>';
 						echo '</form><br />';
 					}
@@ -1375,16 +1266,16 @@ function template_view_download()
 				}
 
 				// Show edit download links if allowed
-				if ($g_manage)
+				if (allowedTo('themes_manage'))
 					echo '&nbsp;<a href="' . $scripturl . '?action=tema;sa=unapprove&id=' . $context['downloads_file']['ID_FILE'] . '">' . $txt['tema_text_unapprove'] . '</a>';
-				if ($g_manage || $g_edit_own && $context['downloads_file']['id_member'] == $user_info['id'])
+				if (allowedTo('themes_manage') || allowedTo('themes_edit') && $context['downloads_file']['id_member'] == $user_info['id'])
 					echo '&nbsp;<a href="' . $scripturl . '?action=tema;sa=edit&id=' . $context['downloads_file']['ID_FILE']. '">' . $txt['tema_text_edit'] . '</a>';
-				if ($g_manage || $g_delete_own && $context['downloads_file']['id_member'] == $user_info['id'])
+				if (allowedTo('themes_manage') || allowedTo('themes_delete') && $context['downloads_file']['id_member'] == $user_info['id'])
 					echo '&nbsp;<a href="' . $scripturl . '?action=tema;sa=delete&id=' . $context['downloads_file']['ID_FILE'] . '">' . $txt['tema_text_delete'] . '</a>';
 
 
 				// Show report download link
-				if ($g_report)
+				if (allowedTo('themes_report'))
 				{
 					echo '&nbsp;<a href="' . $scripturl . '?action=tema;sa=report&id=' . $context['downloads_file']['ID_FILE'] . '">' . $txt['tema_text_reportdownload'] . '</a>';
 				}
@@ -1418,7 +1309,15 @@ echo '
 				<a href="' . $scripturl . '?action=tema;cat=' . $context['downloads_file']['ID_CAT'] . '">' . $txt['tema_text_returndownload'] . '</a>
             </div>
         </div>';
-
+	echo '
+		<div class="pagesection">
+			<div class="buttonlist floatright">
+				<a class="button" href="', $scripturl, '?action=tema">', $txt['tema_text_returndownload'], '</a>
+				<a class="button" href="', $scripturl, '?action=tema;sa=search">', $txt['tema_text_search2'], '</a>';	
+				if (allowedTo('themes_add') && !($user_info['is_guest']))
+				echo '<a class="button" href="', $scripturl , '?action=tema;sa=myfiles;u=' , $user_info['id'],'">', $txt['tema_text_myfiles2'], '</a>';
+			echo'</div>
+		</div>';
 
 }
 
@@ -1461,8 +1360,6 @@ function template_report_download()
 {
 	global $scripturl, $context, $txt;
 
-    ShowTopDownloadBar2();
-
 	echo '
 <form method="post" name="cprofile" id="cprofile" action="' . $scripturl . '?action=tema;sa=report2">
 <div class="cat_bar">
@@ -1483,7 +1380,15 @@ function template_report_download()
   </tr>
 </table>
 </form>';
-
+	echo '
+		<div class="pagesection">
+			<div class="buttonlist floatright">
+				<a class="button" href="', $scripturl, '?action=tema">', $txt['tema_text_returndownload'], '</a>
+				<a class="button" href="', $scripturl, '?action=tema;sa=search">', $txt['tema_text_search2'], '</a>';	
+				if (allowedTo('themes_add') && !($user_info['is_guest']))
+				echo '<a class="button" href="', $scripturl , '?action=tema;sa=myfiles;u=' , $user_info['id'],'">', $txt['tema_text_myfiles2'], '</a>';
+			echo'</div>
+		</div>';
 }
 
 
@@ -1630,9 +1535,6 @@ function template_search()
 {
 	global $scripturl, $txt, $context, $settings;
 
-
-	ShowTopDownloadBar2();
-
 	echo '
 <form method="post" action="', $scripturl, '?action=tema;sa=search2">
 <div class="cat_bar">
@@ -1707,9 +1609,16 @@ function template_search()
 </table>
 </form>
 <p align="center"><a href="' . $scripturl . '?action=tema">' . $txt['tema_text_returndownload'] . '</a></p>
-<br />
-
-';
+<br />';
+	echo '
+		<div class="pagesection">
+			<div class="buttonlist floatright">
+				<a class="button" href="', $scripturl, '?action=tema">', $txt['tema_text_returndownload'], '</a>
+				<a class="button" href="', $scripturl, '?action=tema;sa=search">', $txt['tema_text_search2'], '</a>';	
+				if (allowedTo('themes_add') && !($user_info['is_guest']))
+				echo '<a class="button" href="', $scripturl , '?action=tema;sa=myfiles;u=' , $user_info['id'],'">', $txt['tema_text_myfiles2'], '</a>';
+			echo'</div>
+		</div>';
 }
 
 function template_search_results()
@@ -1717,12 +1626,12 @@ function template_search_results()
 	global $context, $modSettings, $scripturl, $txt, $user_info;
 
 	// Get the permissions for the user
-	$g_add = allowedTo('themes_add');
-	$g_manage = allowedTo('themes_manage');
-	$g_edit_own = allowedTo('themes_edit');
-	$g_delete_own = allowedTo('themes_delete');
-
-	ShowTopDownloadBar2($txt['tema_searchresults']);
+		echo '
+			<div class="cat_bar">
+				<h3 class="catbg centertext">
+					', $txt['tema_searchresults'], '
+				</h3>
+			</div>';
 
 
 	// Show table header
@@ -1784,7 +1693,7 @@ function template_search_results()
 
 
 			// Options
-			if ($g_manage ||  ($g_delete_own ) || ($g_edit_own) )
+			if (allowedTo('themes_manage') ||  (allowedTo('themes_delete') ) || (allowedTo('themes_edit')) )
 			{
 				echo '<th>',$txt['tema_cat_options'],'</th>';
 				$count++;
@@ -1828,14 +1737,14 @@ function template_search_results()
 			}
 
 			// Options
-			if ($g_manage ||  ($g_delete_own && $file['id_member'] == $user_info['id']) || ($g_edit_own && $file['id_member'] == $user_info['id']) )
+			if (allowedTo('themes_manage') ||  (allowedTo('themes_delete') && $file['id_member'] == $user_info['id']) || (allowedTo('themes_edit') && $file['id_member'] == $user_info['id']) )
 			{
 				echo '<td>';
-				if ($g_manage)
+				if (allowedTo('themes_manage'))
 					echo '<a href="' . $scripturl . '?action=tema;sa=unapprove&id=' . $file['ID_FILE'] . '">' . $txt['tema_text_unapprove'] . '</a>';
-				if ($g_manage || $g_edit_own && $file['id_member'] == $user_info['id'])
+				if (allowedTo('themes_manage') || allowedTo('themes_edit') && $file['id_member'] == $user_info['id'])
 					echo '&nbsp;<a href="' . $scripturl . '?action=tema;sa=edit&id=' . $file['ID_FILE'] . '">' . $txt['tema_text_edit'] . '</a>';
-				if ($g_manage || $g_delete_own && $file['id_member'] == $user_info['id'])
+				if (allowedTo('themes_manage') || allowedTo('themes_delete') && $file['id_member'] == $user_info['id'])
 					echo '&nbsp;<a href="' . $scripturl . '?action=tema;sa=delete&id=' . $file['ID_FILE'] . '">' . $txt['tema_text_delete'] . '</a>';
 
 				echo '</td>';
@@ -1876,14 +1785,22 @@ function template_search_results()
     	echo '
                     <div class="tborder">
             <div class="roundframe centertext">';
-    			if ($g_add)
+    			if (allowedTo('themes_add'))
 					echo '<a href="' . $scripturl . '?action=tema;sa=add">' . $txt['tema_text_adddownload'] . '</a><br />';
 
 				echo '
 				<a href="' . $scripturl . '?action=tema">' . $txt['tema_text_returndownload'] . '</a>
             </div>
         </div>';
-
+	echo '
+		<div class="pagesection">
+			<div class="buttonlist floatright">
+				<a class="button" href="', $scripturl, '?action=tema">', $txt['tema_text_returndownload'], '</a>
+				<a class="button" href="', $scripturl, '?action=tema;sa=search">', $txt['tema_text_search2'], '</a>';	
+				if (allowedTo('themes_add') && !($user_info['is_guest']))
+				echo '<a class="button" href="', $scripturl , '?action=tema;sa=myfiles;u=' , $user_info['id'],'">', $txt['tema_text_myfiles2'], '</a>';
+			echo'</div>
+		</div>';
 
 
 }
@@ -1893,13 +1810,13 @@ function template_myfiles()
 	global $context, $modSettings, $scripturl, $txt, $user_info;
 
 	// Get the permissions for the user
-	$g_add = allowedTo('themes_add');
-	$g_manage = allowedTo('themes_manage');
-	$g_edit_own = allowedTo('themes_edit');
-	$g_delete_own = allowedTo('themes_delete');
 
-
-	ShowTopDownloadBar2($context['downloads_userdownloads_name']);
+		echo '
+			<div class="cat_bar">
+				<h3 class="catbg centertext">
+					', $context['downloads_userdownloads_name'], '
+				</h3>
+			</div>';
 
 // Show table header
 		$count = 0;
@@ -1954,7 +1871,7 @@ function template_myfiles()
 
 
 			// Options
-			if ($g_manage ||  ($g_delete_own ) || ($g_edit_own) )
+			if (allowedTo('themes_manage') ||  (allowedTo('themes_delete') ) || (allowedTo('themes_edit')) )
 			{
 				echo '<th class="lefttext">',$txt['tema_cat_options'],'</th>';
 				$count++;
@@ -2024,14 +1941,14 @@ function template_myfiles()
 
 
 			// Options
-			if ($g_manage ||  ($g_delete_own && $file['id_member'] == $user_info['id']) || ($g_edit_own && $file['id_member'] == $user_info['id']) )
+			if (allowedTo('themes_manage') ||  (allowedTo('themes_delete') && $file['id_member'] == $user_info['id']) || (allowedTo('themes_edit') && $file['id_member'] == $user_info['id']) )
 			{
 				echo '<td>';
-				if ($g_manage)
+				if (allowedTo('themes_manage'))
 					echo '<a href="' . $scripturl . '?action=tema;sa=unapprove&id=' . $file['ID_FILE'] . '">' . $txt['tema_text_unapprove'] . '</a>';
-				if ($g_manage || $g_edit_own && $file['id_member'] == $user_info['id'])
+				if (allowedTo('themes_manage') || allowedTo('themes_edit') && $file['id_member'] == $user_info['id'])
 					echo '&nbsp;<a href="' . $scripturl . '?action=tema;sa=edit&id=' . $file['ID_FILE'] . '">' . $txt['tema_text_edit'] . '</a>';
-				if ($g_manage || $g_delete_own && $file['id_member'] == $user_info['id'])
+				if (allowedTo('themes_manage') || allowedTo('themes_delete') && $file['id_member'] == $user_info['id'])
 					echo '&nbsp;<a href="' . $scripturl . '?action=tema;sa=delete&id=' . $file['ID_FILE'] . '">' . $txt['tema_text_delete'] . '</a>';
 
 				echo '</td>';
@@ -2064,14 +1981,22 @@ function template_myfiles()
                     <div class="tborder">
             <div class="roundframe centertext">';
     	
-				if ($g_add)
+				if (allowedTo('themes_add'))
 					echo '<a href="' . $scripturl . '?action=tema;sa=add">' . $txt['tema_text_adddownload'] . '</a> - ';
 
 				echo '
 				<a href="', $scripturl, '?action=tema">', $txt['tema_text_returndownload'], '</a>
             </div>
         </div>';
-
+	echo '
+		<div class="pagesection">
+			<div class="buttonlist floatright">
+				<a class="button" href="', $scripturl, '?action=tema">', $txt['tema_text_returndownload'], '</a>
+				<a class="button" href="', $scripturl, '?action=tema;sa=search">', $txt['tema_text_search2'], '</a>';	
+				if (allowedTo('themes_add') && !($user_info['is_guest']))
+				echo '<a class="button" href="', $scripturl , '?action=tema;sa=myfiles;u=' , $user_info['id'],'">', $txt['tema_text_myfiles2'], '</a>';
+			echo'</div>
+		</div>';
         
 
 
@@ -2123,10 +2048,6 @@ function template_view_rating()
 function template_stats()
 {
 	global $settings, $context, $txt, $scripturl;
-
-
-		ShowTopDownloadBar2();
-
 
 echo '
 <div class="cat_bar">
@@ -2240,7 +2161,15 @@ echo '
 				<a href="' . $scripturl . '?action=tema">' . $txt['tema_text_returndownload'] . '</a>
             </div>
         </div>';
-        
+        	echo '
+		<div class="pagesection">
+			<div class="buttonlist floatright">
+				<a class="button" href="', $scripturl, '?action=tema">', $txt['tema_text_returndownload'], '</a>
+				<a class="button" href="', $scripturl, '?action=tema;sa=search">', $txt['tema_text_search2'], '</a>';	
+				if (allowedTo('themes_add') && !($user_info['is_guest']))
+				echo '<a class="button" href="', $scripturl , '?action=tema;sa=myfiles;u=' , $user_info['id'],'">', $txt['tema_text_myfiles2'], '</a>';
+			echo'</div>
+		</div>';
         
 }
 
@@ -2654,80 +2583,5 @@ function template_catperm()
 </table>';
 }
 
-
-
-
-function template_import_results()
-{
-	global $txt, $context;
-
-	echo '
-    <div class="cat_bar">
-		<h3 class="catbg">
-        ', $txt['tema_txt_import_downloads'], '
-        </h3>
-	</div>
-
-    <table border="0" width="100%" cellspacing="0" align="center" cellpadding="4" class="tborder">
-
-
-		<tr class="windowbg">
-			<td>
-				',$txt['tema_txt_categories_imported'],' ',$context['tp_imported_categories'],'<br />
-				',$txt['tema_txt_files_imported'], ' ',$context['tp_imported_files'],'<br />
-
-			</td>
-		</tr>
-
-</table>';
-
-
-}
-
-function template_import()
-{
-	global $txt, $scripturl;
-
-echo '
-<div class="cat_bar">
-		<h3 class="catbg">
-        ', $txt['tema_txt_import_downloads'], '
-        </h3>
-</div>
-<table border="0" width="100%" cellspacing="0" align="center" cellpadding="4" class="tborder">
-
-		<tr class="windowbg">
-			<td>
-				',$txt['tema_txt_import_note'],'<br />
-			<form method="post" action="',$scripturl,'?action=tema;sa=importtp">
-				<input type="submit" value="',$txt['tema_txt_import_tiny_portal'],'" />
-			</form>
-
-			</td>
-		</tr>
-
-</table>';
-
-}
-
-
-function ShowTopDownloadBar2($title = '&nbsp;')
-{
-	global $txt, $context;
-		echo '
-	<div class="cat_bar">
-		<h3 class="catbg centertext">
-        ', $title, '
-        </h3>
-</div>';
-    
-
-    echo '<div style="height:10px;">';
-    echo template_button_strip($context['downloads']['buttons'], 'right');
-    echo '</div>';
-        
-    echo '<br /><br />';
-
-}
 
 ?>

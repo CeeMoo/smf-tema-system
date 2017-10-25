@@ -25,16 +25,15 @@ else
 
 foreach ($hook_functions as $hook => $function)
 	$call($hook, $function);
-	
-// Insert the settings for 2.1
-$smcFunc['db_query']('', "INSERT IGNORE INTO {db_prefix}settings
-	(variable, value)
-VALUES
-('themes_smfversion','2.1')
-");
+
+	global $boardurl,$boarddir;
+	$yol= $boardurl . '/tema/';
+	$yoldir= $boarddir . '/tema/';
 	
 $mod_settings = array(
 	'tema_max_filesize' => '5000000',
+	'tema_path' => $yoldir,
+	'tema_url' => $yol,
 	'tema_who_viewing' => '0',
 	'tema_set_commentsnewest' => '1',
 	'tema_commentchoice' => '0',
@@ -76,6 +75,7 @@ $mod_settings = array(
 	'tema_set_showcode_htmllink' => '0',
 	'tema_set_enable_multifolder' => '0',
 	'tema_folder_id' => '0',
+	'themes_smfversion' => '2.1',
 );
 
 updateSettings($mod_settings);
