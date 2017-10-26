@@ -426,7 +426,6 @@ function Downloads_AddCategory2()
 	$title = $smcFunc['htmlspecialchars']($_REQUEST['title'],ENT_QUOTES);
 	$description = $smcFunc['htmlspecialchars']($_REQUEST['description'],ENT_QUOTES);
 	$image = $smcFunc['htmlspecialchars']($_REQUEST['image'],ENT_QUOTES);
-	$filename= $smcFunc['htmlspecialchars']($_REQUEST['picture'],ENT_QUOTES);
 	$boardselect = (int) $_REQUEST['boardselect'];
 	$parent = (int) $_REQUEST['parent'];
 	$locktopic = isset($_REQUEST['locktopic']) ? 1 : 0;
