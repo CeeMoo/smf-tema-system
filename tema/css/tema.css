@@ -31,6 +31,7 @@ a:link.butoon, a:visited.butoon{
     vertical-align:middle;
     width:6%;
     text-align:center;
+    float: left;
 }
 
 .iconla a img{

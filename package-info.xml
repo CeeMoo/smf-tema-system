@@ -17,6 +17,7 @@
 		<require-dir name="demo" destination="$boarddir" />
 		<require-file name="tema.english.php" destination="$themedir/languages" />
 		<require-file name="tema.turkish.php" destination="$themedir/languages" />
+		<require-file name="tema.turkish-utf8.php" destination="$themedir/languages" />
 		<require-file name="temaicon.png" destination="$imagesdir/admin" />
 		<require-file name="temaicon.png" destination="$imagesdir" />
 		<require-file name="temaicon2.png" destination="$imagesdir/admin" />
@@ -35,6 +36,7 @@
 		<require-dir name="demo" destination="$boarddir" />
 		<require-file name="tema.english.php" destination="$themedir/languages" />
 		<require-file name="tema.turkish.php" destination="$themedir/languages" />
+		<require-file name="tema.turkish-utf8.php" destination="$themedir/languages" />
 		<require-file name="temaicon.png" destination="$imagesdir/admin" />
 		<require-file name="temaicon.png" destination="$imagesdir" />
 		<require-file name="temaicon2.png" destination="$imagesdir/admin" />
@@ -49,6 +51,7 @@
 		<remove-file name="$themedir/tema2.1.template.php" />
 		<remove-file name="$themedir/languages/tema.english.php" />
 		<remove-file name="$themedir/languages/tema.turkish.php" />
+		<remove-file name="$themedir/languages/tema.turkish-utf8.php" />
 		<remove-file name="$imagesdir/admin/temaicon.png" />
 		<remove-file name="$imagesdir/temaicon.png" />
 		<remove-file name="$imagesdir/admin/temaicon2.png" />
