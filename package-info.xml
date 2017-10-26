@@ -10,7 +10,6 @@
 	<install for="2.1 - 2.1.99,2.1 Beta 1,2.1 Beta 2">
 		<redirect url="?action=admin;area=tema;sa=adminset">redirect.txt</redirect>
 		<readme>ReadMe.txt</readme>
-		<modification type="file" reverse="true">temabeta21.xml</modification>
 		<require-file name="tema2.php" destination="$sourcedir" />
 		<require-file name="Subs-tema2.php" destination="$sourcedir" />
 		<require-file name="tema2.1.template.php" destination="$themedir" />
@@ -45,7 +44,6 @@
 	
 	</upgrade>
 	<uninstall for="2.1 - 2.1.99,2.1 Beta 1,2.1 Beta 2">
-		<modification type="file" reverse="true">temabeta21.xml</modification>
 		<remove-file name="$sourcedir/tema2.php" />
 		<remove-file name="$sourcedir/Subs-tema2.php" />
 		<remove-file name="$themedir/tema2.1.template.php" />
