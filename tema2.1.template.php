@@ -40,7 +40,7 @@ function template_mainview()
 			{
 				echo '<div class="windowbg">';
 				if ($subcat['image'] == '' && $subcat['filename'] == '')
-						echo '<div class="board_icon">&nbsp;</div>
+						echo '<div class="board_icon"><a href="' . $scripturl . '?action=tema;cat=' . $subcat['ID_CAT'] . '"></a></div>
 						<div class="info">
 						<a class="subject" href="' . $scripturl . '?action=tema;cat=' . $subcat['ID_CAT'] . '">' . parse_bbc($subcat['title']) . '</a>
 						<p class="board_description">' . parse_bbc($subcat['description']) . '</p>
@@ -49,11 +49,11 @@ function template_mainview()
 					else
 					{
 						if ($subcat['filename'] == '')
-							echo '<div class="board_icon">
+							echo '<div class="iconla">
 									<a href="' . $scripturl . '?action=tema;cat=' . $subcat['ID_CAT'] . '"><img src="' . $subcat['image'] . '" /></a>
 									</div>';
 						else
-							echo '<div class="board_icon">
+							echo '<div class="iconla">
 									<a href="' . $scripturl . '?action=tema;cat=' . $subcat['ID_CAT'] . '"><img src="' . $modSettings['tema_url'] . 'catimgs/' . $subcat['filename'] . '" /></a>
 									</div>';
 
@@ -241,6 +241,23 @@ function template_mainview()
 					<div class="lastpost">', $txt['tema_text_reorder'], '/', $txt['tema_text_options'], '</div>';
 			echo '
 			</div>';
+
+			echo '<style>
+			.iconla{
+				box-shadow: none;
+			    border-radius: 0;
+			    padding: 0;
+			    margin: 0;
+			    overflow: hidden;
+			    display:inline-block;
+			    vertical-align:middle;
+			}
+
+			.iconla a img{
+				max-width:60px;
+			}
+			</style>';
+
 		echo '
 			<div id="topic_container">';
 		foreach ($context['downloads_cats'] as $i => $cat_info)
@@ -253,7 +270,7 @@ function template_mainview()
 			echo '<div class="windowbg">';
 
 				if ($cat_info['image'] == '' && $cat_info['filename'] == '')
-					echo '<div class="board_icon"></div>
+					echo '<div class="board_icon"><a href="' . $cat_url . '"></a></div>
 							<div class="info">
 								<a class="subject" href="' . $cat_url . '">' . parse_bbc($cat_info['title']) . '</a>
 								<p class="board_description">' . parse_bbc($cat_info['description']) . '</p>
@@ -262,9 +279,9 @@ function template_mainview()
 				else
 				{
 					if ($cat_info['filename'] == '')
-						echo '<div class="board_icon"><a href="' . $cat_url . '"><img src="' . $cat_info['image'] . '" /></a></div>';
+						echo '<div class="iconla"><a href="' . $cat_url . '"><img src="' . $cat_info['image'] . '" /></a></div>';
 					else
-						echo '<div class="board_icon"><a href="' . $cat_url . '"><img src="' . $modSettings['tema_url'] . 'catimgs/' . $cat_info['filename'] . '" /></a></div>';
+						echo '<div class="iconla"><a href="' . $cat_url . '"><img src="' . $modSettings['tema_url'] . 'catimgs/' . $cat_info['filename'] . '" /></a></div>';
 					echo '
 						<div class="info">
 							<a class="subject" href="' . $cat_url . '">' . parse_bbc($cat_info['title']) . '</a>

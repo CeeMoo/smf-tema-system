@@ -498,36 +498,36 @@ $txt['permissionname_themes_view'] = 'View Themes';
 $txt['permissionname_themes_viewdownload'] = 'View Link Themes';
 $txt['permissionhelp_themes_viewdownload'] = 'Allows the user to view Link Themes';
 $txt['permissionhelp_themes_view'] = 'Allows the user to view the Themes';
-$txt['cannot_downloads_view'] = 'You are not allowed to view the Themes';
-$txt['cannot_downloads_viewdownload'] = 'You are not allowed to link the Themes';
+$txt['cannot_themes_view'] = 'You are not allowed to view the Themes';
+$txt['cannot_themes_viewdownload'] = 'You are not allowed to link the Themes';
 
 $txt['permissionname_themes_add'] = 'Add Theme';
 $txt['permissionhelp_themes_add'] = 'Allows the user to add a Theme.';
-$txt['cannot_downloads_add'] = 'You are not allowed to add a Theme.';
+$txt['cannot_themes_add'] = 'You are not allowed to add a Theme.';
 
 $txt['permissionname_themes_edit'] = 'Edit own Theme';
 $txt['permissionhelp_themes_edit'] = 'Allows the user to edit their own Theme.';
-$txt['cannot_downloads_edit'] = 'You are not allowed to edit that Theme';
+$txt['cannot_themes_edit'] = 'You are not allowed to edit that Theme';
 
 $txt['permissionname_themes_delete'] = 'Delete own Theme';
 $txt['permissionhelp_themes_delete'] = 'Allows the user to delete their own Theme.';
-$txt['cannot_downloads_delete'] = 'You are not allowed to delete that Theme.';
+$txt['cannot_themes_delete'] = 'You are not allowed to delete that Theme.';
 
 $txt['permissionname_themes_ratefile'] = 'Rate Themes';
 $txt['permissionhelp_themes_ratefile'] = 'Allows the user to rate a file.';
-$txt['cannot_downloads_ratefile'] = 'You are not allowed to rate that file.';
+$txt['cannot_themes_ratefile'] = 'You are not allowed to rate that file.';
 
 $txt['permissionname_themes_editcomment'] = 'Edit own Comment';
 $txt['permissionhelp_themes_editcomment'] = 'Allows the user to edit their own comments.';
-$txt['cannot_downloads_editcomment'] = 'You are not allowed to edit that comment.';
+$txt['cannot_themes_editcomment'] = 'You are not allowed to edit that comment.';
 
 $txt['permissionname_themes_comment'] = 'Leave Comments';
 $txt['permissionhelp_themes_comment'] = 'Allows the user to leave comments on a Theme.';
-$txt['cannot_downloads_comment'] = 'You are not allowed to leave comments.';
+$txt['cannot_themes_comment'] = 'You are not allowed to leave comments.';
 
 $txt['permissionname_themes_report'] = 'Report Pictures/Comments';
 $txt['permissionhelp_themes_report'] = 'Allows the user to report Theme and comments.';
-$txt['cannot_downloads_report'] = 'You are not allowed to report content.';
+$txt['cannot_themes_report'] = 'You are not allowed to report content.';
 
 $txt['permissionname_themes_autocomment'] = 'Auto Approve Comments';
 $txt['permissionhelp_themes_autocomment'] = 'Comments do not need to wait for approval.';
@@ -538,7 +538,7 @@ $txt['permissionhelp_themes_autoapprove'] = 'Theme do not need to wait for appro
 
 $txt['permissionname_themes_manage'] = 'Admin Theme System';
 $txt['permissionhelp_themes_manage'] = 'Allows the user to add/delete/edit all catagories. Delete Comments, Delete Themes, Approve Themes';
-$txt['cannot_downloads_manage'] = 'You are not allowed to manage the Themes.';
+$txt['cannot_themes_manage'] = 'You are not allowed to manage the Themes.';
 
 // END Theme System Text Strings
 ?>

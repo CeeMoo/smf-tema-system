@@ -497,7 +497,7 @@ function AddDownload($cat)
 	$context['userspace'] = GetUserSpaceUsed($user_info['id']);
 }
 
-function AddDownload2($title,$description,$keywords,$cat,$fileurl,$demourl,$pictureurl,$filesize,$approved )
+function AddDownload2($title,$description,$keywords,$cat,$fileurl,$demourl,$pictureurl,$filesize,$approved)
 {
 	global $txt, $scripturl, $modSettings, $sourcedir, $gd2, $user_info, $smcFunc;
 	GetCatPermission($cat,'addfile');
@@ -556,8 +556,8 @@ function AddDownload2($title,$description,$keywords,$cat,$fileurl,$demourl,$pict
 		$t = time();
 		$file_id = 0;
 		$smcFunc['db_query']('', "INSERT INTO {db_prefix}tema_file
-							(ID_CAT, filesize,filename, orginalfilename, keywords, title, description,id_member,date,approved,pictureurl,demourl)
-						VALUES ($cat, $filesize, '" . $extrafolder . $filename . "', '$orginalfilename',   '$keywords','$title', '$description'," . $user_info['id']  . ",$t,$approved,'$pictureurl','$demourl')");
+							(ID_CAT, filesize,filename, orginalfilename, keywords, title, description,id_member,date,approved,pictureurl,demourl,fileurl,picture)
+						VALUES ($cat, $filesize, '" . $extrafolder . $filename . "', '$orginalfilename',   '$keywords','$title', '$description'," . $user_info['id']  . ",$t,$approved,'$pictureurl','$demourl','$fileurl','$picture')");
 
 		$file_id = $smcFunc['db_insert_id']('{db_prefix}tema_file', 'id_file');
 		if (!empty($modSettings['tema_set_enable_multifolder']))
