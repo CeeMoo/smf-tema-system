@@ -500,7 +500,7 @@ function Downloads_AddCategory2()
 		}
 
 	require_once($sourcedir . '/Subs-tema2.php');
-	AddCategory2($title,$description,$image,$boardselect,$parent,$locktopic,$disablerating,$sortby,$orderby);	
+	AddCategory2($title,$description,$image,$boardselect,$parent,$locktopic,$disablerating,$sortby,$orderby,$filename);	
 	redirectexit('action=tema;sa=admincat');
 }
 
