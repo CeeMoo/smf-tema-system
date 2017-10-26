@@ -425,7 +425,8 @@ function Downloads_AddCategory2()
 	isAllowedTo('themes_manage');
 	$title = $smcFunc['htmlspecialchars']($_REQUEST['title'],ENT_QUOTES);
 	$description = $smcFunc['htmlspecialchars']($_REQUEST['description'],ENT_QUOTES);
-	$image =  htmlspecialchars($_REQUEST['image'],ENT_QUOTES);
+	$image = $smcFunc['htmlspecialchars']($_REQUEST['image'],ENT_QUOTES);
+	$filename= $smcFunc['htmlspecialchars']($_REQUEST['picture'],ENT_QUOTES);
 	$boardselect = (int) $_REQUEST['boardselect'];
 	$parent = (int) $_REQUEST['parent'];
 	$locktopic = isset($_REQUEST['locktopic']) ? 1 : 0;
@@ -500,7 +501,7 @@ function Downloads_AddCategory2()
 		}
 
 	require_once($sourcedir . '/Subs-tema2.php');
-	AddCategory2($title,$description,$image,$boardselect,$parent,$locktopic,$disablerating,$sortby,$orderby,$filename);	
+	AddCategory2($title,$description,$image,$boardselect,$parent,$locktopic,$disablerating,$sortby,$orderby,$filename);
 	redirectexit('action=tema;sa=admincat');
 }
 
@@ -518,7 +519,7 @@ function Downloads_EditCategory()
 	$context['show_spellchecking'] = !empty($modSettings['enableSpellChecking']) && function_exists('pspell_new');
 	require_once($sourcedir . '/Subs-Editor.php');
 	$editorOptions = array(
-		'id' => 'descript',
+		'id' => 'description',
 		'value' => $context['tema_catinfo']['description'],
 		'width' => '90%',
 		'form' => 'catform',
@@ -1480,9 +1481,6 @@ function Downloads_ShowSubCats($cat,$g_manage)
 		$groupid = -1;
 	else
 		$groupid =  $user_info['groups'][0];
-
-
-		// List all the catagories
 		$dbresult = $smcFunc['db_query']('', "
 		SELECT
 			c.ID_CAT, c.title, p.view, c.roworder, c.description, c.image, c.filename
@@ -1491,91 +1489,25 @@ function Downloads_ShowSubCats($cat,$g_manage)
 		WHERE c.ID_PARENT = $cat ORDER BY c.roworder ASC");
 		if ($smcFunc['db_affected_rows']() != 0)
 		{
-		  
-
-            			echo '<br /><table border="0" cellspacing="1" cellpadding="4" class="table_grid"  align="center" width="100%">
-            <thead>	
-            <tr class="catbg">
-            					<th scope="col" class="smalltext first_th" colspan="2">' . $txt['tema_text_categoryname'] . '</th>
-            					<th scope="col" class="smalltext" align="center">' . $txt['tema_text_totalfiles'] . '</th>
-            					';
-            			if ($g_manage)
-            			echo '
-            					<th scope="col" class="smalltext">' . $txt['tema_text_reorder'] . '</th>
-            					<th scope="col" class="smalltext last_th">' . $txt['tema_text_options'] . '</th>';
-            
-            			echo '</tr>
-            			</thead>';
-            
-         
-            
-
-
+		  $context['subthemecat']=array();
 			while($row = $smcFunc['db_fetch_assoc']($dbresult))
 			{
-				// Check permission to show the downloads category
 				if ($row['view'] == '0')
 					continue;
-
 				$totalfiles = Downloads_GetFileTotals($row['ID_CAT']);
-
-				echo '<tr>';
-
-					if ($row['image'] == '' && $row['filename'] == '')
-						echo '<td class="windowbg" width="10%"></td><td  class="windowbg2"><b><a href="' . $scripturl . '?action=tema;cat=' . $row['ID_CAT'] . '">' . parse_bbc($row['title']) . '</a></b><br />' . parse_bbc($row['description']) . '</td>';
-					else
-					{
-						if ($row['filename'] == '')
-							echo '<td class="windowbg" width="10%"><a href="' . $scripturl . '?action=tema;cat=' . $row['ID_CAT'] . '"><img src="' . $row['image'] . '" /></a></td>';
-						else
-							echo '<td class="windowbg" width="10%"><a href="' . $scripturl . '?action=tema;cat=' . $row['ID_CAT'] . '"><img src="' . $modSettings['tema_url'] . 'catimgs/' . $row['filename'] . '" /></a></td>';
-
-						echo '<td class="windowbg2"><b><a href="' . $scripturl . '?action=tema;cat=' . $row['ID_CAT'] . '">' . parse_bbc($row['title']) . '</a></b><br />' . parse_bbc($row['description']) . '</td>';
-					}
-
-
-
-				// Show total files in the category
-				echo '<td align="center" valign="middle" class="windowbg">' . $totalfiles . '</td>';
-
-				// Show Edit Delete and Order category
-				if ( $g_manage)
-				{
-					echo '
-					<td class="windowbg2"><a href="' . $scripturl . '?action=tema;sa=catup;cat=' . $row['ID_CAT'] . '">' . $txt['tema_text_up'] . '</a>&nbsp;<a href="' . $scripturl . '?action=tema;sa=catdown;cat=' . $row['ID_CAT'] . '">' . $txt['tema_text_down'] . '</a></td>
-					<td class="windowbg"><a href="' . $scripturl . '?action=tema;sa=editcat;cat=' . $row['ID_CAT'] . '">' . $txt['tema_text_edit'] . '</a>&nbsp;<a href="' . $scripturl . '?action=tema;sa=deletecat;cat=' . $row['ID_CAT'] . '">' . $txt['tema_text_delete'] . '</a>
-					<br /><br />
-					<a href="' . $scripturl . '?action=tema;sa=catperm;cat=' . $row['ID_CAT'] . '">[' . $txt['tema_text_permissions'] . ']</a>
-					</td>';
-
-				}
-
-
-				echo '</tr>';
-
-
-                  if ($context['downloads21beta'] == false)
-                  {
-        				if ($subcats_linktree != '')
-        					echo '
-        					<tr class="windowbg3">
-        						<td colspan="',($g_manage ? '6' : '4'), '">&nbsp;<span class="smalltext">',($subcats_linktree != '' ? '<b>' . $txt['tema_sub_cats'] . '</b>' . $subcats_linktree : ''),'</span></td>
-        					</tr>';
-                }
-                else
-                {
-                    		if ($subcats_linktree != '')
-        					echo '
-        					<tr class="windowbg2">
-        						<td colspan="',($g_manage ? '6' : '4'), '">&nbsp;<span class="smalltext">',($subcats_linktree != '' ? '<b>' . $txt['tema_sub_cats'] . '</b>' . $subcats_linktree : ''),'</span></td>
-        					</tr>';
-                    
-                }
-
+				$context['subthemecat'][]=array(
+				'image' => $row['image'],
+				'filename' => $row['filename'],
+				'ID_CAT' => $row['ID_CAT'],
+				'description' => $row['description'],
+				'title' => $row['title'],
+				'totalfiles' => $totalfiles,
+				'subcats_linktree' => $subcats_linktree,
+				 );
 			}
 			$smcFunc['db_free_result']($dbresult);
-			echo '</table><br /><br />';
 		}
+		return;
 }
 
 function MainPageBlock($title, $type = 'recent')

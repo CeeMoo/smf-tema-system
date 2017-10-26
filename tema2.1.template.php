@@ -19,6 +19,70 @@ function template_mainview()
 	if (!empty($cat))
 	{
 		Downloads_ShowSubCats($cat,allowedTo('themes_manage'));
+		if(!empty($context['subthemecat']))
+		{
+		
+			echo '
+			<div id="messageindex">';
+			echo '<div class="title_bar" id="topic_header">
+						<div class="board_icon">&nbsp;</div>
+						<div class="info">' . $txt['tema_text_categoryname'] . '</div>
+						<div class="board_stats centertext">' . $txt['tema_text_totalfiles'] . '</div>
+							';
+					if	(allowedTo('themes_manage'))
+						echo '
+						<div class="lastpost">' . $txt['tema_text_reorder'] . '/' . $txt['tema_text_options'] . '</div>';
+				echo '
+				</div>';
+			echo '
+				<div id="topic_container">';
+			foreach($context['subthemecat'] as $subcat)
+			{
+				echo '<div class="windowbg">';
+				if ($subcat['image'] == '' && $subcat['filename'] == '')
+						echo '<div class="board_icon">&nbsp;</div>
+						<div class="info">
+						<a class="subject" href="' . $scripturl . '?action=tema;cat=' . $subcat['ID_CAT'] . '">' . parse_bbc($subcat['title']) . '</a>
+						<p class="board_description">' . parse_bbc($subcat['description']) . '</p>
+						',($subcat['subcats_linktree'] != '' ? '<p><strong>' . $txt['tema_sub_cats'] . '</strong>: ' . $subcat['subcats_linktree'].'</p>' : ''),'
+						</div>';
+					else
+					{
+						if ($subcat['filename'] == '')
+							echo '<div class="board_icon">
+									<a href="' . $scripturl . '?action=tema;cat=' . $subcat['ID_CAT'] . '"><img src="' . $subcat['image'] . '" /></a>
+									</div>';
+						else
+							echo '<div class="board_icon">
+									<a href="' . $scripturl . '?action=tema;cat=' . $subcat['ID_CAT'] . '"><img src="' . $modSettings['tema_url'] . 'catimgs/' . $subcat['filename'] . '" /></a>
+									</div>';
+
+						echo '<div class="info">
+								<a class="subject" href="' . $scripturl . '?action=tema;cat=' . $subcat['ID_CAT'] . '">' . parse_bbc($subcat['title']) . '</a>
+								<p class="board_description">' . parse_bbc($subcat['description']) . '</p>
+								',($subcat['subcats_linktree'] != '' ? '<p><strong>' . $txt['tema_sub_cats'] . '</strong>: ' . $subcat['subcats_linktree'].'</p>' : ''),'
+							</div>';
+					}
+					echo '<div class="board_stats centertext">' . $subcat['totalfiles'] . '</div>';
+					if (allowedTo('themes_manage'))
+					{
+						echo '
+						<div class="lastpost">
+							<div class="buttonlist floatright">
+								<a class="button" href="' . $scripturl . '?action=tema;sa=catup;cat=' . $subcat['ID_CAT'] . '">' . $txt['tema_text_up'] . '</a>
+								<a class="button" href="' . $scripturl . '?action=tema;sa=catdown;cat=' . $subcat['ID_CAT'] . '">' . $txt['tema_text_down'] . '</a>
+								<a class="button" href="' . $scripturl . '?action=tema;sa=editcat;cat=' . $subcat['ID_CAT'] . '">' . $txt['tema_text_edit'] . '</a>
+								<a class="button" href="' . $scripturl . '?action=tema;sa=deletecat;cat=' . $subcat['ID_CAT'] . '">' . $txt['tema_text_delete'] . '</a>
+								<a class="button" href="' . $scripturl . '?action=tema;sa=catperm;cat=' . $subcat['ID_CAT'] . '">' . $txt['tema_text_permissions'] . '</a>
+							</div>
+						</div>';
+					}
+				echo '</div>';
+			}
+				echo '</div>
+				</div>';
+		}
+		
 		
 		if (!isset($context['downloads_cat_norate']))
 			$context['downloads_cat_norate'] = 0;
@@ -168,7 +232,7 @@ function template_mainview()
 		echo '
 		<div id="messageindex">';
 		echo '<div class="title_bar" id="topic_header">
-					<div style="width:10%;" class="board_icon">&nbsp;</div>
+					<div class="board_icon">&nbsp;</div>
 					<div class="info">', $txt['tema_text_categoryname'], '</div>
 					<div class="board_stats centertext">', $txt['tema_text_totalfiles'], '</div>
 						';
@@ -189,7 +253,7 @@ function template_mainview()
 			echo '<div class="windowbg">';
 
 				if ($cat_info['image'] == '' && $cat_info['filename'] == '')
-					echo '<div style="width:10%;" class="board_icon"></div>
+					echo '<div class="board_icon"></div>
 							<div class="info">
 								<a class="subject" href="' . $cat_url . '">' . parse_bbc($cat_info['title']) . '</a>
 								<p class="board_description">' . parse_bbc($cat_info['description']) . '</p>
@@ -198,9 +262,9 @@ function template_mainview()
 				else
 				{
 					if ($cat_info['filename'] == '')
-						echo '<div><a href="' . $cat_url . '"><img src="' . $cat_info['image'] . '" /></a></div>';
+						echo '<div class="board_icon"><a href="' . $cat_url . '"><img src="' . $cat_info['image'] . '" /></a></div>';
 					else
-						echo '<div><a href="' . $cat_url . '"><img src="' . $modSettings['tema_url'] . 'catimgs/' . $cat_info['filename'] . '" /></a></div>';
+						echo '<div class="board_icon"><a href="' . $cat_url . '"><img src="' . $modSettings['tema_url'] . 'catimgs/' . $cat_info['filename'] . '" /></a></div>';
 					echo '
 						<div class="info">
 							<a class="subject" href="' . $cat_url . '">' . parse_bbc($cat_info['title']) . '</a>
@@ -218,7 +282,7 @@ function template_mainview()
 						<a class="button" href="' . $scripturl . '?action=tema;sa=catdown;cat=' . $cat_info['ID_CAT'] . '">' . $txt['tema_text_down'] . '</a>
 						<a class="button" href="' . $scripturl . '?action=tema;sa=editcat;cat=' . $cat_info['ID_CAT'] . '">' . $txt['tema_text_edit'] . '</a>
 						<a class="button" href="' . $scripturl . '?action=tema;sa=deletecat;cat=' . $cat_info['ID_CAT'] . '">' . $txt['tema_text_delete'] . '</a>
-						<a class="button" href="' . $scripturl . '?action=tema;sa=catperm;cat=' . $cat_info['ID_CAT'] . '">[' . $txt['tema_text_permissions'] . ']</a>
+						<a class="button" href="' . $scripturl . '?action=tema;sa=catperm;cat=' . $cat_info['ID_CAT'] . '">' . $txt['tema_text_permissions'] . '</a>
 					</div>
 				</div>';
 			}
@@ -311,7 +375,7 @@ function template_add_category()
 				<span id="caption_subject">' . $txt['tema_form_icon'] . '</span>
 			</dt>
 			<dd class="pf_subject">	
-				<input type="text" name="image" size="64" maxlength="300" />
+				<input type="text" name="image" size="64" maxlength="100" />
 			</dd>
 			<dt class="clear pf_subject">
 				<span id="caption_subject">' . $txt['tema_form_uploadicon'] . '</span>';
