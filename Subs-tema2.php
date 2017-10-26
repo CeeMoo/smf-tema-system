@@ -46,7 +46,7 @@ function AddCategory()
 	$context['cat_parent'] = $parent;
 }
 
-function AddCategory2($title,$description,$image='',$boardselect,$parent,$locktopic,$disablerating,$sortby,$orderby,$filename='')
+function AddCategory2($title,$description,$image,$boardselect,$parent,$locktopic,$disablerating,$sortby,$orderby,$filename)
 {
 	global $txt, $sourcedir, $modSettings, $smcFunc;
 	
@@ -94,7 +94,7 @@ function AddCategory2($title,$description,$image='',$boardselect,$parent,$lockto
 			if ((!empty($modSettings['tema_set_cat_width']) && $sizes[0] > $modSettings['tema_set_cat_width']) || (!empty($modSettings['tema_set_cat_height']) && $sizes[1] > $modSettings['tema_set_cat_height']))
 			{
 
-					// Delete the temp file
+					// Delete the temp file4
 					@unlink($_FILES['picture']['tmp_name']);
 					fatal_error($txt['tema_error_img_size_height'] . $sizes[1] . $txt['tema_error_img_size_width'] . $sizes[0],false);
 

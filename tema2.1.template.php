@@ -168,7 +168,7 @@ function template_mainview()
 		echo '
 		<div id="messageindex">';
 		echo '<div class="title_bar" id="topic_header">
-					<div class="board_icon">&nbsp;</div>
+					<div style="width:10%;" class="board_icon">&nbsp;</div>
 					<div class="info">', $txt['tema_text_categoryname'], '</div>
 					<div class="board_stats centertext">', $txt['tema_text_totalfiles'], '</div>
 						';
@@ -189,7 +189,7 @@ function template_mainview()
 			echo '<div class="windowbg">';
 
 				if ($cat_info['image'] == '' && $cat_info['filename'] == '')
-					echo '<div class="board_icon"></div>
+					echo '<div style="width:10%;" class="board_icon"></div>
 							<div class="info">
 								<a class="subject" href="' . $cat_url . '">' . parse_bbc($cat_info['title']) . '</a>
 								<p class="board_description">' . parse_bbc($cat_info['description']) . '</p>
@@ -198,9 +198,9 @@ function template_mainview()
 				else
 				{
 					if ($cat_info['filename'] == '')
-						echo '<div class="board_icon"><a href="' . $cat_url . '"><img src="' . $cat_info['image'] . '" /></a></div>';
+						echo '<div><a href="' . $cat_url . '"><img src="' . $cat_info['image'] . '" /></a></div>';
 					else
-						echo '<div class="board_icon"><a href="' . $cat_url . '"><img src="' . $modSettings['tema_url'] . 'catimgs/' . $cat_info['filename'] . '" /></a></div>';
+						echo '<div><a href="' . $cat_url . '"><img src="' . $modSettings['tema_url'] . 'catimgs/' . $cat_info['filename'] . '" /></a></div>';
 					echo '
 						<div class="info">
 							<a class="subject" href="' . $cat_url . '">' . parse_bbc($cat_info['title']) . '</a>
@@ -311,7 +311,7 @@ function template_add_category()
 				<span id="caption_subject">' . $txt['tema_form_icon'] . '</span>
 			</dt>
 			<dd class="pf_subject">	
-				<input type="text" name="image" size="64" maxlength="100" />
+				<input type="text" name="image" size="64" maxlength="300" />
 			</dd>
 			<dt class="clear pf_subject">
 				<span id="caption_subject">' . $txt['tema_form_uploadicon'] . '</span>';
