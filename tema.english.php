@@ -34,10 +34,6 @@ $txt['themes_report'] = 'Report Pictures/Comments';
 $txt['themes_autoapprove'] = 'Auto Approve Themes';
 $txt['themes_manage'] = 'Admin Theme System';
 
-
-
-
-
 // Main Theme strings
 $txt['tema_text_categoryname'] = 'Category Name';
 $txt['tema_text_categorydescription'] = 'Category Description';

@@ -1674,7 +1674,7 @@ function DeleteRating($id)
 
 function Stats()
 {
-	global $context, $scripturl, $smcFunc;
+	global $context, $scripturl, $smcFunc, $user_info;
 	$result = $smcFunc['db_query']('', "
 	SELECT
 		SUM(views) AS views, SUM(filesize) AS filesize, SUM(totaldownloads) AS totaldownloads,

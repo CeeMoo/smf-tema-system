@@ -1220,7 +1220,7 @@ function Downloads_DeleteRating()
 
 function Downloads_Stats()
 {
-	global $context, $mbname,$txt,$scripturl, $sourcedir;
+	global $context, $mbname,$txt,$scripturl, $sourcedir, $user_info;
 	isAllowedTo('themes_view');
     $context['linktree'][] = array(
 		'url' => $scripturl . '?action=tema',

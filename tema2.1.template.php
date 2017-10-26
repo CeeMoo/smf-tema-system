@@ -1769,7 +1769,7 @@ function template_view_rating()
 
 function template_stats()
 {
-	global $settings, $context, $txt, $scripturl;
+	global $settings, $context, $txt, $scripturl, $user_info;
 
 echo '
 <div class="cat_bar">
