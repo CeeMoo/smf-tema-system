@@ -16,24 +16,6 @@ function template_mainview()
 
 	@$cat = (int) $_REQUEST['cat'];
 
-			echo '<style>
-			.iconla{
-				box-shadow: none;
-			    border-radius: 0;
-			    padding: 0;
-			    margin: 0;
-			    overflow: hidden;
-			    display:inline-block;
-			    vertical-align:middle;
-			    width:6%;
-			    text-align:center;
-			}
-
-			.iconla a img{
-				max-width:55px;
-			}
-			</style>';
-
 	if (!empty($cat))
 	{
 		Downloads_ShowSubCats($cat,allowedTo('themes_manage'));
@@ -1001,33 +983,6 @@ function template_view_download()
 
 	$keywords = explode(' ',$context['downloads_file']['keywords']);
  	$keywordscount = count($keywords);
-
- 	echo '<style>
-	.butoon{
-		padding:10px;
-		margin:0 5px;
-		line-height:45px;
-		border-radius:5px;
-	    font-weight: 700;
-	    box-shadow: 0 5px 5px rgba(255,255,255,.2) inset;
-	    text-shadow: 1px 1px 3px rgba(0,0,0,.6);
-	}
-	a:link.butoon, a:visited.butoon{
-		color:#fff;
-	}
-	.indirbutoon{
-		background: orange;
-	    color: #fff;
-	    border: 1px solid #f49a3a;
-    
-	}
-	.demobutoon{
-		background: #27AE60;
-	    color: #fff;
-	    border: 1px solid #2a9155;
-    
-	}
- 	</style>';
 
 	// Show the title of the download
         if ($modSettings['tema_set_file_title'])

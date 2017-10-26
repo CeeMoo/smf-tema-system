@@ -20,6 +20,7 @@ function DownloadsMain()
 		loadLanguage('tema','english');
    loadtemplate('tema2.1');
    $context['downloads21beta'] = true;
+   $context['html_headers'] ='<link rel="stylesheet" type="text/css" href="'. $modSettings['tema_url']. 'css/tema.css" />';
 	$subActions = array(
 		'view' => 'Downloads_ViewDownload',
 		'bulkactions' => 'Downloads_BulkActions',
