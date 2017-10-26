@@ -5,7 +5,6 @@ Version 1
 by:ceemoo
 http://www.smf.konusal.com
 */
-
 if (!defined('SMF'))
 	die('Hacking attempt...');
 
@@ -104,7 +103,7 @@ function Downloads_MainView()
 		$cat = 0;
 	if (!empty($cat))
 	{
-		require_once($sourcedir . '/Subs-Tema2.php');
+		require_once($sourcedir . '/Subs-tema2.php');
 		GetCatPermission($cat,'view');
 		$dbresult1 = $smcFunc['db_query']('', "
 		SELECT
@@ -400,12 +399,24 @@ function Downloads_AddCategory()
 {
 	global $context, $mbname, $txt, $modSettings, $sourcedir;
 	isAllowedTo('themes_manage');
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	AddCategory();
+
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_text_addcategory'];
 	$context['sub_template']  = 'add_category';
 	$context['show_spellchecking'] = !empty($modSettings['enableSpellChecking']) && function_exists('pspell_new');
-
+	require_once($sourcedir . '/Subs-Editor.php');
+	$editorOptions = array(
+		'id' => 'descript',
+		'value' => '',
+		'width' => '90%',
+		'form' => 'catform',
+		'labels' => array(
+			'post_button' => '',
+		),
+	);
+	create_control_richedit($editorOptions);
+	$context['post_box_name'] = $editorOptions['id'];
 }
 
 function Downloads_AddCategory2()
@@ -488,7 +499,7 @@ function Downloads_AddCategory2()
 			$orderby = 'DESC';
 		}
 
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	AddCategory2($title,$description,$image,$boardselect,$parent,$locktopic,$disablerating,$sortby,$orderby);	
 	redirectexit('action=tema;sa=admincat');
 }
@@ -500,12 +511,23 @@ function Downloads_EditCategory()
 	$cat = (int) $_REQUEST['cat'];
 	if (empty($cat))
 		fatal_error($txt['tema_error_no_cat']);
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	EditCategory($cat);
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_text_editcategory'];
 	$context['sub_template']  = 'edit_category';
 	$context['show_spellchecking'] = !empty($modSettings['enableSpellChecking']) && function_exists('pspell_new');
-
+	require_once($sourcedir . '/Subs-Editor.php');
+	$editorOptions = array(
+		'id' => 'descript',
+		'value' => $context['tema_catinfo']['description'],
+		'width' => '90%',
+		'form' => 'catform',
+		'labels' => array(
+			'post_button' => '',
+		),
+	);
+	create_control_richedit($editorOptions);
+	$context['post_box_name'] = $editorOptions['id'];
 }
 
 function Downloads_EditCategory2()
@@ -589,7 +611,7 @@ function Downloads_EditCategory2()
 		{
 			$orderby = 'DESC';
 		}
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	EditCategory2($title,$description,$catid,$image,$boardselect,$parent,$locktopic,$disablerating,$sortby,$orderby);		
 	redirectexit('action=tema;sa=admincat');
 
@@ -601,7 +623,7 @@ function Downloads_DeleteCategory()
 	$catid = (int) $_REQUEST['cat'];
 	if (empty($catid))
 		fatal_error($txt['tema_error_no_cat']);
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	DeleteCategory($catid);
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_text_delcategory'];
 	$context['sub_template']  = 'delete_category';
@@ -612,7 +634,7 @@ function Downloads_DeleteCategory2()
 	global $sourcedir;
 	isAllowedTo('themes_manage');
 	$catid = (int) $_REQUEST['catid'];
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	DeleteCategory2($catid);
 	Downloads_RecountFileQuotaTotals(false);
 	redirectexit('action=tema;sa=admincat');
@@ -632,7 +654,7 @@ function Downloads_ViewDownload()
 		$id = (int) $_REQUEST['id'];
 	if (empty($id))
 		fatal_error($txt['tema_error_no_file_selected'], false);
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	ViewDownload($id);
 	$context['show_spellchecking'] = !empty($modSettings['enableSpellChecking']) && function_exists('pspell_new');
 	$context['sub_template']  = 'view_download';
@@ -647,7 +669,7 @@ function Downloads_AddDownload()
 		$cat = (int) $_REQUEST['cat'];
 	else
 		$cat = 0;
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	AddDownload($cat);
 	$context['sub_template']  = 'add_download';
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_form_adddownload'];
@@ -691,7 +713,7 @@ function Downloads_AddDownload2()
 		fatal_error($txt['tema_error_no_title'],false);
 	if ($cat == '')
 		fatal_error($txt['tema_error_no_cat'],false);
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	AddDownload2($title,$description,$keywords,$cat,$fileurl,$demourl,$pictureurl,$filesize,$approved );
 		if ($user_info['id'] != 0)
 			redirectexit('action=tema;sa=myfiles;u=' . $user_info['id']);
@@ -710,7 +732,7 @@ function Downloads_EditDownload()
 			$groupid = -1;
 		else
 			$groupid =  $user_info['groups'][0];
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	EditDownload($id,$groupid);
 	require_once($sourcedir . '/Subs-Editor.php');
 	$editorOptions = array(
@@ -759,7 +781,7 @@ function Downloads_EditDownload2()
 			fatal_error($txt['tema_error_no_title'],false);
 		if ($cat == '')
 			fatal_error($txt['tema_error_no_cat'],false);
-		require_once($sourcedir . '/Subs-Tema2.php');
+		require_once($sourcedir . '/Subs-tema2.php');
 	EditDownload2($id,$title,$description,$keywords,$cat,$fileurl,$pictureurl,$demourl,$filesize,$approved);
 }
 
@@ -770,7 +792,7 @@ function Downloads_DeleteDownload()
 	$id = (int) $_REQUEST['id'];
 	if (empty($id))
 		fatal_error($txt['tema_error_no_file_selected']);
-		require_once($sourcedir . '/Subs-Tema2.php');
+		require_once($sourcedir . '/Subs-tema2.php');
 		DeleteDownload($id);
 	if (allowedTo('themes_manage') || (allowedTo('themes_delete') && $user_info['id'] == $context['downloads_file']['id_member']))
 	{
@@ -787,7 +809,7 @@ function Downloads_DeleteDownload2()
 	$id = (int) $_REQUEST['id'];
 	if (empty($id))
 		fatal_error($txt['tema_error_no_file_selected']);
-		require_once($sourcedir . '/Subs-Tema2.php');
+		require_once($sourcedir . '/Subs-tema2.php');
 		DeleteDownload2($id);
 
 }
@@ -820,7 +842,7 @@ function Downloads_ReportDownload2()
 		fatal_error($txt['tema_error_no_comment'],false);
 	$commentdate = time();
 	$memid = $user_info['id'];
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	ReportDownload2($comment,$id,$commentdate,$memid);
 	redirectexit('action=tema;sa=view;down=' . $id);
 }
@@ -830,7 +852,7 @@ function Downloads_CatUp()
 	global  $sourcedir;
 	isAllowedTo('themes_manage');
 	$cat = (int) $_REQUEST['cat'];
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	ReOrderCats($cat);
 	CatUp($cat);
 }
@@ -840,7 +862,7 @@ function Downloads_CatDown()
 	global  $sourcedir;
 	isAllowedTo('themes_manage');
 	$cat = (int) $_REQUEST['cat'];
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	ReOrderCats($cat);
 	CatDown($cat);
 }
@@ -856,7 +878,7 @@ function Downloads_MyFiles()
 	$u = (int) $_REQUEST['u'];
 	if (empty($u))
 		fatal_error($txt['tema_error_no_user_selected']);
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	MyFiles($u);
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $context['downloads_userdownloads_name'];
 	$context['sub_template']  = 'myfiles';
@@ -870,7 +892,7 @@ function Downloads_ApproveList()
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_form_approvedownloads'];
 	$context['sub_template']  = 'approvelist';
 	$al = (int) $_REQUEST['start'];
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	ApproveList($al);
 	$context['page_index'] = constructPageIndex($scripturl . '?action=admin;area=tema;sa=approvelist', $_REQUEST['start'], $context['downloads_total'], 10);
 }
@@ -882,7 +904,7 @@ function Downloads_ApproveDownload()
 	$id = (int) $_REQUEST['id'];
 	if (empty($id))
 		fatal_error($txt['tema_error_no_file_selected']);
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	ApproveFileByID($id);
 	redirectexit('action=admin;area=tema;sa=approvelist');
 }
@@ -894,7 +916,7 @@ function Downloads_UnApproveDownload()
 	$id = (int) $_REQUEST['id'];
 	if (empty($id))
 		fatal_error($txt['tema_error_no_file_selected']);
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	UnApproveFileByID($id);
 	redirectexit('action=admin;area=tema;sa=approvelist');
 }
@@ -905,7 +927,7 @@ function Downloads_ReportList()
 	isAllowedTo('themes_manage');
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_form_reportdownloads'];
 	$context['sub_template']  = 'reportlist';
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	ReportList();
 }
 
@@ -916,7 +938,7 @@ function Downloads_DeleteReport()
 	$id = (int) $_REQUEST['id'];
 	if (empty($id))
 		fatal_error($txt['tema_error_no_report_selected']);
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	DeleteReport($id);
 	redirectexit('action=admin;area=tema;sa=reportlist');
 }
@@ -933,7 +955,7 @@ function Downloads_Search()
 		$groupid = -1;
 	else
 		$groupid =  $user_info['groups'][0];
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	Search($groupid);
 	$context['sub_template']  = 'search';
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_search'];
@@ -1165,7 +1187,7 @@ function Downloads_RateDownload()
 	if (empty($rating))
 		fatal_error($txt['tema_error_no_rating_selected']);
 	$memid = $user_info['id'];
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	RateDownload($id,$rating,$memid);
 	redirectexit('action=tema;sa=view;down=' . $id);
 }
@@ -1178,7 +1200,7 @@ function Downloads_ViewRating()
 	if (empty($id))
 		fatal_error($txt['tema_error_no_file_selected']);
 	$context['downloads_id'] = $id;
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	ViewRating($id);
 	$context['sub_template']  = 'view_rating';
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_form_viewratings'];
@@ -1191,7 +1213,7 @@ function Downloads_DeleteRating()
 	$id = (int) $_REQUEST['id'];
 	if (empty($id))
 		fatal_error($txt['tema_error_no_rating_selected']);
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	DeleteRating($id);
 }
 
@@ -1205,7 +1227,7 @@ function Downloads_Stats()
 	);
 	$context['sub_template']  = 'stats';
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_text_stats'];
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	Stats();
 }
 
@@ -1218,7 +1240,7 @@ function Downloads_FileSpaceAdmin()
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_filespace'];
 	$context['sub_template']  = 'filespace';
 	$al = (int) $_REQUEST['start'];
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	FileSpaceAdmin($al);
 	$context['page_index'] = constructPageIndex($scripturl . '?action=admin;area=tema;sa=filespace', $_REQUEST['start'],$context['downloads_total'], 20);
 }
@@ -1231,7 +1253,7 @@ function Downloads_FileSpaceList()
 	if (empty($id))
 		fatal_error($txt['tema_error_no_user_selected']);
 	$al = (int) $_REQUEST['start'];
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	FileSpaceList($id,$al);
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_filespace'] . ' - ' . $context['downloads_filelist_real_name'];
 	$context['sub_template']  = 'filelist';
@@ -1243,7 +1265,7 @@ function Downloads_RecountFileQuotaTotals($redirect = true)
 	global $sourcedir;
 	if ($redirect == true)
 		isAllowedTo('themes_manage');
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	RecountFileQuotaTotals();
 	if ($redirect == true)
 		redirectexit('action=admin;area=tema;sa=filespace');
@@ -1258,7 +1280,7 @@ function Downloads_AddQuota()
 	{
 		fatal_error($txt['tema_error_noquota'],false);
 	}
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	AddQuota($groupid,$filelimit);
 	redirectexit('action=admin;area=tema;sa=filespace');
 }
@@ -1268,7 +1290,7 @@ function Downloads_DeleteQuota()
 	global $sourcedir;
 	isAllowedTo('themes_manage');
 	$id = (int) $_REQUEST['id'];
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	DeleteQuota($id);
 	redirectexit('action=admin;area=tema;sa=filespace');
 }
@@ -1281,7 +1303,7 @@ function Downloads_CatPerm()
 	if (empty($cat))
 		fatal_error($txt['tema_error_no_cat']);
 	loadLanguage('Admin');
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	CatPerm($cat);
 	$context['sub_template']  = 'catperm';
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_text_catperm'] . ' -' . $context['downloads_cat_name'];
@@ -1298,7 +1320,7 @@ function Downloads_CatPerm2()
 	$add = isset($_REQUEST['add']) ? 1 : 0;
 	$edit = isset($_REQUEST['edit']) ? 1 : 0;
 	$delete = isset($_REQUEST['delete']) ? 1 : 0;
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	CatPerm2($groupname,$cat,$view,$viewdownload,$add,$edit,$delete);
 	redirectexit('action=tema;sa=catperm;cat=' . $cat);
 }
@@ -1309,7 +1331,7 @@ function Downloads_CatPermList()
 	isAllowedTo('themes_manage');
 	$context['sub_template']  = 'catpermlist';
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_text_catpermlist'];
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	CatPermList();
 }
 
@@ -1318,7 +1340,7 @@ function Downloads_CatPermDelete()
 	global $sourcedir;
 	isAllowedTo('themes_manage');
 	$id = (int) $_REQUEST['id'];
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	CatPermDelete($id);
 	redirectexit('action=admin;area=tema;sa=catpermlist');
 }
@@ -1329,7 +1351,7 @@ function Downloads_PreviousDownload()
 	$id = (int) $_REQUEST['id'];
 	if (empty($id))
 		fatal_error($txt['tema_error_no_file_selected']);
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	PreviousDownload($id);
 }
 
@@ -1339,7 +1361,7 @@ function Downloads_NextDownload()
 	$id = (int) $_REQUEST['id'];
 	if (empty($id))
 		fatal_error($txt['tema_error_no_file_selected']);
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	NextDownload($id);
 }
 
@@ -1350,7 +1372,7 @@ function Downloads_CatImageDelete()
 	$id = (int) $_REQUEST['id'];
 	if (empty($id))
 		exit;
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	CatImageDelete($id);
 	redirectexit('action=tema;sa=editcat;cat=' . $id);
 }
@@ -1361,7 +1383,7 @@ function Downloads_FileImageDelete()
 	$id = (int) $_REQUEST['id'];
 	if (empty($id))
 		exit;
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	FileImageDelete($id);
 	redirectexit('action=tema;sa=edit&id=' . $id);
 }
@@ -1372,7 +1394,7 @@ function Downloads_BulkActions()
 	if (isset($_REQUEST['files']))
 	{
 		$baction = $_REQUEST['doaction'];
-		require_once($sourcedir . '/Subs-Tema2.php');
+		require_once($sourcedir . '/Subs-tema2.php');
 		foreach ($_REQUEST['files'] as $value)
 		{
 
@@ -1391,7 +1413,7 @@ function Downloads_CustomUp()
 	global $txt, $sourcedir;
 	isAllowedTo('themes_manage');
 	$id = (int) $_REQUEST['id'];
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	CustomUp($id);
 }
 
@@ -1400,7 +1422,7 @@ function Downloads_CustomDown()
 	global $txt, $sourcedir;
 	isAllowedTo('themes_manage');
 	$id = (int) $_REQUEST['id'];
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	CustomDown($id);
 }
 
@@ -1414,7 +1436,7 @@ function Downloads_CustomAdd()
 	$required = isset($_REQUEST['required']) ? 1 : 0;
 	if ($title == '')
 		fatal_error($txt['tema_custom_err_title'], false);
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	CustomAdd($id,$title,$defaultvalue,$required);
 	redirectexit('action=tema;sa=editcat;cat=' . $id);
 
@@ -1425,7 +1447,7 @@ function Downloads_CustomDelete()
 	global $sourcedir;
 	isAllowedTo('themes_manage');
 	$id = (int) $_REQUEST['id'];
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	CustomDelete($id);
 }
 
@@ -1433,7 +1455,7 @@ function Downloads_CustomDelete()
 function Downloads_GetFileTotals($ID_CAT)
 {
 	global $sourcedir;
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	GetFileTotals($ID_CAT);
 	return GetFileTotals($ID_CAT);
 }
@@ -1447,7 +1469,7 @@ function Downloads_DownloadFile()
 		$id = (int) $_REQUEST['down'];
 	else
 		$id = (int) $_REQUEST['id'];
-	require_once($sourcedir . '/Subs-Tema2.php');
+	require_once($sourcedir . '/Subs-tema2.php');
 	DownloadFile($id);
 }
 

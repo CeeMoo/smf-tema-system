@@ -203,8 +203,6 @@ function EditCategory($cat)
 			);
 	}
 	$smcFunc['db_free_result']($dbresult);
-
-
 	$context['catid'] = $cat;
 
 }

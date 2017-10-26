@@ -34,6 +34,10 @@ $txt['themes_report'] = 'Report Pictures/Comments';
 $txt['themes_autoapprove'] = 'Auto Approve Themes';
 $txt['themes_manage'] = 'Admin Theme System';
 
+
+
+
+
 // Main Theme strings
 $txt['tema_text_categoryname'] = 'Category Name';
 $txt['tema_text_categorydescription'] = 'Category Description';
@@ -536,4 +540,5 @@ $txt['permissionname_themes_manage'] = 'Admin Theme System';
 $txt['permissionhelp_themes_manage'] = 'Allows the user to add/delete/edit all catagories. Delete Comments, Delete Themes, Approve Themes';
 $txt['cannot_downloads_manage'] = 'You are not allowed to manage the Themes.';
 
+// END Theme System Text Strings
 ?>

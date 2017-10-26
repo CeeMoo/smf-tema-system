@@ -15,24 +15,6 @@ $txt['mobileportrait'] = "Dikey Mobil Görünümünde Göster (320x480)";
 
 // Title string
 $txt['tema_text_title'] = 'Temalar';
-$txt['tema_max_filesize'] = 'Max Theme filesize: ';
-$txt['tema_path'] = 'Theme Path: ';
-$txt['tema_url'] = 'Theme Url: ';
-$txt['tema_who_viewing'] = 'Display who is viewing a Theme';
-$txt['tema_show_ratings'] = 'Show Theme ratings';
-$txt['tema_max_file'] = 'PHP Max Filesize ';
-$txt['tema_set_t_title'] = 'Show title';
-$txt['tema_set_file_views'] = 'Show views';
-$txt['themesizinlerbaslik'] = 'Theme System permission';
-$txt['themes_view'] = 'View Themes';
-$txt['themes_viewdownload'] = 'View Link Themes';
-$txt['themes_add'] = 'Add Theme';
-$txt['themes_edit'] = 'Edit own Theme';
-$txt['themes_delete'] = 'Delete own Theme';
-$txt['themes_ratefile'] = 'Rate Themes';
-$txt['themes_report'] = 'Report Pictures/Comments';
-$txt['themes_autoapprove'] = 'Auto Approve Themes';
-$txt['themes_manage'] = 'Admin Theme System';
 
 // Main Theme strings
 $txt['tema_text_categoryname'] = 'Category İsim';
@@ -452,18 +434,6 @@ $txt['tema_cat_options'] = 'Ayalar';
 
 $txt['tema_text_lastdownload'] = 'En son indirilme: ';
 $txt['tema_text_lastdownload2'] =	'Never';
-
-// TP Theme Convertor
-$txt['tema_txt_import_tiny_portal'] = 'Import Tiny Portal Themes';
-$txt['tema_txt_import'] = 'Import';
-$txt['tema_txt_importtp_results'] = 'Tiny Portal Theme Import Results';
-$txt['tema_txt_import_downloads'] = 'Import Themes';
-
-$txt['tema_txt_import_note'] = 'If you have installed another Theme system in the past you will be able to import those Theme into the Theme System';
-
-$txt['tema_txt_categories_imported'] = 'Categories Imported: ';
-$txt['tema_txt_files_imported'] = 'Files Imported: ';
-
 
 $txt['tema_upload_max_filesize'] = 'PHP: Upload Max Filesize ';
 $txt['tema_post_max_size'] = 'PHP: Post Max Filesize ';

@@ -300,8 +300,9 @@ function template_add_category()
 			<dt class="clear pf_subject">
 				<span id="caption_subject">' . $txt['tema_form_description'] . '&nbsp;</span><br />'. $txt['tema_text_bbcsupport'] .'
 			</dt>
-			<dd class="pf_subject">	
-			<textarea class="editor" rows="6" name="description" cols="54"></textarea></dd>';
+			<dd class="pf_subject">
+				', template_control_richedit($context['post_box_name'], 'smileyBox_message', 'bbcBox_message'),'
+			</dd>';
 		  
 		if ($context['show_spellchecking'])
 		echo '<br /><input type="button" value="', $txt['spell_check'], '" onclick="spellCheck(\'catform\', \'description\');" />';
@@ -388,78 +389,74 @@ function template_add_category()
 function template_edit_category()
 {
 	global $scripturl, $txt, $context, $settings, $context, $modSettings;
-
-
-	// Load the spell checker?
 	if ($context['show_spellchecking'])
+		echo '<script language="JavaScript" type="text/javascript" src="' . $settings['default_theme_url'] . '/scripts/spellcheck.js"></script>';
+
 		echo '
-									<script language="JavaScript" type="text/javascript" src="' . $settings['default_theme_url'] . '/scripts/spellcheck.js"></script>';
+			<div class="cat_bar">
+				<h3 class="catbg centertext">
+				', $txt['tema_text_editcategory'], '
+				</h3>
+			</div>
+			<form method="post" enctype="multipart/form-data" name="catform" id="catform" action="', $scripturl, '?action=tema;sa=editcat2" onsubmit="submitonce(this);">
+			<div id="post_area">
+				<div class="roundframe noup">
+			<dl id="post_header">
+			<dt class="clear pf_subject">
+				<span id="caption_subject">', $txt['tema_form_title'], '</span>
+			</dt>
+			<dd class="pf_subject">	
+					<input type="text" name="title" size="64" maxlength="100" value="', $context['tema_catinfo']['title'], '" />
+			</dd>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">', $txt['tema_text_parentcategory'], '</span>
+			</dt>
+			<dd class="pf_subject">
+				<select name="parent">
+				<option value="0">', $txt['tema_text_catnone'], '</option>
+				';
 
+					foreach ($context['downloads_cat'] as $i => $category)
+					{
+						echo '<option value="' . $category['ID_CAT']  . '" ' . (($context['tema_catinfo']['ID_PARENT'] == $category['ID_CAT']) ? ' selected="selected"' : '') .'>' . $category['title'] . '</option>';
+					}
 
-	echo '
-<form method="post" enctype="multipart/form-data" name="catform" id="catform" action="', $scripturl, '?action=tema;sa=editcat2" onsubmit="submitonce(this);">
-<div class="cat_bar">
-		<h3 class="catbg centertext">
-        ', $txt['tema_text_editcategory'], '
-        </h3>
-</div>
-<table border="0" cellpadding="0" cellspacing="0" width="100%">
-  <tr class="windowbg2">
-    <td width="28%"  align="right"><span class="gen"><b>', $txt['tema_form_title'], '</b>&nbsp;</span></td>
-    <td width="72%"><input type="text" name="title" size="64" maxlength="100" value="', $context['tema_catinfo']['title'], '" /></td>
-  </tr>
-    <tr class="windowbg2">
-    <td width="28%"  align="right"><span class="gen"><b>', $txt['tema_text_parentcategory'], '</b>&nbsp;</span></td>
-    <td width="72%"><select name="parent">
-    <option value="0">', $txt['tema_text_catnone'], '</option>
-    ';
+				echo '</select>
+			</dd>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">' . $txt['tema_form_description'] . '</span><br />' . $txt['tema_text_bbcsupport'] . '
+			</dt>
+			<dd class="pf_subject">	';
+				template_control_richedit($context['post_box_name'], 'smileyBox_message', 'bbcBox_message');
 
-		foreach ($context['downloads_cat'] as $i => $category)
-		{
-			echo '<option value="' . $category['ID_CAT']  . '" ' . (($context['tema_catinfo']['ID_PARENT'] == $category['ID_CAT']) ? ' selected="selected"' : '') .'>' . $category['title'] . '</option>';
-		}
+				if ($context['show_spellchecking'])
+					echo '<input type="button" value="', $txt['spell_check'], '" onclick="spellCheck(\'catform\', \'description\');" />';
+		echo'</dd>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">' . $txt['tema_form_icon'] . '</span>
+			</dt>
+			<dd class="pf_subject">
+				<input type="text" name="image" size="64" maxlength="100" value="' . $context['tema_catinfo']['image'] . '" /></td>
+			</dd>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">' . $txt['tema_form_uploadicon'] . '</span>
+			</dt>
+			<dd class="pf_subject">';
+			if (!is_writable($modSettings['tema_path'] . 'catimgs'))
+				echo '<div class="noticebox"><span class="alert">!</span> ' . $txt['tema_write_catpatherror']  . $modSettings['tema_path'] . 'catimgs' . '</div>';
+			echo '<input type="file" size="48" name="picture" />
+			</dd>';
 
-	echo '</select>
-	</td>
-  </tr>
-  <tr class="windowbg2">
-    <td width="28%"  valign="top" align="right"><span class="gen"><b>' . $txt['tema_form_description'] . '</b>&nbsp;</span><br />' . $txt['tema_text_bbcsupport'] . '</td>
-    <td width="72%"><textarea rows="6" name="description" cols="54">' . $context['tema_catinfo']['description'] . '</textarea>';
-
-   	if ($context['show_spellchecking'])
-   		echo '
-   									<br /><input type="button" value="', $txt['spell_check'], '" onclick="spellCheck(\'catform\', \'description\');" />';
-echo '</td>
-  </tr>
-  <tr class="windowbg2">
-    <td width="28%"  align="right"><span class="gen"><b>' . $txt['tema_form_icon'] . '</b>&nbsp;</span></td>
-    <td width="72%"><input type="text" name="image" size="64" maxlength="100" value="' . $context['tema_catinfo']['image'] . '" /></td>
-  </tr>
-   <tr class="windowbg2">
-    <td width="28%"  align="right"><span class="gen"><b>' . $txt['tema_form_uploadicon'] . '</b>&nbsp;</span></td>
-    <td width="72%">';
-
-
-		// Warn the user if the category image path is not writable
-		if (!is_writable($modSettings['tema_path'] . 'catimgs'))
-			echo '<font color="#FF0000"><b>' . $txt['tema_write_catpatherror']  . $modSettings['tema_path'] . 'catimgs' . '</b></font>';
-
-
-echo '
-    <input type="file" size="48" name="picture" /></td>
-  </tr>';
-
-if ($context['tema_catinfo']['filename'] != '')
-echo '
-  <tr class="windowbg2">
-    <td width="28%"  align="right"><span class="gen"><b>' .   $txt['tema_form_filenameicon'] . '</b>&nbsp;</span></td>
-    <td width="72%">' . $context['tema_catinfo']['filename'] .  '&nbsp;<a href="' . $scripturl . '?action=tema;sa=catimgdel&id=' . $context['tema_catinfo']['ID_CAT'] . '">' . $txt['tema_rep_deletefile'] . '</a></td>
-  </tr>';
-
-
+			if ($context['tema_catinfo']['filename'] != '')
+			echo '
+			 <dt class="clear pf_subject">
+				<span id="caption_subject">' .   $txt['tema_form_filenameicon'] . '</span>
+			</dt>
+			<dd class="pf_subject">
+				' . $context['tema_catinfo']['filename'] .  '&nbsp;<a href="' . $scripturl . '?action=tema;sa=catimgdel&id=' . $context['tema_catinfo']['ID_CAT'] . '">' . $txt['tema_rep_deletefile'] . '</a>
+			</dd>';
 		$sortselect = '';
 		$orderselect = '';
-
 			switch ($context['tema_catinfo']['sortby'])
 			{
 				case 'p.ID_FILE':
@@ -489,16 +486,10 @@ echo '
 				case 'm.real_name':
 					$sortselect = '<option value="membername">' . $txt['tema_txt_sort_membername'] . '</option>';
 				break;
-
-
-
 				default:
 					$sortselect = '<option value="date">' . $txt['tema_txt_sort_date'] . '</option>';
 				break;
 			}
-
-
-
 			switch ($context['tema_catinfo']['orderby'])
 			{
 				case 'ASC':
@@ -513,573 +504,410 @@ echo '
 					$orderselect = '<option value="DESC">' . $txt['tema_txt_sort_desc'] .' </option>';
 				break;
 			}
+	echo '  <dt class="clear pf_subject">
+				<span id="caption_subject">' .   $txt['tema_text_cat_disableratings'] . '</span>
+			</dt>
+			<dd class="pf_subject">
+				<input type="checkbox" name="disablerating" ' . ($context['tema_catinfo']['disablerating'] ? ' checked="checked"' : '') . ' />
+			</dd>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">' .   $txt['tema_txt_sortby']  . '</span>
+			</dt>
+			<dd class="pf_subject">
+				<select name="sortby">
+					',$sortselect,'
+					<option value="date">',$txt['tema_txt_sort_date'],'</option>
+					<option value="title">',$txt['tema_txt_sort_title'],'</option>
+					<option value="mostview">',$txt['tema_txt_sort_mostviewed'],'</option>
+					<option value="mostrated">',$txt['tema_txt_sort_mostrated'],'</option>
+					<option value="mostdowns">',$txt['tema_cat_downloads'],'</option>
+					<option value="filesize">',$txt['tema_cat_filesize'],'</option>
+					<option value="membername">',$txt['tema_cat_membername'],'</option>
+				</select>
+			</dd>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">' .   $txt['tema_txt_orderby'] . '</span>
+			</dt>
+			<dd class="pf_subject">
+				<select name="orderby">
+					',$orderselect,'
+					<option value="desc">',$txt['tema_txt_sort_desc'],'</option>
+					<option value="asc">',$txt['tema_txt_sort_asc'],'</option>
+				</select>
+			</dd>
+			<p class="centertext"><strong>' . $txt['tema_text_postingoptions'] . '</strong></p>
+			<hr />
+			<p class="centertext">' . $txt['tema_postingoptions_info'] . '</p>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">' . $txt['tema_text_boardname'] . '</span>
+			</dt>
+			<dd class="pf_subject">
+				<select name="boardselect" id="boardselect">';
+				foreach ($context['downloads_boards'] as $key => $option)
+				echo '<option value="' . $key . '"' . (($context['tema_catinfo']['ID_BOARD']==$key) ? ' selected="selected"' : '') . '>' . $option . '</option>';
 
+			echo '</select>
+			</dd>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">' . $txt['tema_posting_locktopic'] . '</span>
+			</dt>
+			<dd class="pf_subject">
+				 <input type="checkbox" name="locktopic" ' . ($context['tema_catinfo']['locktopic'] ? ' checked="checked"' : '') . ' />
+			</dd>
+		</dl>
+			<hr />
+			<div class="centertext">
+			<input type="hidden" value="' . $context['tema_catinfo']['ID_CAT'] . '" name="catid" />
+			<input type="submit" value="' . $txt['tema_text_editcategory'] . '" name="submit" />
+			</div>
+			</div>
+		</div>
+		</form>';
+		echo'
+		<hr />
+		<div class="centertext">
+			<p class="centertext"><strong>',  $txt['tema_custom_fields'],'</strong></p>
+			<form method="post" action="', $scripturl, '?action=tema;sa=cusadd">
+			', $txt['tema_custom_title'], '<input type="text" name="title" />
+			', $txt['tema_custom_default_value'], '<input type="text" name="defaultvalue" />
+			<input type="hidden" name="id" value="',$context['tema_catinfo']['ID_CAT'],'" />
+			<input type="checkbox" name="required" />', $txt['tema_custom_required'], '
+			<input type="submit" name="addfield" value="',$txt['tema_custom_addfield'],'" />
+			</form>
+		</div><br />
 
-
-	echo '
-	  <tr class="windowbg2">
-	    <td width="28%"  align="right"><span class="gen"><b>' .   $txt['tema_text_cat_disableratings'] . '</b>&nbsp;</span></td>
-	    <td width="72%"><input type="checkbox" name="disablerating" ' . ($context['tema_catinfo']['disablerating'] ? ' checked="checked"' : '') . ' /></td>
-	  </tr>
-  <tr class="windowbg2">
-    <td width="28%" align="right"><span class="gen"><b>' .   $txt['tema_txt_sortby']  . '</b>&nbsp;</span></td>
-    <td width="72%" ><select name="sortby">
-    	',$sortselect,'
-		<option value="date">',$txt['tema_txt_sort_date'],'</option>
-		<option value="title">',$txt['tema_txt_sort_title'],'</option>
-		<option value="mostview">',$txt['tema_txt_sort_mostviewed'],'</option>
-		<option value="mostrated">',$txt['tema_txt_sort_mostrated'],'</option>
-		<option value="mostdowns">',$txt['tema_cat_downloads'],'</option>
-		<option value="filesize">',$txt['tema_cat_filesize'],'</option>
-		<option value="membername">',$txt['tema_cat_membername'],'</option>
-		</select></td>
-  </tr>
-  <tr class="windowbg2">
-    <td width="28%"  align="right"><span class="gen"><b>' .   $txt['tema_txt_orderby'] . '</b>&nbsp;</span></td>
-    <td width="72%"><select name="orderby">
-    	',$orderselect,'
-		<option value="desc">',$txt['tema_txt_sort_desc'],'</option>
-		<option value="asc">',$txt['tema_txt_sort_asc'],'</option>
-		</select></td>
-  </tr>
-	  <tr class="windowbg2">
-	  	<td colspan="2" align="center">
-	  	<b>' . $txt['tema_text_postingoptions'] . '</b>
-	  	<hr />
-	  	' . $txt['tema_postingoptions_info'] . '
-	  	</td>
-	  </tr>
-	  <tr  class="windowbg2">
-	    <td width="28%" align="right"><span class="gen"><b>' . $txt['tema_text_boardname'] . '</b>&nbsp;</span></td>
-	    <td width="72%">
-	  	<select name="boardselect" id="boardselect">
-	  ';
-
-		foreach ($context['downloads_boards'] as $key => $option)
-			 echo '<option value="' . $key . '"' . (($context['tema_catinfo']['ID_BOARD']==$key) ? ' selected="selected"' : '') . '>' . $option . '</option>';
-
-	echo '</select>
-		</td>
-	  </tr>
-	   <tr  class="windowbg2">
-	    <td colspan="2"  align="center">
-    <input type="checkbox" name="locktopic" ' . ($context['tema_catinfo']['locktopic'] ? ' checked="checked"' : '') . ' /><span class="gen"><b>' . $txt['tema_posting_locktopic'] . '</b>&nbsp;</span>
-	    </td>
-	  </tr>
-   <tr  class="windowbg2">
-  	<td colspan="2"><hr /></td>
-  </tr>
-  <tr class="windowbg2">
-    <td width="28%" colspan="2"  align="center">
-    <input type="hidden" value="' . $context['tema_catinfo']['ID_CAT'] . '" name="catid" />
-    <input type="submit" value="' . $txt['tema_text_editcategory'] . '" name="submit" /></td>
-
-  </tr>
-</table>
-</form><br />';
-
-
-
-	echo'
-	<hr />
-  <div align="center">
-  <b>',  $txt['tema_custom_fields'],'</b><br />
-  	<form method="post" action="', $scripturl, '?action=tema;sa=cusadd">
-  	', $txt['tema_custom_title'], '<input type="text" name="title" />
-  	', $txt['tema_custom_default_value'], '<input type="text" name="defaultvalue" />
-  	<input type="hidden" name="id" value="',$context['tema_catinfo']['ID_CAT'],'" />
-  	<input type="checkbox" name="required" />', $txt['tema_custom_required'], '
-  	<input type="submit" name="addfield" value="',$txt['tema_custom_addfield'],'" />
-  	</form>
-  	</div><br />
-
- 	 <table cellspacing="0" cellpadding="4" border="0" align="center" class="tborder">
- 	 	<tr class="catbg">
- 	 		<td>', $txt['tema_custom_title'], '</td>
- 	 		<td>', $txt['tema_custom_default_value'], '</td>
-			<td>', $txt['tema_custom_required'], '</td>
-			<td>', $txt['tema_text_options'], '</td>
- 	 	</tr>
- 	 ';
-
-
-	// Get all the custom fields
-	foreach ($context['tema_custom'] as $i => $custom)
-	{
-		echo '<tr  class="windowbg2">
- 	 		<td>', $custom['title'], '</td>
- 	 		<td>', $custom['defaultvalue'], '</td>
-			<td>', ($custom['is_required'] ? 'TRUE' : 'FALSE'), '</td>
-			<td><a href="' . $scripturl . '?action=tema;sa=cusup&id=' . $custom['ID_CUSTOM'] . '">' . $txt['tema_text_up'] . '</a>&nbsp;<a href="' . $scripturl . '?action=tema;sa=cusdown&id=' . $custom['ID_CUSTOM'] . '">' . $txt['tema_text_down'] . '</a>
-			&nbsp;&nbsp;<a href="' . $scripturl . '?action=tema;sa=cusdelete&id=' . $custom['ID_CUSTOM'] . '">' . $txt['tema_text_delete'] . '</a>
-			</td>
- 	 	</tr>
- 	 ';
-	}
-
-
-
-echo '</table>
-    <br />
-    <br />
-	<div align="center">
-	<a href="', $scripturl, '?action=tema">', $txt['tema_text_returndownload'], '</a>
-	</div>
-';
-
-
+		<table class="table_grid">
+			<thead>
+				<tr class="title_bar">
+					<th>', $txt['tema_custom_title'], '</th>
+					<th>', $txt['tema_custom_default_value'], '</th>
+					<th>', $txt['tema_custom_required'], '</th>
+					<th>', $txt['tema_text_options'], '</th>
+				</tr>
+			</thead>	
+			<tbody>';
+				foreach ($context['tema_custom'] as $i => $custom)
+				{
+					echo '
+					<tr  class="windowbg">
+						<td>', $custom['title'], '</td>
+						<td>', $custom['defaultvalue'], '</td>
+						<td>', ($custom['is_required'] ? 'TRUE' : 'FALSE'), '</td>
+						<td><a href="' . $scripturl . '?action=tema;sa=cusup&id=' . $custom['ID_CUSTOM'] . '">' . $txt['tema_text_up'] . '</a>&nbsp;<a href="' . $scripturl . '?action=tema;sa=cusdown&id=' . $custom['ID_CUSTOM'] . '">' . $txt['tema_text_down'] . '</a>
+						&nbsp;&nbsp;<a href="' . $scripturl . '?action=tema;sa=cusdelete&id=' . $custom['ID_CUSTOM'] . '">' . $txt['tema_text_delete'] . '</a>
+						</td>
+					</tr>';
+				}
+		echo '</tbody>
+		</table>
+		<div align="center">
+		<a class="button" href="', $scripturl, '?action=tema">', $txt['tema_text_returndownload'], '</a>
+		</div>';
 	if ($context['show_spellchecking'])
 			echo '<form action="', $scripturl, '?action=spellcheck" method="post" accept-charset="', $context['character_set'], '" name="spell_form" id="spell_form" target="spellWindow"><input type="hidden" name="spellstring" value="" /></form>';
-
-
 }
 
 function template_delete_category()
 {
 	global $context, $scripturl, $txt;
-
 	echo '
-	<form method="post" action="' . $scripturl . '?action=tema&sa=deletecat2">
-<table border="0" cellpadding="0" cellspacing="0" width="100%">
-  <tr>
-    <td width="50%" colspan="2"  align="center" class="catbg">
-    <b>' . $txt['tema_text_delcategory'] . '</b></td>
-  </tr>
-  <tr>
-    <td width="28%" colspan="2"  align="center" class="windowbg2">
-    <b>' . $txt['tema_warn_category'] . '</b>
-    <br />
-    <i>' . $txt['tema_text_categoryname'] . '&nbsp;"' . $context['cat_title'] . '"&nbsp;' . $txt['tema_text_totalfiles'] . '&nbsp;' . $context['totalfiles'] . '</i>
-     <br />
-    <input type="hidden" value="' . $context['catid'] . '" name="catid" />
-    <input type="submit" value="' . $txt['tema_text_delcategory'] . '" name="submit" /></td>
-  </tr>
-</table>
-</form>';
-
+		<form method="post" action="' . $scripturl . '?action=tema&sa=deletecat2">
+			<div class="cat_bar">
+				<h3 class="catbg centertext">
+				' . $txt['tema_text_delcategory'] . '
+				</h3>
+			</div>
+			<div class="information centertext">
+			<div class="noticebox lefttext"><span class="alert">!</span> ' . $txt['tema_warn_category'] . ' </div>
+				<p>' . $txt['tema_text_categoryname'] . ' : ' . $context['cat_title'] . '</p>
+				<p>' . $txt['tema_text_totalfiles'] . ' : ' . $context['totalfiles'] . '</p>
+				 <br />
+				<input type="hidden" value="' . $context['catid'] . '" name="catid" />
+				<input type="submit" value="' . $txt['tema_text_delcategory'] . '" name="submit" />
+			</div>
+		</form>';
 }
 
 function template_add_download()
 {
 	global $scripturl, $modSettings, $txt, $context, $settings;
-
-	// Get the category
 	$cat = $context['tema_cat'];
-
-	// Load the spell checker?
 	if ($context['show_spellchecking'])
-		echo '
-									<script language="JavaScript" type="text/javascript" src="' . $settings['default_theme_url'] . '/scripts/spellcheck.js"></script>';
-	
-	   
-	echo '<form method="post" enctype="multipart/form-data" name="picform" id="picform" action="' . $scripturl . '?action=tema&sa=add2" onsubmit="submitonce(this);">
+		echo '<script language="JavaScript" type="text/javascript" src="' . $settings['default_theme_url'] . '/scripts/spellcheck.js"></script>';
+	echo '
     <div class="cat_bar">
 		<h3 class="catbg centertext">
         ', $txt['tema_form_adddownload'], '
         </h3>
-</div>
-<table border="0" cellpadding="0" cellspacing="0" width="100%">
-  <tr class="windowbg2">
-  	<td align="right"><b>' . $txt['tema_form_title'] . '</b>&nbsp;</td>
-  	<td><input type="text" name="title" size="50" /></td>
-  </tr>
-  <tr class="windowbg2">
-  	<td align="right"><b>' . $txt['tema_form_category'] . '</b>&nbsp;</td>
-  	<td><select name="cat">';
+	</div>
+	<form method="post" enctype="multipart/form-data" name="picform" id="picform" action="' . $scripturl . '?action=tema&sa=add2" onsubmit="submitonce(this);">
+			<div id="post_area">
+				<div class="roundframe noup">
+			<dl id="post_header">
+			<dt class="clear pf_subject">
+				<span id="caption_subject">' . $txt['tema_form_title'] . '</span>
+			</dt>
+			<dd class="pf_subject">	
+					<input type="text" name="title" size="50" />
+			</dd>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">' . $txt['tema_form_category'] . '</span>
+			</dt>
+			<dd class="pf_subject">
+				<select name="cat">';
 
- 	foreach ($context['downloads_cat'] as $i => $category)
-	{
-		echo '<option value="' . $category['ID_CAT']  . '" ' . (($cat == $category['ID_CAT']) ? ' selected="selected"' : '') .'>' . $category['title'] . '</option>';
-	}
+				foreach ($context['downloads_cat'] as $i => $category)
+				{
+					echo '<option value="' . $category['ID_CAT']  . '" ' . (($cat == $category['ID_CAT']) ? ' selected="selected"' : '') .'>' . $category['title'] . '</option>';
+				}
 
- echo '</select>
-  	</td>
-  </tr>
-  <tr class="windowbg2">
-  	<td align="right"><b>' . $txt['tema_form_description'] . '</b>&nbsp;</td>
-  	<td> <table>
-   ';
-
- 	if (!function_exists('getLanguages'))
-	{
-		// Showing BBC?
-		if ($context['show_bbc'])
-		{
+			 echo '</select>
+			</dd>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">' . $txt['tema_form_description'] . '</span>
+			</dt>
+			<dd class="pf_subject">';
+				template_control_richedit($context['post_box_name'], 'smileyBox_message', 'bbcBox_message');
+				if ($context['show_spellchecking'])
+					echo '<input type="button" value="', $txt['spell_check'], '" onclick="spellCheck(\'picform\', \'description\');" />';
 			echo '
-								<tr class="windowbg2">
-
-									<td colspan="2" align="center">
-										', template_control_richedit($context['post_box_name'], 'bbc'), '
-									</td>
-								</tr>';
-		}
-
-		// What about smileys?
-		if (!empty($context['smileys']['postform']))
+			</dd>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">', $txt['tema_form_keywords'], '</span>
+			</dt>
+			<dd class="pf_subject">
+				<input type="text" name="keywords" maxlength="100" size="50" />
+			</dd>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">', $txt['tema_form_demourl'], '</span>
+			</dt>
+			<dd class="pf_subject">
+				<input type="text" name="demourl" size="50" />
+			</dd>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">', $txt['tema_form_uploadfile'], '</span>
+			</dt>
+			<dd class="pf_subject">
+				<input type="file" size="48" name="download" />
+			</dd>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">', $txt['tema_form_uploadurl'], '</span>
+			</dt>
+			<dd class="pf_subject">
+				<input type="text" name="fileurl" size="50" />
+			</dd>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">', $txt['tema_form_uploadresimfile'], '</span>
+			</dt>
+			<dd class="pf_subject">
+				<input type="file" size="48" name="picture" />
+			</dd>
+			<dt class="clear pf_subject">
+				<span id="caption_subject">', $txt['tema_form_uploadresimurl'], '</span>
+			</dt>
+			<dd class="pf_subject">
+				<input type="text" name="pictureurl" size="50" />
+			</dd>';
+			foreach ($context['downloads_custom'] as $i => $custom)
+			{
+				echo '
+					<dt class="clear pf_subject">
+						<span id="caption_subject">', $custom['title'], ($custom['is_required'] ? '<font color="#FF0000">*</font>' : ''), '</span>
+					</dt>
+					<dd class="pf_subject">
+						<input type="text" name="cus_', $custom['ID_CUSTOM'],'" value="' , $custom['defaultvalue'], '" />
+					</dd>';
+			}
+		  if ($context['quotalimit'] != 0)
+		  {
 			echo '
-								<tr class="windowbg2">
+				<dt class="clear pf_subject">
+					<span id="caption_subject">',$txt['tema_quotagrouplimit'],'</span>
+				</dt>
+				<dd class="pf_subject">
+					',Downloads_format_size($context['quotalimit'], 2),'
+				</dd>
+				<dt class="clear pf_subject">
+					<span id="caption_subject">',$txt['tema_quotagspaceused'],'</span>
+				</dt>
+				<dd class="pf_subject">
+					',Downloads_format_size($context['userspace'], 2),'
+				</dd>
+				<dt class="clear pf_subject">
+					<span id="caption_subject">',$txt['tema_quotaspaceleft'],'</span>
+				</dt>
+				<dd class="pf_subject">
+					' . Downloads_format_size(($context['quotalimit']-$context['userspace']), 2) . '
+				</dd>';
+		  }
 
-									<td colspan="2" align="center">
-										', template_control_richedit($context['post_box_name'], 'smileys'), '
-									</td>
-								</tr>';
-
-		// Show BBC buttons, smileys and textbox.
+		echo '</dl>
+			<div class="centertext">
+				<input type="submit" value="', $txt['tema_form_adddownload'], '" name="submit" />';
+			if (!allowedTo('themes_autoapprove'))
+				echo '<br /><p>'.$txt['tema_form_notapproved'].'</p>';
 		echo '
-								<tr class="windowbg2">
-
-									<td colspan="2" align="center">
-										', template_control_richedit($context['post_box_name'], 'message'), '
-									</td>
-								</tr>';
-	}
-	else
-	{
-		echo '
-								<tr class="windowbg2">
-		<td>';
-			// Showing BBC?
-		if ($context['show_bbc'])
-		{
-			echo '
-					<div id="bbcBox_message"></div>';
-		}
-
-		// What about smileys?
-		if (!empty($context['smileys']['postform']) || !empty($context['smileys']['popup']))
-			echo '
-					<div id="smileyBox_message"></div>';
-
-		// Show BBC buttons, smileys and textbox.
-		echo '
-					', template_control_richedit($context['post_box_name'], 'smileyBox_message', 'bbcBox_message');
-
-
-		echo '</td></tr>';
-	}
-
-
-		echo '
-			</table>';
-
-     	if ($context['show_spellchecking'])
-     		echo '
-     									<br /><input type="button" value="', $txt['spell_check'], '" onclick="spellCheck(\'picform\', \'description\');" />';
-
-echo '
-  	</td>
-  </tr>
-  <tr class="windowbg2">
-  	<td align="right"><b>', $txt['tema_form_keywords'], '</b>&nbsp;</td>
-  	<td><input type="text" name="keywords" maxlength="100" size="50" />
-  </tr>
-  <tr class="windowbg2">
-  	<td align="right"><b>', $txt['tema_form_demourl'], '</b>&nbsp;</td>
-  	<td><input type="text" name="demourl" size="50" />
-  </tr>
-  <tr class="windowbg2">
-  	<td align="right"><b>', $txt['tema_form_uploadfile'], '</b>&nbsp;</td>
-
-    <td><input type="file" size="48" name="download" />
-    </td>
-  </tr>
-   <tr class="windowbg2">
-  	<td align="right"><b>', $txt['tema_form_uploadurl'], '</b>&nbsp;</td>
-  	<td><input type="text" name="fileurl" size="50" />
-  </tr>
-  <tr class="windowbg2">
-  	<td align="right"><b>', $txt['tema_form_uploadresimfile'], '</b>&nbsp;</td>
-
-    <td><input type="file" size="48" name="picture" />
-    </td>
-  </tr>
-   <tr class="windowbg2">
-  	<td align="right"><b>', $txt['tema_form_uploadresimurl'], '</b>&nbsp;</td>
-  	<td><input type="text" name="pictureurl" size="50" />
-  </tr>
-  <tr  class="windowbg2">
-  	<td colspan="2"></td>
-  </tr>';
-
-
-	foreach ($context['downloads_custom'] as $i => $custom)
-	{
-		echo '<tr class="windowbg2">
- 	 		<td align="right"><b>', $custom['title'], ($custom['is_required'] ? '<font color="#FF0000">*</font>' : ''), '</b></td>
- 	 		<td><input type="text" name="cus_', $custom['ID_CUSTOM'],'" value="' , $custom['defaultvalue'], '" /></td>
-
- 	 	</tr>
- 	 ';
-	}
-
-  // Display the file quota information
-  if ($context['quotalimit'] != 0)
-  {
-	echo '
-	   <tr class="windowbg2">
-		<td align="right">',$txt['tema_quotagrouplimit'],'&nbsp;</td>
-		<td>',Downloads_format_size($context['quotalimit'], 2),'</td>
-	  </tr>
-	   <tr class="windowbg2">
-		<td align="right">',$txt['tema_quotagspaceused'],'&nbsp;</td>
-		<td>',Downloads_format_size($context['userspace'], 2),'</td>
-	  </tr>
-	   <tr class="windowbg2">
-		<td align="right">',$txt['tema_quotaspaceleft'],'&nbsp;</td>
-		<td><b>' . Downloads_format_size(($context['quotalimit']-$context['userspace']), 2) . '</b></td>
-	  </tr>
-
-	  ';
-  }
-
-echo '
-  <tr class="windowbg2">
-    <td width="28%" colspan="2"  align="center">
-
-    <input type="submit" value="', $txt['tema_form_adddownload'], '" name="submit" /><br />';
-
-  	if (!allowedTo('themes_autoapprove'))
-  		echo $txt['tema_form_notapproved'];
-
-echo '
-    </td>
-  </tr>
-</table>
-
-		</form>
-';
-
+			</div>
+		  </div>
+		</div>
+	</form>';
 	if ($context['show_spellchecking'])
-			echo '<form action="', $scripturl, '?action=spellcheck" method="post" accept-charset="', $context['character_set'], '" name="spell_form" id="spell_form" target="spellWindow"><input type="hidden" name="spellstring" value="" /></form>';
-
-
-
+		echo '<form action="', $scripturl, '?action=spellcheck" method="post" accept-charset="', $context['character_set'], '" name="spell_form" id="spell_form" target="spellWindow"><input type="hidden" name="spellstring" value="" /></form>';
 }
 
 function template_edit_download()
 {
 	global $scripturl, $modSettings, $txt, $context, $settings;
-
-
-
-	// Load the spell checker?
 	if ($context['show_spellchecking'])
-		echo '
-									<script language="JavaScript" type="text/javascript" src="' . $settings['default_theme_url'] . '/scripts/spellcheck.js"></script>';
-
-
-	echo '<form method="post" enctype="multipart/form-data" name="picform" id="picform" action="' . $scripturl . '?action=tema&sa=edit2" onsubmit="submitonce(this);">
-<div class="cat_bar">
-		<h3 class="catbg centertext">
-        ', $txt['tema_form_editdownload'], '
-        </h3>
-</div>
-<table border="0" cellpadding="0" cellspacing="0" width="100%">
-  <tr class="windowbg2">
-  	<td align="right"><b>' . $txt['tema_form_title'] . '</b>&nbsp;</td>
-  	<td><input type="text" name="title" size="50" value="' . $context['downloads_file']['title'] . '" /></td>
-  </tr>
-  <tr class="windowbg2">
-  	<td align="right"><b>' . $txt['tema_form_category'] . '</b>&nbsp;</td>
-  	<td><select name="cat">';
-
- 	foreach ($context['downloads_cat'] as $i => $category)
-	{
-		echo '<option value="' . $category['ID_CAT']  . '" ' . (($context['downloads_file']['ID_CAT'] == $category['ID_CAT']) ? ' selected="selected"' : '') .'>' . $category['title'] . '</option>';
-	}
-
-
- echo '</select>
-  	</td>
-  </tr>
-  <tr class="windowbg2">
-  	<td align="right"><b>' . $txt['tema_form_description'] . '</b>&nbsp;</td>
-  	<td><table>
-   ';
-
- 	if (!function_exists('getLanguages'))
-	{
-		// Showing BBC?
-		if ($context['show_bbc'])
-		{
-			echo '
-								<tr class="windowbg2">
-
-									<td colspan="2" align="center">
-										', template_control_richedit($context['post_box_name'], 'bbc'), '
-									</td>
-								</tr>';
-		}
-
-		// What about smileys?
-		if (!empty($context['smileys']['postform']))
-			echo '
-								<tr class="windowbg2">
-
-									<td colspan="2" align="center">
-										', template_control_richedit($context['post_box_name'], 'smileys'), '
-									</td>
-								</tr>';
-
-		// Show BBC buttons, smileys and textbox.
-		echo '
-								<tr class="windowbg2">
-
-									<td colspan="2" align="center">
-										', template_control_richedit($context['post_box_name'], 'message'), '
-									</td>
-								</tr>';
-	}
-	else
-	{
-		echo '
-								<tr class="windowbg2">
-		<td>';
-			// Showing BBC?
-		if ($context['show_bbc'])
-		{
-			echo '
-					<div id="bbcBox_message"></div>';
-		}
-
-		// What about smileys?
-		if (!empty($context['smileys']['postform']) || !empty($context['smileys']['popup']))
-			echo '
-					<div id="smileyBox_message"></div>';
-
-		// Show BBC buttons, smileys and textbox.
-		echo '
-					', template_control_richedit($context['post_box_name'], 'smileyBox_message', 'bbcBox_message');
-
-
-		echo '</td></tr>';
-	}
-
-
-
-
-		echo '
-			</table>';
-
-     	if ($context['show_spellchecking'])
-     		echo '
-     									<br /><input type="button" value="', $txt['spell_check'], '" onclick="spellCheck(\'picform\', \'description\');" />';
-
-
-
-echo '
-  	</td>
-  </tr>
-  <tr class="windowbg2">
-  	<td align="right"><b>' . $txt['tema_form_keywords'] . '</b>&nbsp;</td>
-  	<td><input type="text" name="keywords" size="50" maxlength="100" value="' . $context['downloads_file']['keywords'] . '" />
-  </tr>
-  <tr class="windowbg2">
-  	<td align="right"><b>' . $txt['tema_form_demourl'] . '</b>&nbsp;</td>
-  	<td><input type="text" name="demourl" size="50" value="' . $context['downloads_file']['demourl'] . '" />
-  </tr>
-  <tr class="windowbg2">
-  	<td align="right"><b>', $txt['tema_form_uploadfile'], '</b>&nbsp;</td>
-
-    <td><input type="file" size="48" name="download" />
-    </td>
-  </tr>
-   <tr class="windowbg2">
-  	<td align="right"><b>', $txt['tema_form_uploadurl'], '</b>&nbsp;</td>
-  	<td><input type="text" name="fileurl" size="50" value="' . $context['downloads_file']['fileurl'] . '" />
-  </tr>';
-
-if ($context['downloads_file']['picture'] != ''){
-echo '
-    <td width="28%"  class="windowbg2" align="right"><span class="gen"><b>' .   $txt['tema_form_filenameicon'] . '</b>&nbsp;</span></td>
-    <td width="72%"  class="windowbg2">' . $context['downloads_file']['picture'] .  '&nbsp;<a href="' . $scripturl . '?action=tema;sa=fileimgdel&id=' . $context['downloads_file']['ID_FILE'] . '">' . $txt['tema_rep_deletefile'] . '</a></td>
-  </tr>';	
-}
-echo '
-  <tr class="windowbg2">
-  	<td align="right"><b>', $txt['tema_form_uploadresimfile'], '</b>&nbsp;</td>
-
-    <td><input type="file" size="48" name="picture" />
-    </td>
-  </tr>
-   <tr class="windowbg2">
-  	<td align="right"><b>', $txt['tema_form_uploadresimurl'], '</b>&nbsp;</td>
-  	<td><input type="text" name="pictureurl" size="50" value="' . $context['downloads_file']['pictureurl'] . '" />
-  </tr>
-
-
-   <tr class="windowbg2">
-  	<td colspan="2"><hr /></td>
-  </tr>';
-
-	foreach ($context['downloads_custom'] as $i => $custom)
-	{
-		echo '<tr class="windowbg2">
- 	 		<td align="right"><b>', $custom['title'], ($custom['is_required'] ? '<font color="#FF0000">*</font>' : ''), '</b></td>
- 	 		<td><input type="text" name="cus_', $custom['ID_CUSTOM'],'" value="' , $custom['value'], '" /></td>
-
- 	 	</tr>';
-	}
-
-
-  // If the user can manage the downloads give them the option to change the download owner.
-  if (allowedTo('themes_manage') == true)
-  {
-	  echo '<tr class="windowbg2">
-	  <td align="right">', $txt['tema_text_changeowner'], '</td>
-	  <td><input type="text" name="pic_postername" id="pic_postername" value="" />
-	  <a href="', $scripturl, '?action=findmember;input=pic_postername;quote=1;sesc=', $context['session_id'], '" onclick="return reqWin(this.href, 350, 400);"><img src="', $settings['images_url'], '/icons/members.png" alt="', $txt['find_members'], '" /></a>
-	  <a href="', $scripturl, '?action=findmember;input=pic_postername;quote=1;sesc=', $context['session_id'], '" onclick="return reqWin(this.href, 350, 400);">', $txt['find_members'], '</a>
-	  </td>
-	  </tr>
-	  ';
-  }
-
-
-  // Display the file quota information
-  if ($context['quotalimit'] != 0)
-  {
+		echo '<script language="JavaScript" type="text/javascript" src="' . $settings['default_theme_url'] . '/scripts/spellcheck.js"></script>';
 	echo '
-	   <tr class="windowbg2">
-		<td align="right">',$txt['tema_quotagrouplimit'],'&nbsp;</td>
-		<td>',Downloads_format_size($context['quotalimit'], 2),'</td>
-	  </tr>
-	   <tr class="windowbg2">
-		<td align="right">',$txt['tema_quotagspaceused'],'&nbsp;</td>
-		<td>',Downloads_format_size($context['userspace'], 2),'</td>
-	  </tr>
-	   <tr class="windowbg2">
-		<td align="right">',$txt['tema_quotaspaceleft'],'&nbsp;</td>
-		<td><b>', Downloads_format_size(($context['quotalimit']-$context['userspace']), 2), '</b></td>
-	  </tr>
+		<div class="cat_bar">
+			<h3 class="catbg centertext">
+			', $txt['tema_form_editdownload'], '
+			</h3>
+		</div>
+		<form method="post" enctype="multipart/form-data" name="picform" id="picform" action="' . $scripturl . '?action=tema&sa=edit2" onsubmit="submitonce(this);">
+			<div id="post_area">
+				<div class="roundframe noup">
+			<dl id="post_header">
+			<dt class="clear pf_subject">
+				<span id="caption_subject">' . $txt['tema_form_title'] . '</span>
+				</dt>
+				<dd class="pf_subject">
+					<input type="text" name="title" size="50" value="' . $context['downloads_file']['title'] . '" />
+				</dd>
+				<dt class="clear pf_subject">
+					<span id="caption_subject">' . $txt['tema_form_category'] . '</span>
+				</dt>
+				<dd class="pf_subject">
+					<select name="cat">';
+					foreach ($context['downloads_cat'] as $i => $category)
+					{
+						echo '<option value="' . $category['ID_CAT']  . '" ' . (($context['downloads_file']['ID_CAT'] == $category['ID_CAT']) ? ' selected="selected"' : '') .'>' . $category['title'] . '</option>';
+					}
+			 echo '</select>
+				</dd>
+				<dt class="clear pf_subject">
+					<span id="caption_subject">' . $txt['tema_form_description'] . '</span>
+				</dt>
+				<dd class="pf_subject">';
+					echo '', template_control_richedit($context['post_box_name'], 'smileyBox_message', 'bbcBox_message');
+					if ($context['show_spellchecking'])
+						echo '<br /><input type="button" value="', $txt['spell_check'], '" onclick="spellCheck(\'picform\', \'description\');" />';
+			echo '
+				</dd>
+				<dt class="clear pf_subject">
+					<span id="caption_subject">' . $txt['tema_form_keywords'] . '</span>
+				</dt>
+				<dd class="pf_subject">
+					<input type="text" name="keywords" size="50" maxlength="100" value="' . $context['downloads_file']['keywords'] . '" />
+				</dd>
+				<dt class="clear pf_subject">
+					<span id="caption_subject">' . $txt['tema_form_demourl'] . '</span>
+				</dt>
+				<dd class="pf_subject">
+					<input type="text" name="demourl" size="50" value="' . $context['downloads_file']['demourl'] . '" />
+				</dd>
+				<dt class="clear pf_subject">
+					<span id="caption_subject">', $txt['tema_form_uploadfile'], '</span>
+				</dt>
+				<dd class="pf_subject">
+					<input type="file" size="48" name="download" />
+				</dd>
+				<dt class="clear pf_subject">
+					<span id="caption_subject">', $txt['tema_form_uploadurl'], '</span>
+				</dt>
+				<dd class="pf_subject">
+					<input type="text" name="fileurl" size="50" value="' . $context['downloads_file']['fileurl'] . '" />
+				</dd>';
 
-	  ';
-  }
+				if ($context['downloads_file']['picture'] != ''){
+				echo '
+				<dt class="clear pf_subject">
+					<span id="caption_subject">' .   $txt['tema_form_filenameicon'] . '</span>
+				</dt>
+				<dd class="pf_subject">
+					' . $context['downloads_file']['picture'] .  '&nbsp;<a href="' . $scripturl . '?action=tema;sa=fileimgdel&id=' . $context['downloads_file']['ID_FILE'] . '">' . $txt['tema_rep_deletefile'] . '</a>
+				</dd>';	
+				}
+			echo '
+				<dt class="clear pf_subject">
+					<span id="caption_subject">', $txt['tema_form_uploadresimfile'], '</span>
+				</dt>
+				<dd class="pf_subject">
+					<input type="file" size="48" name="picture" />
+				</dd>
+				<dt class="clear pf_subject">
+					<span id="caption_subject">', $txt['tema_form_uploadresimurl'], '</span>
+				</dt>
+				<dd class="pf_subject">
+					<input type="text" name="pictureurl" size="50" value="' . $context['downloads_file']['pictureurl'] . '" />
+				</dd>';
 
-echo '
-  <tr class="windowbg2">
-    <td width="28%" colspan="2"  align="center">
-	<input type="hidden" name="id" value="' . $context['downloads_file']['ID_FILE'] . '" />
-    <input type="submit" value="' . $txt['tema_form_editdownload'] . '" name="submit" /><br />';
+				foreach ($context['downloads_custom'] as $i => $custom)
+				{
+				echo '
+				<dt class="clear pf_subject">
+					<span id="caption_subject">', $custom['title'], ($custom['is_required'] ? '<font color="#FF0000">*</font>' : ''), '</span>
+				</dt>
+				<dd class="pf_subject">
+					<input type="text" name="cus_', $custom['ID_CUSTOM'],'" value="' , $custom['value'], '" />
+				</dd>';
+				}
 
-  	if (!allowedTo('themes_autoapprove'))
-  		echo $txt['tema_form_notapproved'];
+			  if (allowedTo('themes_manage') == true)
+			  {
+				  echo '
+				<dt class="clear pf_subject">
+					<span id="caption_subject">', $txt['tema_text_changeowner'], '</span>
+				</dt>
+				<dd class="pf_subject">
+					<input type="text" name="pic_postername" id="pic_postername" value="" />
+				  <a href="', $scripturl, '?action=findmember;input=pic_postername;quote=1;sesc=', $context['session_id'], '" onclick="return reqWin(this.href, 350, 400);"><img src="', $settings['images_url'], '/icons/members.png" alt="', $txt['find_members'], '" /></a>
+				  <a href="', $scripturl, '?action=findmember;input=pic_postername;quote=1;sesc=', $context['session_id'], '" onclick="return reqWin(this.href, 350, 400);">', $txt['find_members'], '</a>
+				</dd>';
+			  }
 
-echo '<div align="center"><br /><b>' . $txt['tema_text_olddownload'] . '</b><br />
-' . $context['downloads_file']['orginalfilename'] . '<br />
-			<span class="smalltext">' . $txt['tema_text_views']  . $context['downloads_file']['views'] . '<br />
-			' . $txt['tema_text_filesize']  . Downloads_format_size($context['downloads_file']['filesize'],2) . '<br />
-			' . $txt['tema_text_date'] . $context['downloads_file']['date'] . '<br />
-	</div>
-    </td>
-  </tr>
-</table>
+			  if ($context['quotalimit'] != 0)
+			  {
+				echo '
+				<dt class="clear pf_subject">
+					<span id="caption_subject">',$txt['tema_quotagrouplimit'],'</span>
+				</dt>
+				<dd class="pf_subject">
+					',Downloads_format_size($context['quotalimit'], 2),'
+				</dd>
+				<dt class="clear pf_subject">
+					<span id="caption_subject">',$txt['tema_quotagspaceused'],'</span>
+				</dt>
+				<dd class="pf_subject">
+					',Downloads_format_size($context['userspace'], 2),'
+				</dd>
+				<dt class="clear pf_subject">
+					<span id="caption_subject">',$txt['tema_quotaspaceleft'],'</span>
+				</dt>
+				<dd class="pf_subject">
+					', Downloads_format_size(($context['quotalimit']-$context['userspace']), 2), '
+				</dd> ';
+			  }
 
-		</form>
-';
-
+			echo '</dl>
+			<div class="centertext">
+				<input type="hidden" name="id" value="' . $context['downloads_file']['ID_FILE'] . '" />
+				<input type="submit" value="' . $txt['tema_form_editdownload'] . '" name="submit" />';
+			if (!allowedTo('themes_autoapprove'))
+				echo '<br /><p>'.$txt['tema_form_notapproved'].'</p>';
+			echo'<br /><b>' . $txt['tema_text_olddownload'] . '</b><br />
+					' . $context['downloads_file']['orginalfilename'] . '<br />
+					<span class="smalltext">' . $txt['tema_text_views']  . $context['downloads_file']['views'] . '<br />
+					' . $txt['tema_text_filesize']  . Downloads_format_size($context['downloads_file']['filesize'],2) . '<br />
+					' . $txt['tema_text_date'] . $context['downloads_file']['date'] . '<br />	
+			</div>
+		  </div>
+		</div>
+		</form>';
 	if ($context['show_spellchecking'])
-			echo '<form action="', $scripturl, '?action=spellcheck" method="post" accept-charset="', $context['character_set'], '" name="spell_form" id="spell_form" target="spellWindow"><input type="hidden" name="spellstring" value="" /></form>';
+		echo '<form action="', $scripturl, '?action=spellcheck" method="post" accept-charset="', $context['character_set'], '" name="spell_form" id="spell_form" target="spellWindow"><input type="hidden" name="spellstring" value="" /></form>';
 
 }
 
@@ -1324,62 +1152,45 @@ echo '
 function template_delete_download()
 {
 	global $scripturl, $modSettings, $txt, $context, $settings;
-
-
-	echo '
-	<form method="post" action="', $scripturl, '?action=tema;sa=delete2">
-    <div class="cat_bar">
+	echo '    
+	<div class="cat_bar">
 		<h3 class="catbg centertext">
-        ', $txt['tema_form_deldownload'], '
+			', $txt['tema_form_deldownload'], '
         </h3>
-</div>
-<table border="0" cellpadding="0" cellspacing="0" width="100%">
-
-  <tr class="windowbg2">
-    <td width="28%" colspan="2"  align="center" class="windowbg2">
-	' . $txt['tema_warn_deletedownload'] . '
-	<br />
-<div align="center"><br /><b>' . $txt['tema_text_deldownload'] . '</b><br />
-<a href="' . $scripturl . '?action=tema;sa=view;down=' . $context['downloads_file']['ID_FILE'] . '" target="blank">',$context['downloads_file']['title'],'</a><br />
-			<span class="smalltext">Views: ' . $context['downloads_file']['views'] . '<br />
-			' . $txt['tema_text_filesize']  . Downloads_format_size($context['downloads_file']['filesize'],2) . '<br />
-			' . $txt['tema_text_date'] . $context['downloads_file']['date'] . '<br />
-	</div><br />
-	<input type="hidden" name="id" value="' . $context['downloads_file']['ID_FILE'] . '" />
-    <input type="submit" value="' . $txt['tema_form_deldownload'] . '" name="submit" /><br />
-    </td>
-  </tr>
-</table>
-
-		</form>
-';
-
+	</div>
+	<form method="post" action="', $scripturl, '?action=tema;sa=delete2">
+		<div class="information centertext">
+			<div class="noticebox lefttext"><span class="alert">!</span> ' . $txt['tema_warn_deletedownload'] . ' </div>
+			' . $txt['tema_text_deldownload'] . '<br />
+			<a href="' . $scripturl . '?action=tema;sa=view;down=' . $context['downloads_file']['ID_FILE'] . '" target="blank">',$context['downloads_file']['title'],'</a>
+				<p>Views: ' . $context['downloads_file']['views'] . '</p>
+				<p>' . $txt['tema_text_filesize']  . Downloads_format_size($context['downloads_file']['filesize'],2) . '</p>
+				<p>' . $txt['tema_text_date'] . $context['downloads_file']['date'] . '</p>
+				 <br />
+				<input type="hidden" name="id" value="' . $context['downloads_file']['ID_FILE'] . '" />
+				<input type="submit" value="' . $txt['tema_form_deldownload'] . '" name="submit" />
+		</div>
+	</form>';
 }
 
 function template_report_download()
 {
-	global $scripturl, $context, $txt;
+	global $scripturl, $context, $txt, $user_info;
 
 	echo '
-<form method="post" name="cprofile" id="cprofile" action="' . $scripturl . '?action=tema;sa=report2">
-<div class="cat_bar">
+	<div class="cat_bar">
 		<h3 class="catbg centertext">
-        ', $txt['tema_form_reportdownload'], '
-        </h3>
-</div>
-<table border="0" cellpadding="0" cellspacing="0" width="100%">
-  <tr class="windowbg2">
-    <td width="28%"  valign="top" align="right"><span class="gen"><b>' . $txt['tema_form_comment'] . '</b>&nbsp;</span></td>
-    <td width="72%" ><textarea rows="6" name="comment" cols="54"></textarea></td>
-  </tr>
-  <tr class="windowbg2">
-    <td width="28%" colspan="2" align="center">
-    <input type="hidden" name="id" value="' . $context['downloads_file_id'] . '" />
-    <input type="submit" value="' . $txt['tema_form_reportdownload'] . '" name="submit" /></td>
-
-  </tr>
-</table>
-</form>';
+			', $txt['tema_form_reportdownload'], '
+		</h3>
+	</div>	
+	<form method="post" name="cprofile" id="cprofile" action="' . $scripturl . '?action=tema;sa=report2">
+		<div class="information centertext">
+			<strong>' . $txt['tema_form_comment'] . '</strong><br />
+			<textarea rows="6" name="comment" cols="54"></textarea><br />
+			<input type="hidden" name="id" value="' . $context['downloads_file_id'] . '" />
+			<input type="submit" value="' . $txt['tema_form_reportdownload'] . '" name="submit" />
+		</div>	
+	</form>';
 	echo '
 		<div class="pagesection">
 			<div class="buttonlist floatright">
@@ -1395,35 +1206,30 @@ function template_report_download()
 function template_approvelist()
 {
 	global $scripturl, $context, $modSettings, $txt;
-
-
-echo '
-			<div class="cat_bar">
-								<h3 class="catbg">' . $txt['tema_form_approvedownloads']. '</h3>
-            </div>
-	<table border="0" width="100%" cellspacing="0" align="center" cellpadding="4" class="tborder">
-		<tr class="windowbg">
-			<td>
+	echo '
+		<div class="cat_bar">
+			<h3 class="catbg">
+				' . $txt['tema_form_approvedownloads']. '
+			</h3>
+        </div>
 			<form method="post" action="', $scripturl, '?action=tema;sa=bulkactions">
-			<table cellspacing="0" cellpadding="10" border="0" align="center" width="90%" class="tborder">
+			<table class="table_grid">
 				<thead>
-			<tr class="title_bar">
-				<td>&nbsp;</th>
-				<th  class="lefttext first_th">', $txt['tema_app_download'], '</th>
-				<th  class="lefttext">', $txt['tema_text_category'], '</th>
-				<th  class="lefttext">', $txt['tema_app_title'], '</th>
-				<th  class="lefttext">', $txt['tema_app_description'], '</th>
-				<th  class="lefttext">', $txt['tema_app_date'], '</th>
-				<th  class="lefttext">', $txt['tema_app_membername'], '</th>
-				<th  class="lefttext last_th">', $txt['tema_text_options'], '</th>
-				</tr>
+					<tr class="title_bar">
+						<th>&nbsp;</th>
+						<th  class="lefttext first_th">', $txt['tema_app_download'], '</th>
+						<th  class="lefttext">', $txt['tema_text_category'], '</th>
+						<th  class="lefttext">', $txt['tema_app_title'], '</th>
+						<th  class="lefttext">', $txt['tema_app_description'], '</th>
+						<th  class="lefttext">', $txt['tema_app_date'], '</th>
+						<th  class="lefttext">', $txt['tema_app_membername'], '</th>
+						<th  class="lefttext last_th">', $txt['tema_text_options'], '</th>
+					</tr>
 				</thead>
-				';
-
-            $styleclass = 'windowbg';
+				<tbody>';
 			foreach ($context['downloads_file'] as $i => $file)
 			{
-				echo '<tr class="' . $styleclass . '">';
+				echo '<tr class="windowbg">';
 				echo '<td><input type="checkbox" name="files[]" value="',$file['ID_FILE'],'" /></td>';
 
 				echo '<td><a href="' . $scripturl . '?action=tema;sa=view;down=' . $file['ID_FILE'] . '">',$txt['tema_rep_viewdownload'],'</a></td>';
@@ -1438,70 +1244,46 @@ echo '
 
 				echo '<td><a href="' . $scripturl . '?action=tema;sa=approve&id=' . $file['ID_FILE'] . '">' . $txt['tema_text_approve']  . '</a><br /><a href="' . $scripturl . '?action=tema;sa=edit&id=' . $file['ID_FILE'] . '">' . $txt['tema_text_edit'] . '</a><br /><a href="' . $scripturl . '?action=tema;sa=delete&id=' . $file['ID_FILE'] . '">' . $txt['tema_text_delete'] . '</a></td>';
 				echo '</tr>';
-
-                if ($styleclass == 'windowbg')
-    				$styleclass = 'windowbg2';
-    			else
-    				$styleclass = 'windowbg';
-
 			}
-
-
-
-		echo '<tr class="titlebg">
-				<td align="left" colspan="8">
-				';
-
-				echo $context['page_index'];
-
-			echo '<br /><br /><b>',$txt['tema_text_withselected'],'</b>
-
-			<select name="doaction">
-			<option value="approve">',$txt['tema_form_approvedownloads'],'</option>
-			<option value="delete">',$txt['tema_form_deldownload'],'</option>
-			</select>
-			<input type="submit" value="',$txt['tema_text_performaction'],'" />
-			</form>
-			';
 		echo '
-				</td>
-			</tr>
 			</table>
-			</td>
-		</tr>
-
-</table>';
-
+			<div class="pagesection">';
+				echo $context['page_index'];
+			echo '<div class="floatright">',$txt['tema_text_withselected'],'
+					<select name="doaction">
+					<option value="approve">',$txt['tema_form_approvedownloads'],'</option>
+					<option value="delete">',$txt['tema_form_deldownload'],'</option>
+					</select>			
+					<input type="submit" value="',$txt['tema_text_performaction'],'" />
+				</div>
+			</div>	
+			</form>';
 }
 
 function template_reportlist()
 {
 	global $scripturl, $txt, $context;
-echo '
-			<div class="cat_bar">
-								<h3 class="catbg">' . $txt['tema_form_reportdownloads'] . '</h3>
-            </div>
-	<table border="0" width="100%" cellspacing="0" align="center" cellpadding="4" class="tborder">
-		<tr class="windowbg">
-			<td>
-			<table cellspacing="0" cellpadding="10" border="0" align="center" width="90%" class="table_grid">
-				<thead>
-			<tr class="title_bar">
-				<th  class="lefttext first_th">', $txt['tema_rep_filelink'], '</th>
-				<th  class="lefttext">', $txt['tema_rep_comment'], '</th>
-				<th  class="lefttext">', $txt['tema_app_date'], '</th>
-				<th  class="lefttext">', $txt['tema_rep_reportby'], '</th>
-				<th  class="lefttext last_th">', $txt['tema_text_options'], '</th>
+	echo '
+		<div class="cat_bar">
+			<h3 class="catbg">
+				' . $txt['tema_form_reportdownloads'] . '
+			</h3>
+        </div>
+		<table class="table_grid">
+			<thead>
+				<tr class="title_bar">
+					<th  class="lefttext first_th">', $txt['tema_rep_filelink'], '</th>
+					<th  class="lefttext">', $txt['tema_rep_comment'], '</th>
+					<th  class="lefttext">', $txt['tema_app_date'], '</th>
+					<th  class="lefttext">', $txt['tema_rep_reportby'], '</th>
+					<th  class="lefttext last_th">', $txt['tema_text_options'], '</th>
 				</tr>
-				</thead>
-				';
-
-			// List all reported downloads
-            $styleclass = 'windowbg';
+			</thead>
+			<tbody>';
 			foreach ($context['downloads_reports'] as $i => $report)
 			{
 
-				echo '<tr class="' . $styleclass . '">';
+				echo '<tr class="windowbg">';
 				echo '<td><a href="' . $scripturl . '?action=tema;sa=view;down=' . $report['ID_FILE'] . '">' . $txt['tema_rep_viewdownload'] .'</a></td>';
 				echo '<td>', $report['comment'], '</td>';
 				echo '<td>', timeformat($report['date']), '</td>';
@@ -1512,104 +1294,97 @@ echo '
 					echo '<td>',$txt['tema_guest'],'</td>';
 
 				echo '<td><a href="' . $scripturl . '?action=tema;sa=delete&id=' . $report['ID_FILE'] . '">' . $txt['tema_form_deldownload2']  . '</a>';
-				echo '<br /><br /><a href="' . $scripturl . '?action=tema;sa=deletereport&id=' . $report['ID'] . '">' . $txt['tema_rep_delete'] . '</a></td>';
+				echo '<br /><a href="' . $scripturl . '?action=tema;sa=deletereport&id=' . $report['ID'] . '">' . $txt['tema_rep_delete'] . '</a></td>';
 				echo '</tr>';
-
-                if ($styleclass == 'windowbg')
-    				$styleclass = 'windowbg2';
-    			else
-    				$styleclass = 'windowbg';
-
 			}
-
-
-echo '
-			</table>
-			</td>
-		</tr>
-</table>';
+		echo '
+			</tbody>
+		</table>';
 
 }
 
 function template_search()
 {
-	global $scripturl, $txt, $context, $settings;
+	global $scripturl, $txt, $context, $settings,$user_info;
 
 	echo '
-<form method="post" action="', $scripturl, '?action=tema;sa=search2">
-<div class="cat_bar">
+	<div class="cat_bar">
 		<h3 class="catbg centertext">
-        ', $txt['tema_search_download'], '
+			', $txt['tema_search_download'], '
         </h3>
-</div>
-<table border="0" cellpadding="0" cellspacing="0" width="100%" class="tborder" align="center">
+	</div>
+		<form method="post" action="', $scripturl, '?action=tema;sa=search2">
+			<div id="post_area">
+				<div class="roundframe noup">
+			<dl id="post_header">
+				<dt class="clear pf_subject">
+					<span id="caption_subject">' . $txt['tema_search_for'] . '</span>
+				</dt>
+				<dd class="pf_subject">
+					<input type="text" name="searchfor" size= "50" />
+				</dd>
+				<dt class="clear pf_subject">
+					<span id="caption_subject">' . $txt['tema_search_title'] . '</span>
+				</dt>
+				<dd class="pf_subject">
+					<input type="checkbox" name="searchtitle" checked="checked" />
+				</dd>
+				<dt class="clear pf_subject">
+					<span id="caption_subject">' . $txt['tema_search_description'] . '</span>
+				</dt>
+				<dd class="pf_subject">
+					<input type="checkbox" name="searchdescription" checked="checked" />
+				</dd>
+				<dt class="clear pf_subject">
+					<span id="caption_subject">' . $txt['tema_search_keyword'] . '</span>
+				</dt>
+				<dd class="pf_subject">	
+					<input type="checkbox" name="searchkeywords" />
+				</dd>
+				<hr />
+				<p>',$txt['tema_search_advsearch'],'</p>
+				<dt class="clear pf_subject">
+					<span id="caption_subject">' . $txt['tema_text_category'] . '</span>
+				</dt>
+				<dd class="pf_subject">	
+					<select name="cat">
+						<option value="0">' . $txt['tema_text_catnone'] . '</option>';
+						foreach ($context['downloads_cat'] as $i => $category)
+						{
+							echo '<option value="' . $category['ID_CAT']  . '" >' . $category['title'] . '</option>';
+						}
+						echo '
+					</select>
+				</dd>
+				<dt class="clear pf_subject">
+					<span id="caption_subject">' . $txt['tema_search_daterange']. '</span>
+				</dt>
+				<dd class="pf_subject">	
+					<select name="daterange">
+					<option value="0">' . $txt['tema_search_alltime']  . '</option>
+					<option value="30">' . $txt['tema_search_days30']  . '</option>
+					<option value="60">' . $txt['tema_search_days60']  . '</option>
+					<option value="90">' . $txt['tema_search_days90']  . '</option>
+					<option value="180">' . $txt['tema_search_days180']  . '</option>
+					<option value="365">' . $txt['tema_search_days365']  . '</option>
+					</select>
+				</dd>
+				<dt class="clear pf_subject">
+					<span id="caption_subject">' . $txt['tema_search_membername']. '</span>
+				</dt>
+				<dd class="pf_subject">	
+					<input type="text" name="pic_postername" id="pic_postername" value="" />
+				  <a href="', $scripturl, '?action=findmember;input=pic_postername;quote=1;sesc=', $context['session_id'], '" onclick="return reqWin(this.href, 350, 400);"><img src="', $settings['images_url'], '/icons/members.png" alt="', $txt['find_members'], '" /></a>
+				  <a href="', $scripturl, '?action=findmember;input=pic_postername;quote=1;sesc=', $context['session_id'], '" onclick="return reqWin(this.href, 350, 400);">', $txt['find_members'], '</a>
+				</dd>
+			</dl>
+			<div class="centertext">
+				<input type="submit" value="' . $txt['tema_search'] . '" name="submit" />
+			</div>
 
-  <tr class="windowbg2">
-    <td width="50%"   align="right"><b>' . $txt['tema_search_for'] . '</b>&nbsp;</td>
-    <td width="50%" ><input type="text" name="searchfor" size= "50" />
-    </td>
-  </tr>
-  <tr class="windowbg2" align="center">
-  	<td colspan="2"><input type="checkbox" name="searchtitle" checked="checked" />' . $txt['tema_search_title'] . '&nbsp;<input type="checkbox" name="searchdescription" checked="checked" />' . $txt['tema_search_description'] . '&nbsp;
-  	<input type="checkbox" name="searchkeywords" />' . $txt['tema_search_keyword'] . '</td>
-  </tr>
-  <tr class="windowbg2">
-  	<td colspan="2" align="center">
-  	<hr />
-  	<b>',$txt['tema_search_advsearch'],'</b><br />
-  	<hr />
-
-  	</td>
-  </tr>
-    <tr class="windowbg2">
-    <td width="30%"  align="right">' . $txt['tema_text_category'] . '&nbsp;</td>
-  	<td width="70%">
-		<select name="cat">
-    	<option value="0">' . $txt['tema_text_catnone'] . '</option>
-    ';
-
-	foreach ($context['downloads_cat'] as $i => $category)
-	{
-		echo '<option value="' . $category['ID_CAT']  . '" >' . $category['title'] . '</option>';
-	}
-
-	echo '</select></td>
-    </tr>
-    <tr class="windowbg2">
-     <td width="30%"  align="right">' . $txt['tema_search_daterange']. '&nbsp;</td>
-  	<td width="70%">
-		<select name="daterange">
-    	<option value="0">' . $txt['tema_search_alltime']  . '</option>
-    	<option value="30">' . $txt['tema_search_days30']  . '</option>
-    	<option value="60">' . $txt['tema_search_days60']  . '</option>
-    	<option value="90">' . $txt['tema_search_days90']  . '</option>
-    	<option value="180">' . $txt['tema_search_days180']  . '</option>
-    	<option value="365">' . $txt['tema_search_days365']  . '</option>
-
-</select></td>
-    </tr>
-
-    <tr class="windowbg2">
-     <td width="30%"  align="right">' . $txt['tema_search_membername']. '&nbsp;</td>
-  	<td width="70%">
-		<input type="text" name="pic_postername" id="pic_postername" value="" />
-	  <a href="', $scripturl, '?action=findmember;input=pic_postername;quote=1;sesc=', $context['session_id'], '" onclick="return reqWin(this.href, 350, 400);"><img src="', $settings['images_url'], '/icons/members.png" alt="', $txt['find_members'], '" /></a>
-	  <a href="', $scripturl, '?action=findmember;input=pic_postername;quote=1;sesc=', $context['session_id'], '" onclick="return reqWin(this.href, 350, 400);">', $txt['find_members'], '</a>
-	  </td>
-    </tr>
-
-
-  <tr>
-    <td width="100%" colspan="2"  align="center" class="windowbg2"><br />
-    <input type="submit" value="' . $txt['tema_search'] . '" name="submit" />
-
-    <br /></td>
-
-  </tr>
-</table>
-</form>
-<p align="center"><a href="' . $scripturl . '?action=tema">' . $txt['tema_text_returndownload'] . '</a></p>
-<br />';
+				</div>
+			</div>
+		</form>';
 	echo '
 		<div class="pagesection">
 			<div class="buttonlist floatright">
@@ -1624,89 +1399,65 @@ function template_search()
 function template_search_results()
 {
 	global $context, $modSettings, $scripturl, $txt, $user_info;
-
-	// Get the permissions for the user
 		echo '
 			<div class="cat_bar">
 				<h3 class="catbg centertext">
 					', $txt['tema_searchresults'], '
 				</h3>
-			</div>';
-
-
-	// Show table header
-	$count = 0;
-
-		echo '<br /><table cellspacing="0" cellpadding="10" border="0" align="center" width="90%" class="table_grid">
-
-		<thead>
-		<tr class="title_bar">';
-
+			</div>
+		<table class="table_grid">
+			<thead>
+				<tr class="title_bar">';
 			if (!empty($modSettings['tema_set_t_title']))
 			{
 				echo  '<th  class="lefttext">', $txt['tema_cat_title'], '</th>';
-				$count++;
 			}
 
 			if (!empty($modSettings['tema_set_t_rating']))
 			{
 				echo '<th  class="lefttext">', $txt['tema_cat_rating'], '</th>';
-				$count++;
 			}
 
 			if (!empty($modSettings['tema_set_t_views']))
 			{
 				echo '<th  class="lefttext">', $txt['tema_cat_views'], '</th>';
-				$count++;
 			}
-
-
+			
 			if (!empty($modSettings['tema_set_t_downloads']))
 			{
 				echo '<th  class="lefttext">', $txt['tema_cat_downloads'] , '</th>';
-				$count++;
 			}
 
 			if (!empty($modSettings['tema_set_t_filesize']))
 			{
 				echo '<th  class="lefttext">',$txt['tema_cat_filesize'], '</th>';
-				$count++;
 			}
 
 			if (!empty($modSettings['tema_set_t_date']))
 			{
 				echo '<th  class="lefttext">',$txt['tema_cat_date'], '</th>';
-				$count++;
 			}
 
 			if (!empty($modSettings['tema_set_t_comment']))
 			{
 				echo '<th  class="lefttext">',$txt['tema_cat_comments'],'</th>';
-				$count++;
 			}
 
 			if (!empty($modSettings['tema_set_t_username']))
 			{
 				echo '<th  class="lefttext">',$txt['tema_cat_membername'],'</th>';
-				$count++;
 			}
-
-
-			// Options
 			if (allowedTo('themes_manage') ||  (allowedTo('themes_delete') ) || (allowedTo('themes_edit')) )
 			{
 				echo '<th>',$txt['tema_cat_options'],'</th>';
-				$count++;
 			}
 
 		echo '</tr>
-		</thead>';
-
-
-	foreach ($context['downloads_files'] as $i => $file)
-	{
-
-			echo '<tr class="windowbg2">';
+		</thead>
+		<tbody>';
+		foreach ($context['downloads_files'] as $i => $file)
+		{
+			echo '<tr class="windowbg">';
 
 			if (!empty($modSettings['tema_set_t_title']))
 				echo  '<td><a href="' . $scripturl . '?action=tema;sa=view;down=', $file['ID_FILE'], '">', $file['title'], '</a></td>';
@@ -1736,7 +1487,6 @@ function template_search_results()
 					echo '<td>', $txt['tema_guest'], '</td>';
 			}
 
-			// Options
 			if (allowedTo('themes_manage') ||  (allowedTo('themes_delete') && $file['id_member'] == $user_info['id']) || (allowedTo('themes_edit') && $file['id_member'] == $user_info['id']) )
 			{
 				echo '<td>';
@@ -1749,51 +1499,20 @@ function template_search_results()
 
 				echo '</td>';
 			}
-
-
-
 			echo '</tr>';
 
-	}
-
-
-
+		}
+	echo '</tbody>
+	</table>';
+	echo '
+		<div class="pagesection">';
 		if ($context['downloads_total'] > 0)
 		{
-
 			$q =  $context['downloads_search_query_encoded'];
-
-			echo '<tr class="titlebg">
-					<td align="left" colspan="' . $count . '">
-					';
-
-
-					$context['page_index'] = constructPageIndex($scripturl . '?action=tema;sa=search2;q=' .$q, $_REQUEST['start'], $context['downloads_total'], 10);
-
-					echo $context['page_index'];
-
-			echo '
-					</td>
-				</tr>';
+			$context['page_index'] = constructPageIndex($scripturl . '?action=tema;sa=search2;q=' .$q, $_REQUEST['start'], $context['downloads_total'], 10);
+			echo $context['page_index'];
 		}
-
-	echo '</table>';
-    
-    
-    		// Show return to downloads link and Show add download if they can
-
-    	echo '
-                    <div class="tborder">
-            <div class="roundframe centertext">';
-    			if (allowedTo('themes_add'))
-					echo '<a href="' . $scripturl . '?action=tema;sa=add">' . $txt['tema_text_adddownload'] . '</a><br />';
-
-				echo '
-				<a href="' . $scripturl . '?action=tema">' . $txt['tema_text_returndownload'] . '</a>
-            </div>
-        </div>';
-	echo '
-		<div class="pagesection">
+		echo '
 			<div class="buttonlist floatright">
 				<a class="button" href="', $scripturl, '?action=tema">', $txt['tema_text_returndownload'], '</a>
 				<a class="button" href="', $scripturl, '?action=tema;sa=search">', $txt['tema_text_search2'], '</a>';	
@@ -1801,108 +1520,67 @@ function template_search_results()
 				echo '<a class="button" href="', $scripturl , '?action=tema;sa=myfiles;u=' , $user_info['id'],'">', $txt['tema_text_myfiles2'], '</a>';
 			echo'</div>
 		</div>';
-
-
 }
 
 function template_myfiles()
 {
 	global $context, $modSettings, $scripturl, $txt, $user_info;
-
-	// Get the permissions for the user
-
 		echo '
-			<div class="cat_bar">
-				<h3 class="catbg centertext">
-					', $context['downloads_userdownloads_name'], '
-				</h3>
-			</div>';
-
-// Show table header
-		$count = 0;
-
-
-		echo '<br /><table cellspacing="0" cellpadding="10" border="0" align="center" width="90%" class="table_grid">
-
+		<div class="cat_bar">
+			<h3 class="catbg centertext">
+				', $context['downloads_userdownloads_name'], '
+			</h3>
+		</div>
+		<table class="table_grid">
 			<thead>
-		<tr class="title_bar">';
-
+				<tr class="title_bar">';
 			if (!empty($modSettings['tema_set_t_title']))
 			{
 				echo  '<th  class="lefttext">', $txt['tema_cat_title'], '</th>';
-				$count++;
 			}
 
 			if (!empty($modSettings['tema_set_t_rating']) )
 			{
 				echo '<th  class="lefttext">', $txt['tema_cat_rating'], '</th>';
-				$count++;
 			}
 
 			if (!empty($modSettings['tema_set_t_views']))
 			{
 				echo '<th  class="lefttext">', $txt['tema_cat_views'], '</th>';
-				$count++;
 			}
 
 			if (!empty($modSettings['tema_set_t_downloads']))
 			{
 				echo '<th  class="lefttext">', $txt['tema_cat_downloads'] , '</th>';
-				$count++;
 			}
 
 			if (!empty($modSettings['tema_set_t_filesize']))
 			{
 				echo '<th  class="lefttext">',$txt['tema_cat_filesize'], '</th>';
-				$count++;
 			}
 
 			if (!empty($modSettings['tema_set_t_date']))
 			{
 				echo '<th  class="lefttext">',$txt['tema_cat_date'], '</th>';
-				$count++;
 			}
 
 			if (!empty($modSettings['tema_set_t_username']))
 			{
 				echo '<th  class="lefttext">',$txt['tema_cat_membername'],'</th>';
-				$count++;
 			}
 
-
-			// Options
 			if (allowedTo('themes_manage') ||  (allowedTo('themes_delete') ) || (allowedTo('themes_edit')) )
 			{
 				echo '<th class="lefttext">',$txt['tema_cat_options'],'</th>';
-				$count++;
 			}
 
 		echo '</tr>
 		</thead>
-		';
-
-
-		// Show page listing
-		if ($context['downloads_total'] > 0)
+		<tbody>';
+		foreach ($context['downloads_files'] as $i => $file)
 		{
-			echo '<tr  class="windowbg2">
-					<td align="left" colspan="' . $count . '">
-					';
 
-
-
-					echo $context['page_index'];
-
-			echo '
-					</td>
-				</tr>';
-		}
-
-
-	foreach ($context['downloads_files'] as $i => $file)
-	{
-
-			echo '<tr class="windowbg2">';
+			echo '<tr class="windowbg">';
 
 			if (!empty($modSettings['tema_set_t_title']))
 			{
@@ -1939,8 +1617,6 @@ function template_myfiles()
 					echo '<td>', $txt['tema_guest'], '</td>';
 			}
 
-
-			// Options
 			if (allowedTo('themes_manage') ||  (allowedTo('themes_delete') && $file['id_member'] == $user_info['id']) || (allowedTo('themes_edit') && $file['id_member'] == $user_info['id']) )
 			{
 				echo '<td>';
@@ -1955,39 +1631,58 @@ function template_myfiles()
 			}
 
 			echo '</tr>';
-
-	}
-
-		// Show page listing
-		if ($context['downloads_total'] > 0)
-		{
-			echo '<tr class="titlebg">
-					<td align="left" colspan="' . $count . '">
-					';
-
-					echo $context['page_index'];
-
-			echo '
-					</td>
-				</tr>';
 		}
+		echo '
+			</tbody>
+		</table>';
+	echo '
+		<div class="pagesection">';
+			if ($context['downloads_total'] > 0)
+			{
+			echo $context['page_index'];
+			}
+		echo'
+			<div class="buttonlist floatright">
+				<a class="button" href="', $scripturl, '?action=tema">', $txt['tema_text_returndownload'], '</a>
+				<a class="button" href="', $scripturl, '?action=tema;sa=search">', $txt['tema_text_search2'], '</a>';	
+				if (allowedTo('themes_add') && !($user_info['is_guest']))
+				echo '<a class="button" href="', $scripturl , '?action=tema;sa=myfiles;u=' , $user_info['id'],'">', $txt['tema_text_myfiles2'], '</a>';
+			echo'</div>
+		</div>';
+}
 
-
-		echo '</table>';
-        
-        
-		// Show return to downloads link and Show add downloads if they can
-        	echo '
-                    <div class="tborder">
-            <div class="roundframe centertext">';
-    	
-				if (allowedTo('themes_add'))
-					echo '<a href="' . $scripturl . '?action=tema;sa=add">' . $txt['tema_text_adddownload'] . '</a> - ';
-
-				echo '
-				<a href="', $scripturl, '?action=tema">', $txt['tema_text_returndownload'], '</a>
-            </div>
-        </div>';
+function template_view_rating()
+{
+	global  $context, $settings, $scripturl, $txt,$user_info;
+	echo '
+		<div class="cat_bar">
+			<h3 class="catbg centertext">
+				' . $txt['tema_form_viewratings'] . '
+			</h3>
+		</div>
+		<table class="table_grid">
+			<thead>
+				<tr class="title_bar">
+					<th>' . $txt['tema_app_membername'] . '</th>
+					<th>' . $txt['tema_text_rating'] . '</th>
+					<th>' . $txt['tema_text_options'] . '</th>
+				</tr>
+			</thead>
+			<tbody>';
+				foreach ($context['downloads_rating'] as $i => $rating)
+				{
+					echo '<tr class="windowbg">
+							<td><a href="' . $scripturl . '?action=profile;u=' . $rating['id_member'] . '">'  . $rating['real_name'] . '</a></td>
+							<td>';
+							for($i=0; $i < $rating['value']; $i++)
+								echo '<img src="', $settings['images_url'], '/membericons/icon.png" alt="*" border="0" />';
+					echo '</td>
+						  <td><a href="' . $scripturl . '?action=tema;sa=delrating&id=' . $rating['ID'] . '">'  . $txt['tema_text_delete'] . '</a></td>
+						  </tr>';
+				}
+			echo '  
+			</tbody>
+		</table>';
 	echo '
 		<div class="pagesection">
 			<div class="buttonlist floatright">
@@ -1997,52 +1692,6 @@ function template_myfiles()
 				echo '<a class="button" href="', $scripturl , '?action=tema;sa=myfiles;u=' , $user_info['id'],'">', $txt['tema_text_myfiles2'], '</a>';
 			echo'</div>
 		</div>';
-        
-
-
-}
-
-function template_view_rating()
-{
-	global  $context, $settings, $scripturl, $txt;
-
-
-	echo '<table cellspacing="0" cellpadding="5" border="0" align="center" width="50%" class="tborder">
-				<tr class="titlebg">
-					<td align="center" colspan="3">' . $txt['tema_form_viewratings'] . '</td>
-				</tr>
-				<tr class="titlebg">
-					<td align="center">' . $txt['tema_app_membername'] . '</td>
-					<td align="center">' . $txt['tema_text_rating'] . '</td>
-					<td align="center">' . $txt['tema_text_options'] . '</td>
-				</tr>';
-
-	foreach ($context['downloads_rating'] as $i => $rating)
-	{
-		echo '<tr class="windowbg2">
-				<td align="center"><a href="' . $scripturl . '?action=profile;u=' . $rating['id_member'] . '">'  . $rating['real_name'] . '</a></td>
-				<td align="center">';
-		// Show the star images
-		for($i=0; $i < $rating['value']; $i++)
-			echo '<img src="', $settings['images_url'], '/membericons/icon.png" alt="*" border="0" />';
-
-		echo '</td>
-			  <td align="center"><a href="' . $scripturl . '?action=tema;sa=delrating&id=' . $rating['ID'] . '">'  . $txt['tema_text_delete'] . '</a></td>
-		      </tr>';
-	}
-	echo '
-	</table>';
-    
-        	echo '
-                    <div class="tborder">
-            <div class="roundframe centertext">';
-    	
-				echo '
-				<a href="' . $scripturl . '?action=tema;sa=view;down=' . $context['downloads_id'] . '">' . $txt['tema_text_returnfile'] . '</a>
-            </div>
-        </div>';
-
-
 }
 
 function template_stats()

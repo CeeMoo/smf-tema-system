@@ -1,5 +1,10 @@
 <?php
-
+/*
+Theme System
+Version 1
+by:ceemoo
+http://www.smf.konusal.com
+*/
 // If SSI.php is in the same place as this file, and SMF isn't defined, this is being run standalone.
 if (file_exists(dirname(__FILE__) . '/SSI.php') && !defined('SMF'))
   require_once(dirname(__FILE__) . '/SSI.php');

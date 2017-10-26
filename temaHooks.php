@@ -5,7 +5,6 @@ Version 1
 by:ceemoo
 http://www.smf.konusal.com
 */
-
 if (!defined('SMF'))
 	die('Hacking attempt...');
 
