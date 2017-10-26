@@ -36,7 +36,7 @@ function themes_admin_areas(&$admin_areas)
 								'tema' => array(
 									'label' =>'',
 									'file' => 'tema2.php',
-									'function' => 'Downloads_AdminSettings2',
+									'function' => 'DownloadsMain',
 								),
 								'adminset' => array(
 									'label' => $txt['tema_text_settings'],
