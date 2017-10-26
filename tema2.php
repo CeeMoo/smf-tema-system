@@ -407,7 +407,7 @@ function Downloads_AddCategory()
 	$context['show_spellchecking'] = !empty($modSettings['enableSpellChecking']) && function_exists('pspell_new');
 	require_once($sourcedir . '/Subs-Editor.php');
 	$editorOptions = array(
-		'id' => 'descript',
+		'id' => 'description',
 		'value' => '',
 		'width' => '90%',
 		'form' => 'catform',
