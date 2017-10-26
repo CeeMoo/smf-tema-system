@@ -25,13 +25,12 @@ function template_mainview()
 			    overflow: hidden;
 			    display:inline-block;
 			    vertical-align:middle;
+			    width:6%;
+			    text-align:center;
 			}
 
 			.iconla a img{
-				max-width:60px;
-			}
-			.board_icon{
-				width:0;
+				max-width:55px;
 			}
 			</style>';
 
@@ -1003,6 +1002,33 @@ function template_view_download()
 	$keywords = explode(' ',$context['downloads_file']['keywords']);
  	$keywordscount = count($keywords);
 
+ 	echo '<style>
+	.butoon{
+		padding:10px;
+		margin:0 5px;
+		line-height:45px;
+		border-radius:5px;
+	    font-weight: 700;
+	    box-shadow: 0 5px 5px rgba(255,255,255,.2) inset;
+	    text-shadow: 1px 1px 3px rgba(0,0,0,.6);
+	}
+	a:link.butoon, a:visited.butoon{
+		color:#fff;
+	}
+	.indirbutoon{
+		background: orange;
+	    color: #fff;
+	    border: 1px solid #f49a3a;
+    
+	}
+	.demobutoon{
+		background: #27AE60;
+	    color: #fff;
+	    border: 1px solid #2a9155;
+    
+	}
+ 	</style>';
+
 	// Show the title of the download
         if ($modSettings['tema_set_file_title'])
         echo '
@@ -1019,13 +1045,20 @@ function template_view_download()
 			<tr class="windowbg2">
 				<td align="center">';
 
-					echo '<a href="' . $scripturl . '?action=tema;sa=downfile&id=', $context['downloads_file']['ID_FILE'], '">', ($context['downloads_file']['fileurl'] == '' ? $context['downloads_file']['orginalfilename'] : $txt['tema_app_download']), '</a><br />';
+					echo '<a class="butoon indirbutoon" href="' . $scripturl . '?action=tema;sa=downfile&id=', $context['downloads_file']['ID_FILE'], '">', ($context['downloads_file']['fileurl'] == '' ? $context['downloads_file']['orginalfilename'] : $txt['tema_app_download']), '</a>';
 
 					if($context['downloads_file']['demourl'] != ''){
-						echo '<a href="'.$boardurl.'/demo/index.php?tema='.$context['downloads_file']['title'].'">Demo</a>';
-						echo '<br />';
+						echo '<a class="butoon demobutoon" href="'.$boardurl.'/demo/index.php?tema='.$context['downloads_file']['title'].'">Demo</a>';
 					}
 					
+			echo '
+				</td>
+			</tr>';
+
+		// Show the main download
+		echo '
+			<tr class="windowbg2">
+				<td align="center">';					
 
 				if($modSettings['tema_set_file_thumb'] != 0){
 					echo '<img src="',$context['downloads_file']['picture'] == '' ? $context['downloads_file']['pictureurl'] : $modSettings['tema_url'].'temaresim/'.$context['downloads_file']['picture'],'" alt="'.$context['downloads_file']['title'].'">';

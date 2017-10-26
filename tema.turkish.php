@@ -1,6 +1,6 @@
 <?php
 /*
-Theme System
+Tema System
 Version 1
 by:ceemoo
 http://www.smf.konusal.com
@@ -15,15 +15,15 @@ $txt['mobileportrait'] = "Dikey Mobil Görünümünde Göster (320x480)";
 
 // Title string
 $txt['tema_text_title'] = 'Temalar';
-$txt['tema_max_filesize'] = 'Max Theme filesize: ';
-$txt['tema_path'] = 'Theme Path: ';
-$txt['tema_url'] = 'Theme Url: ';
+$txt['tema_max_filesize'] = 'Max Tema filesize: ';
+$txt['tema_path'] = 'Tema Path: ';
+$txt['tema_url'] = 'Tema Url: ';
 $txt['tema_who_viewing'] = 'Display who is viewing a Theme';
-$txt['tema_show_ratings'] = 'Show Theme ratings';
+$txt['tema_show_ratings'] = 'Show Tema ratings';
 $txt['tema_max_file'] = 'PHP Max Filesize ';
 $txt['tema_set_t_title'] = 'Show title';
 $txt['tema_set_file_views'] = 'Show views';
-$txt['themesizinlerbaslik'] = 'Theme System permission';
+$txt['themesizinlerbaslik'] = 'Tema System permission';
 $txt['themes_view'] = 'View Themes';
 $txt['themes_viewdownload'] = 'View Link Themes';
 $txt['themes_add'] = 'Add Theme';
@@ -31,12 +31,12 @@ $txt['themes_edit'] = 'Edit own Theme';
 $txt['themes_delete'] = 'Delete own Theme';
 $txt['themes_ratefile'] = 'Rate Themes';
 $txt['themes_report'] = 'Report Pictures/Comments';
-$txt['themes_autoapprove'] = 'Auto Approve Themes';
-$txt['themes_manage'] = 'Admin Theme System';
+$txt['themes_autoapprove'] = 'Auto Onaylı Themes';
+$txt['themes_manage'] = 'Admin Tema System';
 
-// Main Theme strings
-$txt['tema_text_categoryname'] = 'Category İsim';
-$txt['tema_text_categorydescription'] = 'Category Description';
+// Main Tema strings
+$txt['tema_text_categoryname'] = 'Kategori İsim';
+$txt['tema_text_categorydescription'] = 'Kategori Description';
 $txt['tema_text_totalfiles'] = 'Toplam Tema sayısı';
 $txt['tema_text_reorder'] = 'Reorder';
 $txt['tema_text_options'] = 'Ayarlar';
@@ -65,9 +65,9 @@ $txt['tema_text_myfiles'] = 'Temalarım';
 $txt['tema_text_search'] = 'Arama';
 $txt['tema_text_myfiles2'] = 'Temalarım';
 $txt['tema_text_search2'] = 'Arama';
-$txt['tema_text_edit'] = 'Düzenle';
-$txt['tema_text_delete'] = 'Sil';
-$txt['tema_text_unapprove'] = 'Onay kaldır';
+$txt['tema_text_edit'] = '[Düzenle]';
+$txt['tema_text_delete'] = '[Sil]';
+$txt['tema_text_unapprove'] = '[Onay kaldır]';
 $txt['tema_text_approve'] = 'Onayla';
 $txt['tema_text_up'] = 'Yukarı';
 $txt['tema_text_down'] = 'Aşağıya';
@@ -88,7 +88,7 @@ $txt['tema_text_adddownload'] = 'Tema ekle';
 $txt['tema_text_returndownload'] = 'Tema system geri dön';
 $txt['tema_text_returnfile'] = 'Tema geri dön';
 //Online strings
-$txt['tema_who_viewdownload'] = ' are viewing this Theme category.';
+$txt['tema_who_viewdownload'] = ' are viewing this Tema category.';
 $txt['tema_who_viewfile'] = ' are viewing this files.';
 $txt['tema_who_members'] = 'Üyeler';
 $txt['tema_who_hidden'] = 'Gizle';
@@ -98,10 +98,10 @@ $txt['tema_form_title'] = 'Başlık:';
 $txt['tema_form_description'] = 'Açıklama:';
 $txt['tema_form_icon'] = 'Kategori icon url:';
 $txt['tema_form_uploadicon'] = 'Kategori icon yükle';
-$txt['tema_write_catpatherror'] = 'Warning Category Image Path is not writable! ';
-$txt['tema_form_filenameicon'] = 'Category Icon Filename:';
+$txt['tema_write_catpatherror'] = 'Warning Kategori Image Path is not writable! ';
+$txt['tema_form_filenameicon'] = 'Kategori Icon Filename:';
 
-$txt['tema_warn_category'] = 'Warning this WILL DELETE this category and Tüm Themes, comments, ratings that category contains...';
+$txt['tema_warn_category'] = 'Warning this WILL DELETE this Kategori and Tüm Themes, comments, ratings that Kategori contains...';
 
 $txt['tema_form_adddownload'] = 'Tema Ekle';
 $txt['tema_form_category'] =	'Kategori:';
@@ -114,7 +114,7 @@ $txt['tema_form_uploadresimurl'] = 'Tema önizlemesini url ile gönder:';
 
 $txt['tema_form_additionaloptions'] = 'Additional Options:';
 $txt['tema_form_allowcomments'] = 'Allow comments to be posted on this Theme.';
-$txt['tema_form_notapproved'] = 'Your file will not appear in the Theme to others until it is approved.';
+$txt['tema_form_notapproved'] = 'Your file will not appear in the Tema to others until it is approved.';
 $txt['tema_form_editdownload'] = 'Tema Düzenle';
 $txt['tema_form_viewratings'] = 'Oylamaları gör';
 $txt['tema_form_ratedownload'] = 'Tema\'yı oyla';
@@ -140,7 +140,7 @@ $txt['tema_text_commodifiedby'] = 'Son editleyen: ';
 $txt['tema_text_home'] = 'Tema Anasayfa';
 
 // Delete file
-$txt['tema_warn_deletedownload'] = 'Warning this will delete your Theme and you can not restore it.';
+$txt['tema_warn_deletedownload'] = 'Warning this will delete your Tema and you can not restore it.';
 $txt['tema_form_deldownload'] = 'Tema Sil';
 $txt['tema_form_deldownload2'] = '[Tema Sil]';
 
@@ -150,36 +150,36 @@ $txt['tema_form_reportdownload'] = 'Tema Şikayet';
 
 
 $txt['tema_form_managecats'] = 'Manage Categories';
-$txt['tema_form_approvedownloads'] = 'Approve Themes';
+$txt['tema_form_approvedownloads'] = 'Onaylı Themes';
 $txt['tema_form_reportdownloads'] = 'Reported Themes';
-$txt['tema_form_approvecomments'] = 'Approve Comments';
-$txt['tema_form_approveallcomments'] = 'Approve Tüm Comments';
+$txt['tema_form_approvecomments'] = 'Onaylı Comments';
+$txt['tema_form_approveallcomments'] = 'Onaylı Tüm Comments';
 $txt['tema_form_reportedcomments'] = 'Reported Comments';
 // Settings page
-$txt['tema_set_description'] = 'Allows you to edit the important settings for your Theme section.';
-$txt['tema_set_filesize'] = 'Max Theme filesize: ';
-$txt['tema_set_path'] = 'Theme Path: ';
-$txt['tema_set_url'] = 'Theme Url: ';
+$txt['tema_set_description'] = 'Allows you to edit the important settings for your Tema section.';
+$txt['tema_set_filesize'] = 'Max Tema filesize: ';
+$txt['tema_set_path'] = 'Tema Path: ';
+$txt['tema_set_url'] = 'Tema Url: ';
 $txt['tema_set_whoonline'] = 'Display who is viewing a Theme';
-$txt['tema_set_commentschoice'] = 'Allow the user to toggle if comments can be shown on a Theme or not.';
-$txt['tema_set_permissionnotice'] = 'Lastly! Do not forget to make sure the permissions are set for each group, in order for them to view and add to the Themes.';
-$txt['tema_set_editpermissions'] = 'Edit Permissions';
-$txt['tema_set_files_per_page'] = 'Theme per page:';
+$txt['tema_set_commentschoice'] = 'Allow the user to toggle if comments can be shown on a Tema or not.';
+$txt['tema_set_permissionnotice'] = 'Lastly! Do not forget to make sure the İzinler are set for each group, in order for them to view and add to the Themes.';
+$txt['tema_set_editpermissions'] = 'Edit İzinler';
+$txt['tema_set_files_per_page'] = 'Tema per page:';
 $txt['tema_set_commentsappr'] = 'Comments require approval?';
 $txt['tema_set_commentsnewest'] = 'Display newest comments first.';
-$txt['tema_set_showratings'] = 'Show Theme ratings';
-$txt['tema_set_enable_multifolder'] = 'Enable multiple folders for Theme storage';
-$txt['tema_index_toprated'] = 'Show top rated Theme on the main page';
-$txt['tema_index_recent'] = 'Show the most recent Theme on the main page';
-$txt['tema_index_mostviewed'] = 'Show the most viewed Theme on the main page';
-$txt['tema_index_mostdownloaded'] = 'Show the most Themeed Theme on the main page';
-$txt['tema_index_mostcomments'] = 'Show the most commented Theme on the main page';
+$txt['tema_set_showratings'] = 'Show Tema ratings';
+$txt['tema_set_enable_multifolder'] = 'Enable multiple folders for Tema storage';
+$txt['tema_index_toprated'] = 'Show top rated Tema on the main page';
+$txt['tema_index_recent'] = 'Show the most recent Tema on the main page';
+$txt['tema_index_mostviewed'] = 'Show the most viewed Tema on the main page';
+$txt['tema_index_mostdownloaded'] = 'Show the most Themeed Tema on the main page';
+$txt['tema_index_mostcomments'] = 'Show the most commented Tema on the main page';
 $txt['tema_index_showtop'] = 'Show the index blocks on top of Themes';
 
-$txt['tema_set_count_child'] = 'Counts child categories Theme totals. <br />(Uses more queries)';
+$txt['tema_set_count_child'] = 'Counts child categories Tema totals. <br />(Uses more queries)';
 $txt['tema_set_show_quickreply'] = 'Show quick reply on comment view';
 
-// Category Display Settings
+// Kategori Display Settings
 $txt['tema_set_t_downloads'] = 'Show total Themes';
 $txt['tema_set_t_views'] = 'Show total views';
 $txt['tema_set_t_filesize'] = 'Show filesize';
@@ -187,9 +187,9 @@ $txt['tema_set_t_date'] = 'Show date';
 $txt['tema_set_t_comment'] = 'Show comment total';
 $txt['tema_set_t_username'] = 'Show username';
 $txt['tema_set_t_rating'] = 'Show rating';
-$txt['tema_catthumb_settings'] = 'Category Display Settings';
+$txt['tema_catthumb_settings'] = 'Kategori Display Settings';
 
-// Category Size Width and Size Height
+// Kategori Size Width and Size Height
 $txt['tema_set_cat_height'] = 'Kategori resim uzunluğu:';
 $txt['tema_set_cat_width'] = 'Kategori resim genişliği:';
 
@@ -197,7 +197,7 @@ $txt['tema_set_cat_width'] = 'Kategori resim genişliği:';
 $txt['tema_set_file_image_height'] = 'Tema gösterim resim uzunluğu:';
 $txt['tema_set_file_image_width'] = 'Tema gösterim resim genişliği:';
 
-// Theme Display Settings
+// Tema Display Settings
 $txt['tema_files_settings'] = 'Tema Görüntü Ayarlarını göster';
 $txt['tema_set_file_thumb'] = 'Tema dosyasında küçük tema Resmi gözüksün mü ?';
 $txt['tema_set_file_prevnext'] = 'Önceki ve Sonraki tema gitmeyi göster';
@@ -217,7 +217,7 @@ $txt['tema_save_settings'] = 'Ayarları kaydet';
 
 // Shop Settings
 $txt['tema_shop_settings'] = '<b>Shop Points Settings</b><br /><span class="smalltext">Only if SMF Shop is installed</span>';
-$txt['tema_shop_fileadd']  = 'Theme Add Points: ';
+$txt['tema_shop_fileadd']  = 'Tema Add Points: ';
 $txt['tema_shop_commentadd'] = 'Comment Add Points: ';
 
 
@@ -230,7 +230,7 @@ $txt['tema_set_showcode_htmllink'] = 'Html link göster';
 $txt['tema_txt_directlink'] = 'Gerçek Link';
 $txt['tema_txt_htmllink'] = 'Html Link';
 
-// Approve list
+// Onaylı list
 $txt['tema_app_download'] = 'İndir';
 $txt['tema_app_title'] = 'Başlık';
 $txt['tema_app_description'] = 'Açıklama';
@@ -241,7 +241,7 @@ $txt['tema_text_withselected'] = 'Seçilenler';
 $txt['tema_text_performaction'] = 'Perform Git';
 
 // Report list
-$txt['tema_rep_filelink'] = 'Theme Link';
+$txt['tema_rep_filelink'] = 'Tema Link';
 $txt['tema_rep_reportby'] = 'Şikayet et';
 $txt['tema_rep_comment'] = 'Yorum';
 $txt['tema_rep_viewdownload'] = 'View Theme';
@@ -302,8 +302,8 @@ $txt['tema_text_addsubcat'] = 'Add Sub Category';
 // Board
 $txt['tema_text_postingoptions'] = 'Posting Options';
 $txt['tema_text_boardname'] = 'Board İsim:';
-$txt['tema_postingoptions_info'] = 'Information: If you select a board, on a new Theme that is approved a post will be created.';
-$txt['tema_posting_showlinktodownload'] = 'Show link to main Theme page';
+$txt['tema_postingoptions_info'] = 'Information: If you select a board, on a new Tema that is approved a post will be created.';
+$txt['tema_posting_showlinktodownload'] = 'Show link to main Tema page';
 $txt['tema_posting_locktopic'] = 'Lock Topic';
 
 // File Space and Quota information
@@ -318,10 +318,10 @@ $txt['tema_filespace_groupname'] = 'Member Group İsim';
 $txt['tema_filespace_limit'] = 'File Space Limit';
 $txt['tema_filespace_addquota'] = 'Add Quota Limit';
 
-// Category permission strings
-$txt['tema_text_catpermlist'] = 'Category Permission List';
-$txt['tema_text_catpermlist2'] = 'Category Permissions';
-$txt['tema_text_catperm'] = 'Category Permission';
+// Kategori permission strings
+$txt['tema_text_catpermlist'] = 'Kategori Permission List';
+$txt['tema_text_catpermlist2'] = 'Kategori İzinler';
+$txt['tema_text_catperm'] = 'Kategori Permission';
 $txt['tema_text_addperm'] = 'Add Permission';
 
 
@@ -329,19 +329,19 @@ $txt['tema_text_addperm'] = 'Add Permission';
 //#############################
 //Downloads.php Strings
 //#############################
-$txt['tema_error_cat_title'] = 'You need to enter a category title!';
-$txt['tema_error_no_file_selected'] = 'No Theme selected.';
-$txt['tema_error_file_notapproved'] = 'This Theme is not approved yet and you do not have permission to view it.';
-$txt['tema_error_no_title'] = 'You need to enter a Theme title.';
+$txt['tema_error_cat_title'] = 'You need to enter a Kategori title!';
+$txt['tema_error_no_file_selected'] = 'No Tema selected.';
+$txt['tema_error_file_notapproved'] = 'This Tema is not approved yet and you do not have permission to view it.';
+$txt['tema_error_no_title'] = 'You need to enter a Tema title.';
 $txt['tema_error_no_cat'] = 'You need to select a category.';
 
-$txt['tema_error_file_filesize'] = 'Theme exceeds max filesize. Max Filesize is ';
-$txt['tema_error_no_download'] = 'No uploaded Theme found.';
-$txt['tema_error_no_downloadexist'] = 'No Theme exists';
+$txt['tema_error_file_filesize'] = 'Tema exceeds max filesize. Max Filesize is ';
+$txt['tema_error_no_download'] = 'No uploaded Tema found.';
+$txt['tema_error_no_downloadexist'] = 'No Tema exists';
 $txt['tema_error_noedit_permission'] = 'You do not have permission to edit that Theme.';
 $txt['tema_error_nodelete_permission'] = 'You do not have permission to delete that Theme.';
 $txt['tema_error_no_comment'] = 'You did not enter a comment!';
-$txt['tema_error_not_allowcomment'] = 'Wait a second...This Theme does not allow comments...';
+$txt['tema_error_not_allowcomment'] = 'Wait a second...This Tema does not allow comments...';
 $txt['tema_error_no_com_selected'] = 'No comment selected.';
 $txt['tema_error_no_user_selected'] = 'No user selected.';
 $txt['tema_error_no_report_selected'] = 'No report selected.';
@@ -355,10 +355,10 @@ $txt['tema_error_noquota'] = 'You did not enter a quota limit.';
 $txt['tema_error_nogroup'] = 'No member group selected.';
 $txt['tema_error_quotaexist'] = 'A quota already exits for that group. Delete the old quota first.';
 $txt['tema_error_nouser_exists'] = 'No user exists.';
-$txt['tema_error_nocat_above'] = 'There is no category above the current one.';
-$txt['tema_error_nocat_below'] = 'There is no category below the current one.';
+$txt['tema_error_nocat_above'] = 'There is no Kategori above the current one.';
+$txt['tema_error_nocat_below'] = 'There is no Kategori below the current one.';
 $txt['tema_error_norate_own'] = 'You can not rate your own Theme.';
-$txt['tema_error_no_catexists'] = 'You need to create a category first before you upload a Theme.';
+$txt['tema_error_no_catexists'] = 'You need to create a Kategori first before you upload a Theme.';
 $txt['tema_error_invalid_picture'] = 'Invalid Picture file';
 
 // Quota Limits
@@ -366,13 +366,13 @@ $txt['tema_quotagrouplimit'] ='Quota Limit';
 $txt['tema_quotagspaceused'] ='Quota Space Used';
 $txt['tema_quotaspaceleft'] ='Quota Space Left';
 
-// Permissions
+// İzinler
 $txt['tema_perm_no_view'] = 'You are not allowed to view this category.';
 $txt['tema_perm_no_viewdownload'] = 'You need premium member group :'."<a href='$boardurl/index.php?action=profile;area=subscriptions'>Paid account</a>";
-$txt['tema_perm_no_add'] = 'You are not allowed to add a Theme in this category.';
-$txt['tema_perm_no_edit'] = 'You are not allowed to edit that Theme in this category.';
-$txt['tema_perm_no_delete'] = 'You are not allowed to delete that Theme in this category.';
-$txt['tema_perm_no_ratefile'] = 'You are not allowed to rate that Theme in this category.';
+$txt['tema_perm_no_add'] = 'You are not allowed to add a Tema in this category.';
+$txt['tema_perm_no_edit'] = 'You are not allowed to edit that Tema in this category.';
+$txt['tema_perm_no_delete'] = 'You are not allowed to delete that Tema in this category.';
+$txt['tema_perm_no_ratefile'] = 'You are not allowed to rate that Tema in this category.';
 $txt['tema_perm_no_editcomment'] = 'You are not allowed to edit that comment in this category.';
 $txt['tema_perm_no_addcomment'] = 'You are not allowed to leave comments in this category.';
 $txt['tema_perm_no_report'] = 'You are not allowed to report content in this category.';
@@ -382,12 +382,12 @@ $txt['tema_notify_subject'] = 'New Comment: %s';
 $txt['tema_notify_title'] = 'Notify me of comments';
 
 $txt['tema_perm_view'] = 'Göster';
-$txt['tema_perm_viewdownload'] = 'View Theme link';
+$txt['tema_perm_viewdownload'] = 'View Tema link';
 $txt['tema_perm_add'] = 'Tema Ekle';
 $txt['tema_perm_edit'] = 'Tema ekleyen düzenle';
 $txt['tema_perm_delete'] = 'Temayı sil';
 
-$txt['tema_permerr_permexist'] = 'A permission already exists for this group and category please delete it first.';
+$txt['tema_permerr_permexist'] = 'A permission already exists for this group and Kategori please delete it first.';
 
 $txt['tema_perm_allowed'] = 'izin verildi';
 $txt['tema_perm_denied'] = 'Engellenledi';
@@ -439,7 +439,7 @@ $txt['tema_error_img_size_height'] = 'Image exceeds size requirements. Your heig
 $txt['tema_error_img_size_width'] = ' Your width was: ';
 
 
-// Category Display
+// Kategori Display
 
 $txt['tema_cat_title'] = 'Başlık';
 $txt['tema_cat_rating'] = 'Oylama';
@@ -465,21 +465,21 @@ $txt['tema_txt_www'] = 'WWW';
 $txt['tema_txt_profile_email'] = 'Email';
 
 
-// Begin Theme System Text Strings
-$txt['tema_menu'] = 'Themes';
-$txt['tema_admin'] = 'Theme Configuration';
+// Begin Tema System Text Strings
+$txt['tema_menu'] = 'Temalar';
+$txt['tema_admin'] = 'Tema Configuration';
 $txt['tema_text_settings'] = 'Ayarlar';
 
-$txt['tema_form_approvedownloads'] = 'Approve Themes';
+$txt['tema_form_approvedownloads'] = 'Onaylı Themes';
 $txt['tema_form_reportdownloads'] = 'Reported Themes';
-$txt['tema_form_approvecomments'] = 'Approve Comments';
+$txt['tema_form_approvecomments'] = 'Onaylı Comments';
 $txt['tema_filespace'] = 'File Space Manager';
-$txt['tema_text_catpermlist2'] = 'Category Permissions';
+$txt['tema_text_catpermlist2'] = 'Kategori İzinler';
 $txt['tema_txt_import'] = 'Import';
 
-// Permissions
-$txt['permissiongroup_downloads'] = 'Theme System';
-$txt['permissiongroup_simple_downloads'] = 'Theme System';
+// İzinler
+$txt['permissiongroup_downloads'] = 'Tema System';
+$txt['permissiongroup_simple_downloads'] = 'Tema System';
 
 $txt['permissionname_themes_view'] = 'View Themes';
 $txt['permissionname_themes_viewdownload'] = 'View Link Themes';
@@ -512,19 +512,19 @@ $txt['permissionhelp_downloads_comment'] = 'Allows the user to leave comments on
 $txt['cannot_themes_comment'] = 'You are not allowed to leave comments.';
 
 $txt['permissionname_themes_report'] = 'Report Pictures/Comments';
-$txt['permissionhelp_downloads_report'] = 'Allows the user to report Theme and comments.';
+$txt['permissionhelp_downloads_report'] = 'Allows the user to report Tema and comments.';
 $txt['cannot_themes_report'] = 'You are not allowed to report content.';
 
-$txt['permissionname_themes_autocomment'] = 'Auto Approve Comments';
+$txt['permissionname_themes_autocomment'] = 'Auto Onaylı Comments';
 $txt['permissionhelp_downloads_autocomment'] = 'Comments do not need to wait for approval.';
 
-$txt['permissionname_themes_autoapprove'] = 'Auto Approve Themes';
-$txt['permissionhelp_downloads_autoapprove'] = 'Theme do not need to wait for approval.';
+$txt['permissionname_themes_autoapprove'] = 'Auto Onaylı Themes';
+$txt['permissionhelp_downloads_autoapprove'] = 'Tema do not need to wait for approval.';
 
 
-$txt['permissionname_themes_manage'] = 'Admin Theme System';
-$txt['permissionhelp_downloads_manage'] = 'Allows the user to add/delete/edit Tüm catagories. Delete Comments, Delete Themes, Approve Themes';
+$txt['permissionname_themes_manage'] = 'Admin Tema System';
+$txt['permissionhelp_downloads_manage'] = 'Allows the user to add/delete/edit Tüm catagories. Delete Comments, Delete Themes, Onaylı Themes';
 $txt['cannot_themes_manage'] = 'You are not allowed to manage the Themes.';
 
-// END Theme System Text Strings
+// END Tema System Text Strings
 ?>
