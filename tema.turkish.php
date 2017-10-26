@@ -15,6 +15,24 @@ $txt['mobileportrait'] = "Dikey Mobil Görünümünde Göster (320x480)";
 
 // Title string
 $txt['tema_text_title'] = 'Temalar';
+$txt['tema_max_filesize'] = 'Max Theme filesize: ';
+$txt['tema_path'] = 'Theme Path: ';
+$txt['tema_url'] = 'Theme Url: ';
+$txt['tema_who_viewing'] = 'Display who is viewing a Theme';
+$txt['tema_show_ratings'] = 'Show Theme ratings';
+$txt['tema_max_file'] = 'PHP Max Filesize ';
+$txt['tema_set_t_title'] = 'Show title';
+$txt['tema_set_file_views'] = 'Show views';
+$txt['themesizinlerbaslik'] = 'Theme System permission';
+$txt['themes_view'] = 'View Themes';
+$txt['themes_viewdownload'] = 'View Link Themes';
+$txt['themes_add'] = 'Add Theme';
+$txt['themes_edit'] = 'Edit own Theme';
+$txt['themes_delete'] = 'Delete own Theme';
+$txt['themes_ratefile'] = 'Rate Themes';
+$txt['themes_report'] = 'Report Pictures/Comments';
+$txt['themes_autoapprove'] = 'Auto Approve Themes';
+$txt['themes_manage'] = 'Admin Theme System';
 
 // Main Theme strings
 $txt['tema_text_categoryname'] = 'Category İsim';
