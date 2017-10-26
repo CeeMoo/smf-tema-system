@@ -16,6 +16,25 @@ function template_mainview()
 
 	@$cat = (int) $_REQUEST['cat'];
 
+			echo '<style>
+			.iconla{
+				box-shadow: none;
+			    border-radius: 0;
+			    padding: 0;
+			    margin: 0;
+			    overflow: hidden;
+			    display:inline-block;
+			    vertical-align:middle;
+			}
+
+			.iconla a img{
+				max-width:60px;
+			}
+			.board_icon{
+				width:0;
+			}
+			</style>';
+
 	if (!empty($cat))
 	{
 		Downloads_ShowSubCats($cat,allowedTo('themes_manage'));
@@ -34,6 +53,7 @@ function template_mainview()
 						<div class="lastpost">' . $txt['tema_text_reorder'] . '/' . $txt['tema_text_options'] . '</div>';
 				echo '
 				</div>';
+
 			echo '
 				<div id="topic_container">';
 			foreach($context['subthemecat'] as $subcat)
@@ -242,22 +262,6 @@ function template_mainview()
 			echo '
 			</div>';
 
-			echo '<style>
-			.iconla{
-				box-shadow: none;
-			    border-radius: 0;
-			    padding: 0;
-			    margin: 0;
-			    overflow: hidden;
-			    display:inline-block;
-			    vertical-align:middle;
-			}
-
-			.iconla a img{
-				max-width:60px;
-			}
-			</style>';
-
 		echo '
 			<div id="topic_container">';
 		foreach ($context['downloads_cats'] as $i => $cat_info)
@@ -392,7 +396,7 @@ function template_add_category()
 				<span id="caption_subject">' . $txt['tema_form_icon'] . '</span>
 			</dt>
 			<dd class="pf_subject">	
-				<input type="text" name="image" size="64" maxlength="100" />
+				<input type="text" name="image" size="64" maxlength="300" />
 			</dd>
 			<dt class="clear pf_subject">
 				<span id="caption_subject">' . $txt['tema_form_uploadicon'] . '</span>';
@@ -2253,7 +2257,6 @@ function template_catperm()
 				<td>' .  $txt['tema_perm_add']  . '</td>
 				<td>' .  $txt['tema_perm_edit']  . '</td>
 				<td>' .  $txt['tema_perm_delete']  . '</td>
-				<td>' .  $txt['tema_perm_addcomment']  . '</td>
 				<td>' .  $txt['tema_text_options']  . '</td>
 				</tr>';
 

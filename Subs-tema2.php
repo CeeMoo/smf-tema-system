@@ -46,7 +46,7 @@ function AddCategory()
 	$context['cat_parent'] = $parent;
 }
 
-function AddCategory2($title,$description,$image,$boardselect,$parent,$locktopic,$disablerating,$sortby,$orderby,$filename)
+function AddCategory2($title,$description,$image,$boardselect,$parent,$locktopic,$disablerating,$sortby,$orderby)
 {
 	global $txt, $sourcedir, $modSettings, $smcFunc;
 	
@@ -65,10 +65,12 @@ function AddCategory2($title,$description,$image,$boardselect,$parent,$locktopic
 		$order = $row['cat_order'];
 	$order++;
 
+	$filename = '';
+
 	// Insert the category
 	$smcFunc['db_query']('', "INSERT INTO {db_prefix}tema_cat
 			(title, description,roworder,image,ID_BOARD,ID_PARENT,disablerating,locktopic,sortby,orderby,filename)
-		VALUES ('$title', '$description',$order,'$image',$boardselect,$parent,$disablerating,$locktopic,'$sortby','$orderby','$filename')");
+		VALUES ('$title', '$description',$order,'$image',$boardselect,$parent,$disablerating,$locktopic,'$sortby','$orderby','$filename')");	
 	$smcFunc['db_free_result']($dbresult);
 
 	// Get the Category ID
