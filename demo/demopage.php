@@ -39,7 +39,7 @@
 			$al=str_replace ("http://","//",$al);
 
         echo'<ul class="links">
-                        <li class="purchase" rel="http://www.dijilab.com/urun/flexible-responsive-wordpress-portal-temasi/">
+                        <li class="purchase" rel="'.$temayol.$row1['ID_FILE'].'">
                             <a href="'.$temayol.$row1['ID_FILE'].'"><img src="images/purchase.png" alt="'.$txt['purchade'].'" />'.$txt['purchade'].'</a>
                         </li>
                     
@@ -50,7 +50,7 @@
 
                                     <div class="share">
                         <ul>
-                            <li><div class="g-plusone" data-size="medium" data-href="http://www.dijilab.com/urun/flexible-responsive-wordpress-portal-temasi/"></div></li>
+                            <li><div class="g-plusone" data-size="medium" data-href="'.$temayol.$row1['ID_FILE'].'"></div></li>
                         </ul>
                     </div>
                                 <div style="clear:both"></div>
