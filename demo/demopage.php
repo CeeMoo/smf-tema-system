@@ -31,18 +31,20 @@
         <?php
         if(isset($_REQUEST['tema'])){
             $temaisim = htmlspecialchars($_REQUEST['tema'],ENT_QUOTES);
-            $dbresult1 = $smcFunc['db_query']('', "SELECT p.title, p.ID_FILE, p.demourl FROM {db_prefix}tema_file as p WHERE p.title = '$temaisim'");
+            $dbresult1 = $smcFunc['db_query']('', "SELECT p.title, p.ID_FILE, p.demourl FROM {db_prefix}tema_file as p WHERE p.title = '$temaisim' order by p.title desc limit 1");
             $row1 = $smcFunc['db_fetch_assoc']($dbresult1);
             $smcFunc['db_free_result']($dbresult1);
-
+			$al=$row1['demourl'];
+			$al=str_replace ("https://","//",$al);
+			$al=str_replace ("http://","//",$al);
 
         echo'<ul class="links">
                         <li class="purchase" rel="http://www.dijilab.com/urun/flexible-responsive-wordpress-portal-temasi/">
                             <a href="'.$temayol.$row1['ID_FILE'].'"><img src="images/purchase.png" alt="'.$txt['purchade'].'" />'.$txt['purchade'].'</a>
                         </li>
                     
-                                            <li class="close" rel="'.$row1['demourl'].'">
-                            <a href="'.$row1['demourl'].'"><img src="images/cross.png" alt="Kapat" />'.$txt['clos'].'</a>
+                                            <li class="close" rel="'.$al.'">
+                            <a href="'.$al.'"><img src="images/cross.png" alt="Kapat" />'.$txt['clos'].'</a>
                         </li>     
                                     </ul>
 
@@ -56,13 +58,14 @@
         </div>';
 
 
-            echo '<iframe id="iframe" src="'.$row1['demourl'].'" frameborder="0" width="100%" height="100%"></iframe>';
+            echo '<iframe id="iframe" src="'.$al.'" frameborder="0" width="100%" height="100%"></iframe>';
         }else{
             echo '
                     </div>
                                 <div style="clear:both"></div>
             </div>
         </div>';
-            echo '<iframe id="iframe" src="'.$row2['demourl'].'" frameborder="0" width="100%" height="100%"></iframe>';
+
+            echo '<iframe id="iframe" src="'.$al.'" frameborder="0" width="100%" height="100%"></iframe>';
         }
         ?>
