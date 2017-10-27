@@ -8,7 +8,7 @@ http://www.smf.konusal.com
 if (!defined('SMF'))
 	die('Hacking attempt...');
 
-function DownloadsMain()
+function ThemesMain()
 {
 	global $boardurl, $modSettings, $boarddir, $currentVersion, $context;
 	$currentVersion = '2.0';
@@ -31,7 +31,7 @@ function DownloadsMain()
 		'report' => 'Downloads_ReportDownload',
 		'report2' => 'Downloads_ReportDownload2',
 		'deletereport' => 'Downloads_DeleteReport',
-		'reportlist' => 'Downloads_ReportList',
+		'reportlist' => 'Themes_ReportList',
 		'rate' => 'Downloads_RateDownload',
 		'viewrating' => 'Downloads_ViewRating',
 		'delrating' => 'Downloads_DeleteRating',
@@ -39,7 +39,7 @@ function DownloadsMain()
 		'catdown' => 'Downloads_CatDown',
 		'catperm' => 'Downloads_CatPerm',
 		'catperm2' => 'Downloads_CatPerm2',
-		'catpermlist' => 'Downloads_CatPermList',
+		'catpermlist' => 'Themes_CatPermList',
 		'catpermdelete' => 'Downloads_CatPermDelete',
 		'catimgdel' => 'Downloads_CatImageDelete',
 		'fileimgdel' => 'Downloads_FileImageDelete',
@@ -50,7 +50,7 @@ function DownloadsMain()
 		'deletecat' => 'Downloads_DeleteCategory',
 		'deletecat2' => 'Downloads_DeleteCategory2',
 		'myfiles' => 'Downloads_MyFiles',
-		'approvelist' => 'Downloads_ApproveList',
+		'approvelist' => 'Themes_ApproveList',
 		'approve' => 'Downloads_ApproveDownload',
 		'unapprove' => 'Downloads_UnApproveDownload',
 		'add' => 'Downloads_AddDownload',
@@ -58,7 +58,7 @@ function DownloadsMain()
 		'search' => 'Downloads_Search',
 		'search2' => 'Downloads_Search2',
 		'stats' => 'Downloads_Stats',
-		'filespace' => 'Downloads_FileSpaceAdmin',
+		'filespace' => 'Themes_FileSpaceAdmin',
 		'filelist' => 'Downloads_FileSpaceList',
 		'recountquota' => 'Downloads_RecountFileQuotaTotals',
 		'addquota' => 'Downloads_AddQuota',
@@ -886,7 +886,7 @@ function Downloads_MyFiles()
 	$context['page_index'] = constructPageIndex($scripturl . '?action=tema;sa=myfiles;u=' . $context['downloads_userid'], $_REQUEST['start'], $context['downloads_total'], $modSettings['tema_set_files_per_page']);
 }
 
-function Downloads_ApproveList()
+function Themes_ApproveList()
 {
 	global $context, $mbname, $txt, $scripturl, $sourcedir;
 	isAllowedTo('themes_manage');
@@ -922,7 +922,7 @@ function Downloads_UnApproveDownload()
 	redirectexit('action=admin;area=tema;sa=approvelist');
 }
 
-function Downloads_ReportList()
+function Themes_ReportList()
 {
 	global $context, $mbname, $txt, $sourcedir;
 	isAllowedTo('themes_manage');
@@ -1233,7 +1233,7 @@ function Downloads_Stats()
 }
 
 
-function Downloads_FileSpaceAdmin()
+function Themes_FileSpaceAdmin()
 {
 	global $mbname, $txt, $context, $scripturl, $sourcedir;
 	isAllowedTo('themes_manage');
@@ -1326,7 +1326,7 @@ function Downloads_CatPerm2()
 	redirectexit('action=tema;sa=catperm;cat=' . $cat);
 }
 
-function Downloads_CatPermList()
+function Themes_CatPermList()
 {
 	global $mbname, $txt, $context, $sourcedir;
 	isAllowedTo('themes_manage');

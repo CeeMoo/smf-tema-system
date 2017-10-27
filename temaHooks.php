@@ -19,7 +19,7 @@ function themes_actions(&$actionArray)
     if (loadlanguage('tema') == false)
         loadLanguage('tema','english');
    
-  $actionArray += array('tema' => array('tema2.php', 'DownloadsMain'));
+  $actionArray += array('tema' => array('tema2.php', 'ThemesMain'));
   
 }
 function themes_admin_areas(&$admin_areas)
@@ -36,11 +36,11 @@ function themes_admin_areas(&$admin_areas)
 								'tema' => array(
 									'label' =>'',
 									'file' => 'tema2.php',
-									'function' => 'DownloadsMain',
+									'function' => 'ThemesMain',
 								),
 								'adminset' => array(
 									'label' => $txt['tema_text_settings'],
-									'function' => 'Downloads_AdminSettings2',
+									'function' => 'Themes_AdminSettings2',
 									'icon' => 'temaicon.png',
 									'subsections' => array(
 									),
@@ -48,7 +48,7 @@ function themes_admin_areas(&$admin_areas)
 								'approvelist' => array(
 									'label' => $txt['tema_form_approvethemes'],
 									'file' => 'tema2.php',
-									'function' => 'Downloads_ApproveList',
+									'function' => 'Themes_ApproveList',
 									'custom_url' => $scripturl . '?action=admin;area=tema;sa=approvelist',
 									'icon' => 'temaicon.png',
 									'subsections' => array(
@@ -57,7 +57,7 @@ function themes_admin_areas(&$admin_areas)
 								'reportlist' => array(
 									'label' => $txt['tema_form_reportthemes'],
 									'file' => 'tema2.php',
-									'function' => 'Downloads_ReportList',
+									'function' => 'Themes_ReportList',
 									'custom_url' => $scripturl . '?action=admin;area=tema;sa=reportlist',
 									'icon' => 'temaicon.png',
 									'subsections' => array(
@@ -67,7 +67,7 @@ function themes_admin_areas(&$admin_areas)
 								'filespace' => array(
 									'label' => $txt['tema_filespace'],
 									'file' => 'tema2.php',
-									'function' => 'Downloads_FileSpaceAdmin',
+									'function' => 'Themes_FileSpaceAdmin',
 									'custom_url' => $scripturl . '?action=admin;area=tema;sa=filespace',
 									'icon' => 'temaicon.png',
 									'subsections' => array(
@@ -77,7 +77,7 @@ function themes_admin_areas(&$admin_areas)
 								'catpermlist' => array(
 									'label' => $txt['tema_text_catpermlist2'],
 									'file' => 'tema2.php',
-									'function' => 'Downloads_CatPermList',
+									'function' => 'Themes_CatPermList',
 									'custom_url' => $scripturl . '?action=admin;area=tema;sa=catpermlist',
 									'icon' => 'temaicon.png',
 									'subsections' => array(
@@ -90,7 +90,7 @@ function themes_admin_areas(&$admin_areas)
 		
 }
 
-function Downloads_AdminSettings2()
+function Themes_AdminSettings2()
 {
 
 	global $context, $scripturl, $sourcedir;
