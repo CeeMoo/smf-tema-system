@@ -117,28 +117,20 @@ function Downloads_MainView()
 		$context['downloads_sortby'] = $row1['sortby'];
 		$context['downloads_orderby'] = $row1['orderby'];
 		$context['downloads_cat_norate'] = $row1['disablerating'];
+		$context['downloads_ID_PARENT'] = $row1['ID_PARENT'];
 		if ($context['downloads_cat_norate'] == '')
 			$context['downloads_cat_norate'] = 0;
-
 		$smcFunc['db_free_result']($dbresult1);
-
-		GetParentLink($row1['ID_PARENT']);
-
+		GetParentLink($context['downloads_ID_PARENT']);
 		$context['linktree'][] = array(
 					'url' => $scripturl . '?action=tema;cat=' . $cat,
 					'name' => $context['downloads_cat_name']
 				);
 
 		$context['page_title'] = $mbname . ' - ' . $context['downloads_cat_name'];
-
 		$total = GetTotalByCATID($cat);
-
-
 		$context['start'] = (int) $_REQUEST['start'];
-
 		$context['downloads_total'] = $total;
-
-
 		$sortby = '';
 		$orderby = '';
 		if (isset($_REQUEST['sortby']))
@@ -261,20 +253,12 @@ function Downloads_MainView()
 
 		}
 		$smcFunc['db_free_result']($dbresult);
-
-
-
 		$context['page_index'] = constructPageIndex($scripturl . '?action=tema;cat=' . $cat . ';sortby=' . $context['downloads_sortby'] . ';orderby=' . $context['downloads_orderby2'], $_REQUEST['start'], $total, $modSettings['tema_set_files_per_page']);
-
-
-
 
 		if (!empty($modSettings['tema_who_viewing']))
 		{
 			$context['can_moderate_forum'] = allowedTo('moderate_forum');
 
-				// SMF 1.1.x
-				// Taken from Display.php
 				// Start out with no one at all viewing it.
 				$context['view_members'] = array();
 				$context['view_members_list'] = array();
@@ -1513,28 +1497,11 @@ function Downloads_ShowSubCats($cat,$g_manage)
 function MainPageBlock($title, $type = 'recent')
 {
 	global $scripturl, $txt, $modSettings, $context, $user_info, $smcFunc;
-
-
 	if (!$user_info['is_guest'])
 		$groupsdata = implode($user_info['groups'],',');
 	else
 		$groupsdata = -1;
-
-
-	$maxrowlevel = 4;
-	echo '<br class="clear"/>
-    <div class="cat_bar">
-		<h3 class="catbg centertext">
-        ', $title, '
-        </h3>
-</div>';
-
- if ($context['downloads21beta'] == false)
-   echo '<table class="table_list">';
-  else
-    echo '<table class="table_grid">'; 
-                
-			//Check what type it is
+	$context['MainPagebaslik'] = $title;
 			$query = ' ';
 			$query_type = 'p.ID_FILE';
 			switch($type)
@@ -1565,95 +1532,30 @@ function MainPageBlock($title, $type = 'recent')
 					LEFT JOIN {db_prefix}tema_catperm AS c ON (c.ID_GROUP IN ($groupsdata) AND c.ID_CAT = p.ID_CAT)
 					WHERE p.approved = 1 AND (c.view IS NULL || c.view =1) GROUP by p.ID_FILE ORDER BY $query_type DESC LIMIT 8";
 
-			// Execute the SQL query
 			$dbresult = $smcFunc['db_query']('', $query);
-			$rowlevel = 0;
+
+		$context['MainPageicerik']=array();
 		while($row = $smcFunc['db_fetch_assoc']($dbresult))
 		{
-			if ($rowlevel == 0)
-				echo '<tr class="windowbg2">';
+			$context['MainPageicerik'][]=array(
+			'ID_FILE' => $row['ID_FILE'],
+			'title' => $row['title'],
+			'picture' => $row['picture'],
+			'pictureurl' => $row['pictureurl'],
+			'totalratings' => $row['totalratings'],
+			'rating' => $row['rating'],
+			'totaldownloads' => $row['totaldownloads'],
+			'views' => $row['views'],
+			'filesize' => $row['filesize'],
+			'date' => $row['date'],
+			'real_name' => $row['real_name'],
+			'id_member' => $row['id_member'],
+			);
 
-			echo '<td align="center"><a href="' . $scripturl . '?action=tema;sa=view;down=' . $row['ID_FILE'] . '">',$row['title'],'</a><br />';
-			echo '<div style="height:280px;overflow:hidden;">
-				<a href="' . $scripturl . '?action=tema;sa=view;down=' . $row['ID_FILE'] . '"><img style="width:auto;max-width:100%;" src="',$row['picture'] == '' ? $row['pictureurl'] : $modSettings['tema_url'].'temaresim/'.$row['picture'],'" alt="">
-				</a>
-			</div>'; 
-
-			echo '<span class="smalltext">';
-			if (!empty($modSettings['tema_set_t_rating']))
-				echo $txt['tema_form_rating'] . Downloads_GetStarsByPrecent(($row['totalratings'] != 0) ? ($row['rating'] / ($row['totalratings']* 5) * 100) : 0) . '<br />';
-			if (!empty($modSettings['tema_set_t_downloads']))
-				echo $txt['tema_text_downloads'] . $row['totaldownloads'] . '<br />';
-			if (!empty($modSettings['tema_set_t_views']))
-				echo $txt['tema_text_views'] . $row['views'] . '<br />';
-			if (!empty($modSettings['tema_set_t_filesize']))
-				echo $txt['tema_text_filesize'] . Downloads_format_size($row['filesize'], 2) . '<br />';
-			if (!empty($modSettings['tema_set_t_date']))
-				echo $txt['tema_text_date'] . timeformat($row['date']) . '<br />';
-			if (!empty($modSettings['tema_set_t_username']))
-			{
-				if ($row['real_name'] != '')
-					echo $txt['tema_text_by'] . ' <a href="' . $scripturl . '?action=profile;u=' . $row['id_member'] . '">'  . $row['real_name'] . '</a><br />';
-				else
-					echo $txt['tema_text_by'] . ' ' . $txt['tema_guest'] . '<br />';
-			}
-			echo '</span></td>';
-
-
-			if ($rowlevel < ($maxrowlevel-1))
-				$rowlevel++;
-			else
-			{
-				echo '</tr>';
-				$rowlevel = 0;
-			}
 		}
-		if ($rowlevel !=0)
-		{
-			echo '</tr>';
-		}
-
-	echo '
-	      </table><br class="clear"/>';
-
 	$smcFunc['db_free_result']($dbresult);
 
 }
-
-
-
-
-function Downloads_DoToolBarStrip($button_strip, $direction )
-{
-	global $settings, $txt;
-
-	if (!empty($settings['use_tabs']))
-	{
-		template_button_strip($button_strip, $direction);
-	}
-	else
-	{
-
-			echo '<td>';
-
-			foreach ($button_strip as $tab)
-			{
-
-
-				echo '
-							<a href="', $tab['url'], '">', $txt[$tab['text']], '</a>';
-
-				if (empty($tab['is_last']))
-					echo ' | ';
-			}
-
-
-			echo '</td>';
-
-	}
-
-}
-
 function Downloads_format_size($size, $round = 0)
 {
     //Size must be bytes!
@@ -1661,185 +1563,7 @@ function Downloads_format_size($size, $round = 0)
     for ($i=0; $size > 1024 && $i < count($sizes) - 1; $i++) $size /= 1024;
     return round($size,$round).$sizes[$i];
 }
-function ShowTopDownloadBar($title = '&nbsp;')
-{
-	global $txt, $context;
-		echo '
-	<div class="cat_bar">
-		<h3 class="catbg centertext">
-        ', $title, '
-        </h3>
-</div>
-    
-				<table border="0" cellpadding="0" cellspacing="0" align="center" width="90%">
-						<tr>
-							<td style="padding-right: 1ex;" align="right" width="100%">
 
-						', Downloads_DoToolBarStrip($context['downloads']['buttons'], 'top'), '
-		
-						</td>
-						</tr>
-					</table>
-
-<br />';
-}
-
-function Downloads_ShowUserBox($memCommID, $online_color = '')
-{
-	global $memberContext, $settings, $modSettings, $txt, $context, $scripturl, $options, $downloadSettings;
-
-	
-	echo '
-	<b>', $memberContext[$memCommID]['link'], '</b>
-							<div class="smalltext">';
-
-		// Show the member's custom title, if they have one.
-		if (isset($memberContext[$memCommID]['title']) && $memberContext[$memCommID]['title'] != '')
-			echo '
-								', $memberContext[$memCommID]['title'], '<br />';
-
-		// Show the member's primary group (like 'Administrator') if they have one.
-		if (isset($memberContext[$memCommID]['group']) && $memberContext[$memCommID]['group'] != '')
-			echo '
-								', $memberContext[$memCommID]['group'], '<br />';
-
-		// Don't show these things for guests.
-		if (!$memberContext[$memCommID]['is_guest'])
-		{
-			// Show the post group if and only if they have no other group or the option is on, and they are in a post group.
-			if ((empty($settings['hide_post_group']) || $memberContext[$memCommID]['group'] == '') && $memberContext[$memCommID]['post_group'] != '')
-				echo '
-								', $memberContext[$memCommID]['post_group'], '<br />';
-			echo '
-								', $memberContext[$memCommID]['group_stars'], '<br />';
-
-			// Is karma display enabled?  Total or +/-?
-			if ($modSettings['karmaMode'] == '1')
-				echo '
-								<br />
-								', $modSettings['karmaLabel'], ' ', $memberContext[$memCommID]['karma']['good'] - $memberContext[$memCommID]['karma']['bad'], '<br />';
-			elseif ($modSettings['karmaMode'] == '2')
-				echo '
-								<br />
-								', $modSettings['karmaLabel'], ' +', $memberContext[$memCommID]['karma']['good'], '/-', $memberContext[$memCommID]['karma']['bad'], '<br />';
-
-			// Is this user allowed to modify this member's karma?
-			if ($memberContext[$memCommID]['karma']['allow'])
-				echo '
-								<a href="', $scripturl, '?action=modifykarma;sa=applaud;uid=', $memberContext[$memCommID]['id'], ';sesc=', $context['session_id'], '">', $modSettings['karmaApplaudLabel'], '</a>
-								<a href="', $scripturl, '?action=modifykarma;sa=smite;uid=', $memberContext[$memCommID]['id'],  ';sesc=', $context['session_id'], '">', $modSettings['karmaSmiteLabel'], '</a><br />';
-
-			// Show online and offline buttons?
-			if (!empty($modSettings['onlineEnable']) && !$memberContext[$memCommID]['is_guest'])
-				echo '
-								', $context['can_send_pm'] ? '<a href="' . $memberContext[$memCommID]['online']['href'] . '" title="' . $memberContext[$memCommID]['online']['label'] . '">' : '', $settings['use_image_buttons'] ? '<img src="' . $memberContext[$memCommID]['online']['image_href'] . '" alt="' . $memberContext[$memCommID]['online']['text'] . '" border="0" style="margin-top: 2px;" />' : $memberContext[$memCommID]['online']['text'], $context['can_send_pm'] ? '</a>' : '', $settings['use_image_buttons'] ? '<span class="smalltext"> ' . $memberContext[$memCommID]['online']['text'] . '</span>' : '', '<br /><br />';
-
-			// Show the member's gender icon?
-			if (!empty($settings['show_gender']) && $memberContext[$memCommID]['gender']['image'] != '')
-				echo '
-								', $txt['tema_txt_gender'], ': ', $memberContext[$memCommID]['gender']['image'], '<br />';
-
-			// Show how many posts they have made.
-			echo '
-								', $txt['tema_txt_posts'], ': ', $memberContext[$memCommID]['posts'], '<br />
-								<br />';
-
-			// Show avatars, images, etc.?
-			if (!empty($settings['show_user_images']) && empty($options['show_no_avatars']) && !empty($memberContext[$memCommID]['avatar']['image']))
-				echo '
-								<div style="overflow: hidden; width: 100%;">', $memberContext[$memCommID]['avatar']['image'], '</div><br />';
-
-			// Show their personal text?
-			if (!empty($settings['show_blurb']) && $memberContext[$memCommID]['blurb'] != '')
-				echo '
-								', $memberContext[$memCommID]['blurb'], '<br />
-								<br />';
-
-			// This shows the popular messaging icons.
-			echo '
-								', $memberContext[$memCommID]['icq']['link'], '
-								', $memberContext[$memCommID]['msn']['link'], '
-								', $memberContext[$memCommID]['aim']['link'], '
-								', $memberContext[$memCommID]['yim']['link'], '<br />';
-
-			// Show the profile, website, email address, and personal message buttons.
-			if ($settings['show_profile_buttons'])
-			{
-	
-					echo '
-								<a href="', $memberContext[$memCommID]['href'], '">', ($settings['use_image_buttons'] ? '<img src="' . $settings['images_url'] . '/icons/profile_sm.gif" alt="' . $txt['tema_txt_view_profile'] . '" title="' . $txt['tema_txt_view_profile'] . '" border="0" />' : $txt['tema_txt_view_profile']), '</a>';
-
-				// Don't show an icon if they haven't specified a website.
-				if ($memberContext[$memCommID]['website']['url'] != '')
-					echo '
-								<a href="', $memberContext[$memCommID]['website']['url'], '" title="' . $memberContext[$memCommID]['website']['title'] . '" target="_blank">', ($settings['use_image_buttons'] ? '<img src="' . $settings['images_url'] . '/www_sm.gif" alt="' . $txt['tema_txt_www'] . '" border="0" />' : $txt['tema_txt_www']), '</a>';
-
-					
-					
-				// Don't show the email address if they want it hidden.
-			if (in_array($memberContext[$memCommID]['show_email'], array('yes', 'yes_permission_override', 'no_through_forum')))
-					echo '
-								<a href="', $scripturl, '?action=emailuser;sa=email;uid=', $memberContext[$memCommID]['id'], '" rel="nofollow">', ($settings['use_image_buttons'] ? '<img src="' . $settings['images_url'] . '/email_sm.gif" alt="' . $txt['tema_txt_profile_email'] . '" title="' . $txt['tema_txt_profile_email'] . '" />' : $txt['tema_txt_profile_email']), '</a></li>';
-			
-					
-		
-					
-
-				// Since we know this person isn't a guest, you *can* message them.
-				if ($context['can_send_pm'])
-					echo '
-								<a href="', $scripturl, '?action=pm;sa=send;u=', $memberContext[$memCommID]['id'], '" title="', $memberContext[$memCommID]['online']['label'], '">', $settings['use_image_buttons'] ? '<img src="' . $settings['images_url'] . '/im_' . ($memberContext[$memCommID]['online']['is_online'] ? 'on' : 'off') . '.gif" alt="' . $memberContext[$memCommID]['online']['label'] . '" border="0" />' : $memberContext[$memCommID]['online']['label'], '</a>';
-			}
-		}
-		// Otherwise, show the guest's email.
-		elseif (empty($memberContext[$memCommID]['hide_email']))
-			echo '
-								<br />
-								<br />
-								<a href="mailto:', $memberContext[$memCommID]['email'], '">', ($settings['use_image_buttons'] ? '<img src="' . $settings['images_url'] . '/email_sm.gif" alt="' . $txt['tema_txt_profile_email'] . '" title="' . $txt['tema_txt_profile_email'] . '" border="0" />' : $txt['tema_txt_profile_email']), '</a>';
-
-		// Done with the information about the poster... on to the post itself.
-		echo '
-							</div>';
-}
-
-function Downloads_GetStarsByPrecent($percent)
-{
-	global $settings, $txt, $context;
-
-    if ($context['downloads21beta'] == false)
-    {
-    	if ($percent == 0)
-    		return $txt['tema_text_catnone'];
-    	else if ($percent <= 20)
-    		return str_repeat('<img src="' . $settings['images_url'] . '/star.gif" alt="*" border="0" />', 1);
-    	else if ($percent <= 40)
-    		return str_repeat('<img src="' . $settings['images_url'] . '/star.gif" alt="*" border="0" />', 2);
-    	else if ($percent <= 60)
-    		return str_repeat('<img src="' . $settings['images_url'] . '/star.gif" alt="*" border="0" />', 3);
-    	else if ($percent <= 80)
-    		return str_repeat('<img src="' . $settings['images_url'] . '/star.gif" alt="*" border="0" />', 4);
-    	else if ($percent <= 100)
-    		return str_repeat('<img src="' . $settings['images_url'] . '/star.gif" alt="*" border="0" />', 5);
-            
-       } 
-    else
-    {
-        if ($percent == 0)
-    		return $txt['tema_text_catnone'];
-    	else if ($percent <= 20)
-    		return str_repeat('<img src="' . $settings['images_url'] . '/membericons/icon.png" alt="*" border="0" />', 1);
-    	else if ($percent <= 40)
-    		return str_repeat('<img src="' . $settings['images_url'] . '/membericons/icon.png" alt="*" border="0" />', 2);
-    	else if ($percent <= 60)
-    		return str_repeat('<img src="' . $settings['images_url'] . '/membericons/icon.png" alt="*" border="0" />', 3);
-    	else if ($percent <= 80)
-    		return str_repeat('<img src="' . $settings['images_url'] . '/membericons/icon.png" alt="*" border="0" />', 4);
-    	else if ($percent <= 100)
-    		return str_repeat('<img src="' . $settings['images_url'] . '/membericons/icon.png" alt="*" border="0" />', 5);
-    }
-
-}
 
 function resmikclt($max_width, $max_height, $source_file, $dst_dir, $quality = 80){
     $imgsize = getimagesize($source_file);

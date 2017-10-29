@@ -157,7 +157,29 @@ function template_mainview()
 
 
 			if (!empty($modSettings['tema_set_t_rating']) && $context['downloads_cat_norate'] != 1)
-				echo '<td>', Downloads_GetStarsByPrecent(($file['totalratings'] != 0) ? ($file['rating'] / ($file['totalratings']* 5) * 100) : 0), '</td>';
+				echo '<td>';
+					if ($file['totalratings'] == 0)
+					{
+						echo $txt['tema_text_catnone'];
+					}
+					else
+					{
+						$stars = 5;
+						$derece =($file['rating'] / ($file['totalratings']* $stars) * 100);
+						if ($derece == 0)
+							echo $txt['tema_form_rating'];
+						else if ($derece <= 20)
+							echo str_repeat('<span class="generic_star"></span>', 1);
+						else if ($derece <= 40)
+							echo str_repeat('<span class="generic_star"></span>', 2);
+						else if ($derece <= 60)
+							echo str_repeat('<span class="generic_star"></span>', 3);
+						else if ($derece <= 80)
+							echo str_repeat('<span class="generic_star"></span>', 4);
+						else if ($derece <= 100)
+							echo str_repeat('<span class="generic_star"></span>', 5);
+					}
+				echo '</td>';
 
 			if (!empty($modSettings['tema_set_t_views']))
 				echo '<td>', $file['views'], '</td>';
@@ -224,12 +246,6 @@ function template_mainview()
 				</h3>
 			</div>';
 
-		if (!empty($modSettings['tema_index_showtop']))
-		{
-			if (!empty($modSettings['tema_index_recent']))
-				MainPageBlock($txt['tema_main_recent'], 'recent');
-		}
-
 		echo '
 		<div id="messageindex">';
 		echo '<div class="title_bar" id="topic_header">
@@ -292,12 +308,23 @@ function template_mainview()
 		}
 		echo '</div>
 		</div>';
-
-		if (empty($modSettings['tema_index_showtop']))
-		{
-			if (!empty($modSettings['tema_index_recent']))
+			if (!empty($modSettings['tema_index_recent'])){
 				MainPageBlock($txt['tema_main_recent'], 'recent');
-		}
+				Enlist();
+			}
+			if (!empty($modSettings['tema_index_toprated'])){
+				MainPageBlock($txt['tema_main_toprated'], 'toprated');
+				Enlist();
+			}
+			if (!empty($modSettings['tema_index_mostviewed'])){
+				MainPageBlock($txt['tema_main_viewed'], 'viewed');
+				Enlist();
+			}	
+			if (!empty($modSettings['tema_index_mostdownloaded'])){
+				MainPageBlock($txt['tema_main_mostdownloads'], 'mostdownloaded');
+				Enlist();
+			}	
+			
 		if (allowedTo('themes_manage'))
 		{
 			echo '
@@ -983,8 +1010,6 @@ function template_view_download()
 
 	$keywords = explode(' ',$context['downloads_file']['keywords']);
  	$keywordscount = count($keywords);
-
-	// Show the title of the download
         if ($modSettings['tema_set_file_title'])
         echo '
         <div class="cat_bar">
@@ -992,80 +1017,95 @@ function template_view_download()
                 ', $context['downloads_file']['title'], '
                 </h3>
         </div>';
-
-	echo '<table cellspacing="0" cellpadding="10" border="0" align="center" width="100%" class="tborder">';
-
-		// Show the main download
 		echo '
-			<tr class="windowbg2">
-				<td align="center">';
+		<div class="information centertext">';
+			if (!empty($modSettings['tema_who_viewing']))
+			{
+				echo '<span class="smalltext floatleft">';
+				echo empty($context['view_members_list']) ? '0 ' . $txt['tema_who_members'] : implode(', ', $context['view_members_list']) . (empty($context['view_num_hidden']) || $context['can_moderate_forum'] ? '' : ' (+ ' . $context['view_num_hidden'] . ' ' . $txt['tema_who_hidden'] . ')');
 
+				echo $txt['who_and'], $context['view_num_guests'], ' ', $context['view_num_guests'] == 1 ? $txt['guest'] : $txt['guests'], $txt['tema_who_viewfile'], '</span>';
+			}
+			if ($modSettings['tema_set_file_prevnext'])
+				echo '<p class="floatright">
+					<a href="', $scripturl, '?action=tema;sa=prev&id=', $context['downloads_file']['ID_FILE'], '">', $txt['tema_text_prev'], '</a> |
+					<a href="', $scripturl, '?action=tema;sa=next&id=', $context['downloads_file']['ID_FILE'], '">', $txt['tema_text_next'], '</a>
+					</p>';
+		echo '
+		</div>';
+	echo '<div class="roundframe">
+			<div class="centertext">';
 					echo '<a class="butoon indirbutoon" href="' . $scripturl . '?action=tema;sa=downfile&id=', $context['downloads_file']['ID_FILE'], '">', ($context['downloads_file']['fileurl'] == '' ? $context['downloads_file']['orginalfilename'] : $txt['tema_app_download']), '</a>';
 
 					if($context['downloads_file']['demourl'] != ''){
 						echo '<a class="butoon demobutoon" href="'.$boardurl.'/demo/index.php?tema='.$context['downloads_file']['title'].'">Demo</a>';
 					}
-					
 			echo '
-				</td>
-			</tr>';
-
-		// Show the main download
-		echo '
-			<tr class="windowbg2">
-				<td align="center">';					
+			</div>
+			<div class="description centertext">';					
 
 				if($modSettings['tema_set_file_thumb'] != 0){
 					echo '<img src="',$context['downloads_file']['picture'] == '' ? $context['downloads_file']['pictureurl'] : $modSettings['tema_url'].'temaresim/'.$context['downloads_file']['picture'],'" alt="'.$context['downloads_file']['title'].'">';
 				}
 			echo '
-				</td>
-			</tr>';
+				</div>
+			<div class="windowbg">';
+			if ($modSettings['tema_set_file_desc'])
+				echo '' . $txt['tema_form_description'] . ' ' . parse_bbc($context['downloads_file']['description']);
 
-		echo '
-			<tr class="windowbg2">
-				<td align="center"><span class="smalltext"><b>';
+			echo '
+			</div>
+			<div class="windowbg">
+				<div class="poster centertext">';
+			
+			if ($modSettings['tema_set_file_poster'])
+			{
 
+				if ($context['downloads_file']['real_name'] != ''){
+					loadMemberData($context['downloads_file']['id_member']);
+					loadMemberContext($context['downloads_file']['id_member']);
+					$poster = $memberContext[$context['downloads_file']['id_member']];
+					echo'<h4>
+							'.$poster['link_color'].'
+						</h4>
+						<ul class="user_info">
+							<li class="avatar">
+								'.$poster['avatar']['image'].'
+							</li>
+							<li class="icons">
+								'.$poster['group_icons'].'
+							</li>
+						</ul>';		
+				}	
+				else
+					echo $txt['tema_text_postedby'] . ' ' . $txt['tema_guest'] . '&nbsp;';
+
+			}
+			
+			if ($modSettings['tema_set_file_date'])
+				echo'<p class="smalltext">'. $context['downloads_file']['date'] . '</p>';
+
+			echo'</div>
+			<div class="postarea"><dl class="stats"><dt>';	
+			
+				foreach ($context['downloads_custom'] as $i => $custom)
+				{
+					if ($custom['value'] != '')
+						echo '<p class="smalltext">', $custom['title'], ': ',$custom['value'], '</p>';
+
+				}
 			if ($modSettings['tema_set_file_showfilesize'] && $context['downloads_file']['fileurl'] == '')
-				echo $txt['tema_text_filesize']  . Downloads_format_size($context['downloads_file']['filesize'],2) . '&nbsp;&nbsp;';
-
-
+				echo $txt['tema_text_filesize']  . Downloads_format_size($context['downloads_file']['filesize'],2) . '<br />';
+				
 			if ($modSettings['tema_set_file_views'])
-				echo $txt['tema_text_views'] . ' (' . $context['downloads_file']['views'] . ')&nbsp;&nbsp;';
+				echo $txt['tema_text_views'] . ' (' . $context['downloads_file']['views'] . ')<br />';
 
 			if ($modSettings['tema_set_file_downloads'])
-				echo $txt['tema_cat_downloads'] . ' (' . $context['downloads_file']['totaldownloads'] . ')&nbsp;&nbsp;';
+				echo $txt['tema_cat_downloads'] . ' (' . $context['downloads_file']['totaldownloads'] . ')<br />';
 
 			if ($modSettings['tema_set_file_lastdownload'])
-				echo $txt['tema_text_lastdownload'] . ' ' . ($context['downloads_file']['lastdownload'] != 0 ? timeformat($context['downloads_file']['lastdownload']) : $txt['tema_text_lastdownload2'] ) . '&nbsp;';
-
-			echo '</b></span>
-				</td>
-			</tr>';
-
-		// Show the previous and next links
-		if ($modSettings['tema_set_file_prevnext'])
-			echo '<tr class="windowbg2">
-			<td align="center"><b>
-				<a href="', $scripturl, '?action=tema;sa=prev&id=', $context['downloads_file']['ID_FILE'], '">', $txt['tema_text_prev'], '</a> |
-				<a href="', $scripturl, '?action=tema;sa=next&id=', $context['downloads_file']['ID_FILE'], '">', $txt['tema_text_next'], '</a>
-				</b>
-				
-			</td>
-			</tr>';
-
-			echo '
-			<tr class="windowbg2">
-				<td>';
-
-			// Show description
-			if ($modSettings['tema_set_file_desc'])
-				echo '<b>' . $txt['tema_form_description'] . ' </b>' . parse_bbc($context['downloads_file']['description']);
-
-			echo '
-				<hr />';
-
-
+				echo $txt['tema_text_lastdownload'] . ' ' . ($context['downloads_file']['lastdownload'] != 0 ? timeformat($context['downloads_file']['lastdownload']) : $txt['tema_text_lastdownload2'] ) . '<br />';
+		 	
 			if ($modSettings['tema_set_file_keywords'])
 				if ($context['downloads_file']['keywords'] != '')
 				{
@@ -1079,137 +1119,91 @@ function template_view_download()
 					echo '<br />';
 				}
 
-			echo '<b>';
-			if ($modSettings['tema_set_file_poster'])
-			{
-
-				if ($context['downloads_file']['real_name'] != '')
-					echo $txt['tema_text_postedby'] . '<a href="' . $scripturl . '?action=profile;u=' . $context['downloads_file']['id_member'] . '">'  . $context['downloads_file']['real_name'] . '</a>&nbsp;';
-				else
-					echo $txt['tema_text_postedby'] . ' ' . $txt['tema_guest'] . '&nbsp;';
-
-			}
-			if ($modSettings['tema_set_file_date'])
-				echo $context['downloads_file']['date'] . '<br />';
-
-			echo '</b>';
-
-				// Show Custom Fields
-				foreach ($context['downloads_custom'] as $i => $custom)
-				{
-					// No reason to show empty custom fields on the display page
-					if ($custom['value'] != '')
-						echo '<b>', $custom['title'], ':</b>&nbsp;',$custom['value'], '<br />';
-
-				}
-
-		 	echo '<br />';
+			echo '</dt><dd>';
 
 				// Show rating information
 			if ($modSettings['tema_set_file_showrating'])
 				if ($modSettings['tema_show_ratings'] == true && $context['downloads_file']['disablerating'] == 0)
 				{
-
-					$max_num_stars = 5;
-
+				echo'<div class="derece">';
 					if ($context['downloads_file']['totalratings'] == 0)
 					{
-						// Display message that no ratings are in yet
-						echo $txt['tema_form_rating'] . $txt['tema_form_norating'];
+						echo'<p>'.$txt['tema_form_rating'] . $txt['tema_form_norating'].'</p><br class="clear"/>';
 					}
 					else
-					{
-						// Compute the rating in %
-						$rating =($context['downloads_file']['rating'] / ($context['downloads_file']['totalratings']* $max_num_stars) * 100);
-
-						echo $txt['tema_form_rating'] . Downloads_GetStarsByPrecent($rating)  . ' ' . $txt['tema_form_ratingby'] .$context['downloads_file']['totalratings'] . $txt['tema_form_ratingmembers'] . '<br />';
+					{	
+						$stars = 5;
+						$derece =($context['downloads_file']['rating'] / ($context['downloads_file']['totalratings']* $stars) * 100);
+						if ($derece == 0)
+							echo $txt['tema_form_rating'];
+						else if ($derece <= 20)
+							echo $txt['tema_form_rating'].' : '.str_repeat('<span class="generic_star"></span>', 1);
+						else if ($derece <= 40)
+							echo $txt['tema_form_rating'].' : '.str_repeat('<span class="generic_star"></span>', 2);
+						else if ($derece <= 60)
+							echo $txt['tema_form_rating'].' : '.str_repeat('<span class="generic_star"></span>', 3);
+						else if ($derece <= 80)
+							echo $txt['tema_form_rating'].' : '.str_repeat('<span class="generic_star"></span>', 4);
+						else if ($derece <= 100)
+							echo $txt['tema_form_rating'].' : '.str_repeat('<span class="generic_star"></span>', 5);
+						echo '<br/>'.$txt['tema_form_ratingby'].' : '.$context['downloads_file']['totalratings'] . $txt['tema_form_ratingmembers'] . '
+						<br class="clear"/>';
 					}
-
+					
 					if (allowedTo('themes_ratefile'))
 					{
-						echo '<form method="post" action="' . $scripturl . '?action=tema;sa=rate">';
-							for($i = 1; $i <= $max_num_stars;$i++)
-								echo '<input type="radio" name="rating" value="' . $i .'" />' . str_repeat('<img src="' . $settings['images_url'] . '/membericons/icon.png" alt="*" border="0" />', $i);
-
-
-					echo '
-							 <input type="hidden" name="id" value="' . $context['downloads_file']['ID_FILE'] . '" />
-							 <input type="submit" name="submit" value="' . $txt['tema_form_ratedownload'] . '" />
-						';
-
-						// If the user can manage the downloads let them see who voted for what and option to delete rating
-						if (allowedTo('themes_manage'))
-							echo '&nbsp;<a href="' . $scripturl . '?action=tema;sa=viewrating&id=' . $context['downloads_file']['ID_FILE'] . '">' . $txt['tema_form_viewratings'] . '</a>';
-						echo '</form><br />';
+						$stars =1;
+						echo '<div class="stars"><form method="post" action="' . $scripturl . '?action=tema;sa=rate">
+								<input type="hidden" name="id" value="' . $context['downloads_file']['ID_FILE'] . '" />
+								<input type="submit" name="submit"  value="' . $txt['tema_form_ratedownload'] . '" />';
+							for($i = 5; $i >= $stars;$i--)
+								echo '<input class="star star-' . $i .'" id="star-' . $i .'" type="radio" name="rating" value="' . $i .'" />
+									<label class="star star-' . $i .'" for="star-' . $i .'"></label>';
+						echo '</form></div>';
 					}
+			echo '</div>';
+				
 				}
-
-				// Show linking codes
 
 				if (!empty($modSettings['tema_set_showcode_directlink']) || !empty($modSettings['tema_set_showcode_htmllink']))
 				{
-					echo '<br /><b>',$txt['tema_txt_download_linking'],'</b><br />
-					<table border="0">
-					';
-
-
+					echo '<div class="derece" style="line-height: 24px;"><p>',$txt['tema_txt_download_linking'],'</p>';
 					if ($modSettings['tema_set_showcode_directlink'])
 					{
-						echo '<tr><td width="30%">', $txt['tema_txt_directlink'], '</td><td> <input type="text" value="' . $scripturl . '?action=tema;sa=downfile&id=' . $context['downloads_file']['ID_FILE']  . '" size="50"></td></tr>';
+						echo '<strong class="smalltext floatleft">', $txt['tema_txt_directlink'], '</strong><input class="deinput floatright" type="text" value="' . $scripturl . '?action=tema;sa=downfile&id=' . $context['downloads_file']['ID_FILE']  . '">';
 					}
 					if ($modSettings['tema_set_showcode_htmllink'])
 					{
-						echo '<tr><td width="30%">', $txt['tema_set_showcode_htmllink'], '</td><td> <input type="text" value="<a href=&#34;' . $scripturl . '?action=tema;sa=downfile&id=' . $context['downloads_file']['ID_FILE']  . '&#34;>', ($context['downloads_file']['fileurl'] == '' ? $context['downloads_file']['orginalfilename'] : $txt['tema_app_download']), '</a>" size="50"></td></tr>';
+						echo '<strong class="smalltext floatleft">', $txt['tema_txt_htmllink'], '</strong><input class="deinput floatright" type="text" value="<a href=&#34;' . $scripturl . '?action=tema;sa=downfile&id=' . $context['downloads_file']['ID_FILE']  . '&#34;>', ($context['downloads_file']['fileurl'] == '' ? $context['downloads_file']['orginalfilename'] : $txt['tema_app_download']), '</a>" >';
 					}
-
-					echo '</table>';
-
+					echo '<br class="clear"/></div>';
 				}
-
-				// Show edit download links if allowed
+				
+				echo '</dd></dl>
+					<div class="buttonlist">';
 				if (allowedTo('themes_manage'))
-					echo '&nbsp;<a href="' . $scripturl . '?action=tema;sa=unapprove&id=' . $context['downloads_file']['ID_FILE'] . '">' . $txt['tema_text_unapprove'] . '</a>';
+					echo '<a class="button" href="' . $scripturl . '?action=tema;sa=unapprove&id=' . $context['downloads_file']['ID_FILE'] . '">' . $txt['tema_text_unapprove'] . '</a>';
 				if (allowedTo('themes_manage') || allowedTo('themes_edit') && $context['downloads_file']['id_member'] == $user_info['id'])
-					echo '&nbsp;<a href="' . $scripturl . '?action=tema;sa=edit&id=' . $context['downloads_file']['ID_FILE']. '">' . $txt['tema_text_edit'] . '</a>';
+					echo '<a class="button" href="' . $scripturl . '?action=tema;sa=edit&id=' . $context['downloads_file']['ID_FILE']. '">' . $txt['tema_text_edit'] . '</a>';
 				if (allowedTo('themes_manage') || allowedTo('themes_delete') && $context['downloads_file']['id_member'] == $user_info['id'])
-					echo '&nbsp;<a href="' . $scripturl . '?action=tema;sa=delete&id=' . $context['downloads_file']['ID_FILE'] . '">' . $txt['tema_text_delete'] . '</a>';
+					echo '<a class="button" href="' . $scripturl . '?action=tema;sa=delete&id=' . $context['downloads_file']['ID_FILE'] . '">' . $txt['tema_text_delete'] . '</a>';
 
-
-				// Show report download link
 				if (allowedTo('themes_report'))
 				{
-					echo '&nbsp;<a href="' . $scripturl . '?action=tema;sa=report&id=' . $context['downloads_file']['ID_FILE'] . '">' . $txt['tema_text_reportdownload'] . '</a>';
+					echo '<a class="button" href="' . $scripturl . '?action=tema;sa=report&id=' . $context['downloads_file']['ID_FILE'] . '">' . $txt['tema_text_reportdownload'] . '</a>';
 				}
-
+				if (allowedTo('themes_ratefile'))
+				{
+					if (allowedTo('themes_manage'))
+						echo '<a class="button" href="' . $scripturl . '?action=tema;sa=viewrating&id=' . $context['downloads_file']['ID_FILE'] . '">' . $txt['tema_form_viewratings'] . '</a>';	
+				}			
 				echo '
-				</td>
-			</tr>';
+					</div>';
+				
+		echo '</div>
+		</div>
+	</div>';
 
-		// Display who is viewing the download.
-		if (!empty($modSettings['tema_who_viewing']))
-		{
-			echo '<tr class="windowbg2">
-			<td align="center"><span class="smalltext">';
-
-			// Show just numbers...?
-			// show the actual people viewing the topic?
-			echo empty($context['view_members_list']) ? '0 ' . $txt['tema_who_members'] : implode(', ', $context['view_members_list']) . (empty($context['view_num_hidden']) || $context['can_moderate_forum'] ? '' : ' (+ ' . $context['view_num_hidden'] . ' ' . $txt['tema_who_hidden'] . ')');
-
-			// Now show how many guests are here too.
-			echo $txt['who_and'], $context['view_num_guests'], ' ', $context['view_num_guests'] == 1 ? $txt['guest'] : $txt['guests'], $txt['tema_who_viewfile'], '</span></td></tr>';
-		}
-
-echo '
-		</table><br />';
-    
-         	echo '
-                    <div class="tborder">
-            <div class="roundframe centertext">';
-    	
-				echo '
-				<a href="' . $scripturl . '?action=tema;cat=' . $context['downloads_file']['ID_CAT'] . '">' . $txt['tema_text_returndownload'] . '</a>
-            </div>
-        </div>';
 	echo '
 		<div class="pagesection">
 			<div class="buttonlist floatright">
@@ -1536,7 +1530,29 @@ function template_search_results()
 				echo  '<td><a href="' . $scripturl . '?action=tema;sa=view;down=', $file['ID_FILE'], '">', $file['title'], '</a></td>';
 
 			if (!empty($modSettings['tema_set_t_rating']))
-				echo '<td>', Downloads_GetStarsByPrecent(($file['totalratings'] != 0) ? ($file['rating'] / ($file['totalratings']* 5) * 100) : 0), '</td>';
+				echo '<td>';
+					if ($file['totalratings'] == 0)
+					{
+						echo $txt['tema_text_catnone'];
+					}
+					else
+					{
+						$stars = 5;
+						$derece =($file['rating'] / ($file['totalratings']* $stars) * 100);
+							if ($derece == 0)
+								echo $txt['tema_form_rating'];
+							else if ($derece <= 20)
+								echo str_repeat('<span class="generic_star"></span>', 1);
+							else if ($derece <= 40)
+								echo str_repeat('<span class="generic_star"></span>', 2);
+							else if ($derece <= 60)
+								echo str_repeat('<span class="generic_star"></span>', 3);
+							else if ($derece <= 80)
+								echo str_repeat('<span class="generic_star"></span>', 4);
+							else if ($derece <= 100)
+								echo str_repeat('<span class="generic_star"></span>', 5);
+					}
+				echo '</td>';
 
 			if (!empty($modSettings['tema_set_t_views']))
 				echo '<td>', $file['views'], '</td>';
@@ -1666,7 +1682,29 @@ function template_myfiles()
 			}
 
 			if (!empty($modSettings['tema_set_t_rating']))
-				echo '<td>', Downloads_GetStarsByPrecent(($file['totalratings'] != 0) ? ($file['rating'] / ($file['totalratings']* 5) * 100) : 0), '</td>';
+				echo '<td>';
+					if ($file['totalratings'] == 0)
+					{
+						echo $txt['tema_text_catnone'];
+					}
+					else
+					{
+						$stars = 5;
+						$derece =($file['rating'] / ($file['totalratings']* $stars) * 100);
+						if ($derece == 0)
+							echo $txt['tema_form_rating'];
+						else if ($derece <= 20)
+							echo str_repeat('<span class="generic_star"></span>', 1);
+						else if ($derece <= 40)
+							echo str_repeat('<span class="generic_star"></span>', 2);
+						else if ($derece <= 60)
+							echo str_repeat('<span class="generic_star"></span>', 3);
+						else if ($derece <= 80)
+							echo str_repeat('<span class="generic_star"></span>', 4);
+						else if ($derece <= 100)
+							echo str_repeat('<span class="generic_star"></span>', 5);
+					}
+				echo '</td>';
 
 			if (!empty($modSettings['tema_set_t_views']))
 				echo '<td>', $file['views'], '</td>';
@@ -1771,119 +1809,125 @@ function template_stats()
 {
 	global $settings, $context, $txt, $scripturl, $user_info;
 
-echo '
-<div class="cat_bar">
-		<h3 class="catbg centertext">
-        ', $txt['tema_stats_title'], '
-        </h3>
-</div>
-<table border="0" cellpadding="1" cellspacing="0" width="100%" align="center" class="table_grid">
-
-			<tr class="catbg">
-				<td colspan="2">&nbsp;</td>
-			</tr>
-			<tr class="windowbg2">
-				<td width="50%" valign="top">
-					<table border="0" cellpadding="1" cellspacing="0" width="100%">
-						<tr class="windowbg2">
-							<td  width="50%">', $txt['tema_stats_totalfiles'] ,  '</td>
-							<td width="50%"  align="right">', comma_format($context['total_files']) , '</td>
-						</tr>
-						<tr class="windowbg2">
-							<td width="50%">', $txt['tema_stats_totalviews'] ,  '</td>
-							<td width="50%"  align="right">', comma_format($context['total_views']) , '</td>
-						</tr>
-
-					</table>
-				</td>
-				<td width="50%" valign="top">
-					<table border="0" cellpadding="1" cellspacing="0" width="100%">
-						<tr class="windowbg2">
-							<td width="50%">', $txt['tema_stats_totaldownloads'] , '</td>
-							<td  idth="50%"  align="right">', comma_format($context['total_downloads']), '</td>
-						</tr>
-						<tr class="windowbg2">
-							<td width="50%">', $txt['tema_stats_totalfize'] ,  '</td>
-							<td width="50%" align="right">', $context['total_filesize'] , '</td>
-						</tr>
-					</table>
-				</td>
-
-			</tr>
-			<tr class="windowbg">
-				<td width="50%"><b>', $txt['tema_stats_viewed'], '</b></td>
-				<td width="50%"><b>', $txt['tema_stats_toprated'], '</b></td>
-			</tr>
-			<tr class="windowbg2">
-				<td width="50%" valign="top">
-					<table border="0" cellpadding="1" cellspacing="0" width="100%">';
-						foreach ($context['top_viewed'] as $file)
-						{
-							echo '<tr class="windowbg2">
-									<td width="60%" valign="top">', $file['link'], '</td>
-									<td width="20%" align="left" valign="top">', $file['views'] > 0 ? '<img src="' . $settings['images_url'] . '/bar_stats.png" width="' . $file['percent'] . '" height="15" alt="" />' : '&nbsp;', '</td>
-									<td width="20%" align="right" valign="top">', $file['views'], '</td>
-								</tr>';
-						}
 	echo '
-					</table>
-				</td>
-				<td width="50%" valign="top">
-					<table border="0" cellpadding="1" cellspacing="0" width="100%">';
-						foreach ($context['top_rating'] as $file)
+	<div id="statistics" class="main_section">
+		<div class="cat_bar">
+			<h3 class="catbg">', $txt['tema_stats_title'], '</h3>
+		</div>
+		<div class="roundframe">
+			<div class="title_bar">
+				<h4 class="titlebg">
+					<span class="generic_icons general"></span> ', $txt['tema_stats_title'], '
+				</h4>
+			</div>
+			<dl class="stats half_content nobb">
+				<dt>', $txt['tema_stats_totalfiles'] ,  '</dt>
+				<dd>', comma_format($context['total_files']) , '</dd>
+				<dt>', $txt['tema_stats_totalviews'] ,  '</dt>
+				<dd>', comma_format($context['total_views']) , '</dd>
+			</dl>
+			<dl class="stats half_content nobb">
+				<dt>', $txt['tema_stats_totaldownloads'] , '</dt>
+				<dd>', comma_format($context['total_downloads']), '</dd>
+				<dt>', $txt['tema_stats_totalfize'] ,  '</dt>
+				<dd>', $context['total_filesize'] , '</dd>
+			</dl>
+			<div class="half_content">
+				<div class="title_bar">
+					<h4 class="titlebg">
+						', $txt['tema_stats_viewed'], '
+					</h4>
+				</div>
+				<dl class="stats">';
+					foreach ($context['top_viewed'] as $file)
 						{
-							echo '<tr class="windowbg2">
-									<td width="60%" valign="top">', $file['link'], '</td>
-									<td width="20%" align="left" valign="top">', $file['rating'] > 0 ? '<img src="' . $settings['images_url'] . '/bar_stats.png" width="' . $file['percent'] . '" height="15" alt="" />' : '&nbsp;', '</td>
-									<td width="20%" align="right" valign="top">', $file['rating'], '</td>
-								</tr>';
+							echo '
+							<dt>', $file['link'], '</dt>
+							<dd class="statsbar">';
+							if (!empty($file['percent']))
+							echo '
+							<div class="bar" style="width: ', $file['percent'], '%;">
+								<span class="righttext">', $file['views'], '</span>
+							</div>';
+							else
+							echo '
+							<div class="bar empty"><span class="righttext">', $file['views'], '</span></div>';
+							echo '
+							</dd>';
 						}
-	echo '
-					</table>
-				</td>
-			</tr>
-			<tr class="windowbg">
-				<td width="50%"><b>', $txt['tema_stats_topfile'], '</b></td>
-				<td width="50%"><b>',$txt['tema_stats_last'], '</b></td>
-			</tr>
-			<tr class="windowbg2">
-				<td width="50%" valign="top">
-					<table border="0" cellpadding="1" cellspacing="0" width="100%">';
-						foreach ($context['totaldownloads'] as $file)
+					
+					
+				echo'	
+				</dl>
+			</div>
+			<div class="half_content">
+				<div class="title_bar">
+					<h4 class="titlebg">
+						', $txt['tema_stats_toprated'], '
+					</h4>
+				</div>
+				<dl class="stats">';
+					foreach ($context['top_rating'] as $file)
 						{
-							echo '<tr class="windowbg2">
-									<td width="60%" valign="top">', $file['link'], '</td>
-									<td width="20%" align="left" valign="top">', $file['totaldownloads'] > 0 ? '<img src="' . $settings['images_url'] . '/bar_stats.png" width="' . $file['percent'] . '" height="15" alt="" />' : '&nbsp;', '</td>
-									<td width="20%" align="right" valign="top">', $file['totaldownloads'], '</td>
-								</tr>';
+							echo '<dt>', $file['link'], '</dt>
+							<dd class="statsbar">';
+							if (!empty($file['percent']))
+							echo '
+							<div class="bar" style="width: ', $file['percent'], '%;">
+								<span class="righttext">', $file['rating'], '</span>
+							</div>';
+							else
+							echo '
+							<div class="bar empty"><span class="righttext">', $file['rating'], '</span></div>';
+							echo '
+							</dd>';
 						}
-
-	echo '
-					</table>
-				</td>
-				<td width="50%" valign="top">
-					<table border="0" cellpadding="1" cellspacing="0" width="100%">';
-						foreach ($context['last_upload'] as $file)
+				echo'	
+				</dl>
+			</div>
+			<div class="half_content">
+				<div class="title_bar">
+					<h4 class="titlebg">
+						', $txt['tema_stats_topfile'], '
+					</h4>
+				</div>
+				<dl class="stats">';
+					foreach ($context['totaldownloads'] as $file)
 						{
-							echo '<tr class="windowbg2">
-									<td width="100%" colspan="3" valign="top">', $file['link'], '</td>
-								</tr>';
+							echo '<dt>', $file['link'], '</dt>
+							<dd class="statsbar">';
+							if (!empty($file['percent']))
+							echo '
+							<div class="bar" style="width: ', $file['percent'], '%;">
+								<span class="righttext">', $file['totaldownloads'], '</span>
+							</div>';
+							else
+							echo '
+							<div class="bar empty"><span class="righttext">', $file['totaldownloads'], '</span></div>';
+							echo '
+							</dd>';
 						}
-	echo '
-					</table>
-				</td>
-			</tr>
-		</table>';
-        
-            	echo '
-                    <div class="tborder">
-            <div class="roundframe centertext">';
-    	
-				echo '
-				<a href="' . $scripturl . '?action=tema">' . $txt['tema_text_returndownload'] . '</a>
-            </div>
-        </div>';
-        	echo '
+				echo'
+				</dl>
+			</div>
+			<div class="half_content">
+				<div class="title_bar">
+					<h4 class="titlebg">
+						',$txt['tema_stats_last'], '
+					</h4>
+				</div>
+				<dl class="stats half_content nobb">';
+					foreach ($context['last_upload'] as $file)
+						{
+							echo '<dt>', $file['link'], '</dt><dd></dd>';
+						}
+				echo'
+				</dl>
+			</div>
+		</div>
+		<br class="clear">	
+	</div>';
+		echo '
 		<div class="pagesection">
 			<div class="buttonlist floatright">
 				<a class="button" href="', $scripturl, '?action=tema">', $txt['tema_text_returndownload'], '</a>
@@ -1899,130 +1943,100 @@ echo '
 function template_filespace()
 {
 	global $scripturl, $txt, $context;
-    
-
-	echo '
+		echo '
 			<div class="cat_bar">
-								<h3 class="catbg">' . $txt['tema_filespace']. '</h3>
+				<h3 class="catbg">
+				' . $txt['tema_filespace']. '
+				</h3>
             </div>
-	<table border="0" width="100%" cellspacing="0" align="center" cellpadding="4" class="tborder">
-		<tr class="windowbg">
-			<td>
-            <b>' .$txt['tema_filespace_groupquota_title'] . '</b><br />
-			<table cellspacing="0" cellpadding="10" border="0" align="center" width="90%" class="table_grid">
+
+            <b>' .$txt['tema_filespace_groupquota_title'] . '</b>
+			<table class="table_grid">
                 <thead>
-			<tr class="title_bar">
-				<th  class="lefttext first_th">' . $txt['tema_filespace_groupname'] . '</th>
-				<th  class="lefttext">' .$txt['tema_filespace_limit']  . '</th>
-				<th  class="lefttext last_th">' .  $txt['tema_text_options']  . '</th>
-				</tr>
+					<tr class="title_bar">
+						<th>' . $txt['tema_filespace_groupname'] . '</th>
+						<th>' .$txt['tema_filespace_limit']  . '</th>
+						<th>' .  $txt['tema_text_options']  . '</th>
+					</tr>
                 </thead>';
 
-		// Show the member groups
-        $styleclass = 'windowbg';
 			foreach ($context['downloads_membergroups'] as $i => $group)
 			{
 
-				echo '<tr class="' . $styleclass . '">';
+				echo '<tr class="windowbg">';
 				echo '<td>'  . $group['group_name'] . '</td>';
 				echo '<td>' . Downloads_format_size($group['totalfilesize'], 2) . '</td>';
 				echo '<td><a href="' . $scripturl . '?action=tema;sa=deletequota&id=' . $group['ID_GROUP'] . '">' . $txt['tema_text_delete'] . '</a></td>';
 				echo '</tr>';
 
-                if ($styleclass == 'windowbg')
-    				$styleclass = 'windowbg2';
-    			else
-    				$styleclass = 'windowbg';
-
 			}
-
-			// Show Regular members
 			foreach ($context['downloads_reggroup'] as $i => $group)
 			{
-				echo '<tr class="' . $styleclass . '">';
+				echo '<tr class="windowbg">';
 				echo '<td>', $txt['membergroups_members'], '</td>';
 				echo '<td>' . Downloads_format_size($group['totalfilesize'], 2) . '</td>';
 				echo '<td><a href="',$scripturl, '?action=tema;sa=deletequota&id=' . $group['ID_GROUP'] . '">' . $txt['tema_text_delete'] . '</a></td>';
 				echo '</tr>';
 
-                if ($styleclass == 'windowbg')
-    				$styleclass = 'windowbg2';
-    			else
-    				$styleclass = 'windowbg';
-
 			}
 
 		echo '
-				<tr class="windowbg">
-					<td colspan="3" align="center">
-						<form method="post" action="' . $scripturl . '?action=tema;sa=addquota">
-						' . $txt['tema_filespace_groupname']  . '&nbsp;<select name="groupname">
+			</table>
+				<div class="windowbg centertext">
+					<form class="login" method="post" action="' . $scripturl . '?action=tema;sa=addquota">
+						<dl>
+						<dt>
+							' . $txt['tema_filespace_groupname']  . '
+						</dt>
+						<dd>	
+							<select name="groupname">
 								<option value="0">', $txt['membergroups_members'], '</option>';
 								foreach ($context['groups'] as $group)
 									echo '<option value="', $group['ID_GROUP'], '">', $group['group_name'], '</option>';
 
-							echo '</select><br />' . $txt['tema_filespace_limit'] . '&nbsp;&nbsp;&nbsp;&nbsp;<input type="text" name="filelimit" /> (bytes)
-							<br /><br />
-						<input type="submit" value="' . $txt['tema_filespace_addquota'] . '" />
-						</form>
-					</td>
-				</tr>
-
-				</table>
-			</td>
-		</tr>
-		<tr class="windowbg">
-			<td>
-			<table cellspacing="0" cellpadding="10" border="0" align="center" width="90%" class="table_grid">
+							echo '</select>
+						</dd>
+						<dt>
+							' . $txt['tema_filespace_limit'] . '
+						</dt>
+						<dd>	
+							<input type="text" name="filelimit" /> (bytes)
+						</dd>
+						</dl>
+						<p>	
+							<input type="submit" value="' . $txt['tema_filespace_addquota'] . '" />
+						</p>
+					</form>
+				</div>
+			<table class="table_grid">
 				<thead>
-			<tr class="title_bar">
-				<th  class="lefttext first_th">' . $txt['tema_app_membername'] . '</th>
-				<th  class="lefttext">' . $txt['tema_text_options'] . '</th>
-				<th  class="lefttext last_th">' . $txt['tema_filespace_filesize']  . '</th>
-				</tr>
+					<tr class="title_bar">
+						<th>' . $txt['tema_app_membername'] . '</th>
+						<th>' . $txt['tema_text_options'] . '</th>
+						<th>' . $txt['tema_filespace_filesize']  . '</th>
+					</tr>
                 </thead>';
 
-                
-	// List all members filespace usage
-    $styleclass = 'windowbg';
-	foreach ($context['downloads_members'] as $i => $member)
-	{
+				foreach ($context['downloads_members'] as $i => $member)
+				{
 
-		echo '<tr class="' . $styleclass . '">';
-		echo '<td><a href="' . $scripturl . '?action=profile;u=' . $member['id_member'] . '">'  . $member['real_name'] . '</a></td>';
-		echo '<td><a href="' . $scripturl . '?action=tema;sa=filelist&id=' . $member['id_member'] . '">'  . $txt['tema_filespace_list'] . '</a></td>';
-		echo '<td>' . Downloads_format_size($member['totalfilesize'], 2) . '</td>';
-		echo '</tr>';
-
-        if ($styleclass == 'windowbg')
-		  $styleclass = 'windowbg2';
-		else
-		  $styleclass = 'windowbg';
-
-	}
-
-
-			echo '<tr class="titlebg">
-					<td align="left" colspan="3">
-					';
-
-
-					echo $context['page_index'];
+					echo '<tr class="windowbg">';
+					echo '<td><a href="' . $scripturl . '?action=profile;u=' . $member['id_member'] . '">'  . $member['real_name'] . '</a></td>';
+					echo '<td><a href="' . $scripturl . '?action=tema;sa=filelist&id=' . $member['id_member'] . '">'  . $txt['tema_filespace_list'] . '</a></td>';
+					echo '<td>' . Downloads_format_size($member['totalfilesize'], 2) . '</td>';
+					echo '</tr>';
+				}
+			echo'
+			</table>';
+			
 
 			echo '
-					</td>
-				</tr>
-			<tr class="titlebg">
-					<td align="left" colspan="3">
-					<form method="post" action="' . $scripturl . '?action=tema;sa=recountquota">
+			<div class="pagesection">
+				<form method="post" action="' . $scripturl . '?action=tema;sa=recountquota">
 					<input type="submit" value="' . $txt['tema_filespace_recount'] . '" />
-					</form>
-					</td>
-			</tr>
-			</table>
-			</td>
-		</tr>
-</table>';
+				</form>
+				',$context['page_index'],'
+			</div>';
 
 }
 
@@ -2030,97 +2044,66 @@ function template_filelist()
 {
 	global $scripturl, $txt, $context, $modSettings;
 
-	echo '
-	<div class="cat_bar">
-								<h3 class="catbg">' . $txt['tema_filespace_list_title'] . ' - ' . $context['downloads_filelist_real_name'] . '</h3>
+		echo '
+			<div class="cat_bar">
+				<h3 class="catbg">
+					' . $txt['tema_filespace_list_title'] . ' - ' . $context['downloads_filelist_real_name'] . '
+				</h3>
             </div>
-	<table border="0" width="100%" cellspacing="0" align="center" cellpadding="4" class="tborder">
 
-		<tr class="windowbg">
-			<td>
-			<table cellspacing="0" cellpadding="10" border="0" align="center" width="90%" class="table_grid">
-				<tr class="catbg">
-				<td>' . $txt['tema_app_title'] . '</td>
-				<td>' . $txt['tema_filespace_filesize']  . '</td>
-				<td>' . $txt['tema_text_options'] . '</td>
-
-				</tr>';
-
-		// List all user's downloads
-        $styleclass = 'windowbg';
+			<table class="table_grid">
+				<thead>
+					<tr class="title_bar">
+						<th>' . $txt['tema_app_title'] . '</th>
+						<th>' . $txt['tema_filespace_filesize']  . '</th>
+						<th>' . $txt['tema_text_options'] . '</th>
+					</tr>
+				</thead>';
 		  	foreach ($context['downloads_files'] as $i => $file)
 			{
 
-				echo '<tr class="' . $styleclass . '">';
+				echo '<tr class="windowbg">';
 				echo '<td><a href="' . $scripturl . '?action=tema;sa=view;down=' . $file['ID_FILE'] . '">', $file['title'],'</a></td>';
 				echo '<td>' . Downloads_format_size($file['filesize'], 2) . '</td>';
 				echo '<td><a href="' . $scripturl . '?action=tema;sa=delete&id=' . $file['ID_FILE'] . '">' . $txt['tema_text_delete'] . '</a></td>';
 				echo '</tr>';
-
-                if ($styleclass == 'windowbg')
-    				$styleclass = 'windowbg2';
-    			else
-    				$styleclass = 'windowbg';
-
 			}
-
-
-		if ($context['downloads_total'] > 0)
-		{
-			echo '<tr class="titlebg">
-					<td align="left" colspan="3">
-					';
-
-
-
-					echo $context['page_index'];
-
-			echo '
-					</td>
-				</tr>';
-		}
-
-echo '<tr class="titlebg">
-					<td align="center" colspan="3">
-					<a href="' . $scripturl . '?action=admin;area=tema;sa=filespace">' . $txt['tema_filespace'] . '</a>
-					</td>
-		</tr>
-
+			echo'
 			</table>
-			</td>
-		</tr>
-</table>';
+			<div class="pagesection">';
+				if ($context['downloads_total'] > 0)
+				{
+				echo $context['page_index'];
+				}
+			echo'<a class="button" href="' . $scripturl . '?action=admin;area=tema;sa=filespace">' . $txt['tema_filespace'] . '</a>	
+			</div>';
 }
 
 function template_catpermlist()
 {
 	global $scripturl, $txt, $context;
-
-	echo '
+		echo '
 			<div class="cat_bar">
-								<h3 class="catbg">' . $txt['tema_text_catpermlist'] . '</h3>
+				<h3 class="catbg">
+					' . $txt['tema_text_catpermlist'] . '
+				</h3>
             </div>
-	<table border="0" width="100%" cellspacing="0" align="center" cellpadding="4" class="tborder">
-		<tr class="windowbg">
-			<td>
-			<table border="0" cellspacing="1" cellpadding="4" class="table_grid"  align="center" width="100%">
-<thead>
-<tr class="title_bar">
-				<th  class="lefttext first_th">' . $txt['tema_filespace_groupname'] . '</th>
-				<th  class="lefttext">' . $txt['tema_text_category']  . '</th>
-				<th  class="lefttext">' .  $txt['tema_perm_view']  . '</th>
-				<th  class="lefttext">' .  $txt['tema_perm_add']  . '</th>
-				<th  class="lefttext">' .  $txt['tema_perm_edit']  . '</th>
-				<th  class="lefttext">' .  $txt['tema_perm_delete']  . '</th>
-				<th  class="lefttext last_th">' .  $txt['tema_text_options']  . '</th>
-				</tr>
+			<table class="table_grid">
+				<thead>
+					<tr class="title_bar">
+						<th>' . $txt['tema_filespace_groupname'] . '</th>
+						<th>' . $txt['tema_text_category']  . '</th>
+						<th>' .  $txt['tema_perm_view']  . '</th>
+						<th>' .  $txt['tema_perm_add']  . '</th>
+						<th>' .  $txt['tema_perm_edit']  . '</th>
+						<th>' .  $txt['tema_perm_delete']  . '</th>
+						<th>' .  $txt['tema_text_options']  . '</th>
+					</tr>
 				</thead>';
-
-		// Show the member groups
 			foreach ($context['downloads_membergroups'] as $i => $row)
 			{
 
-				echo '<tr class="windowbg2">';
+				echo '<tr class="windowbg">';
 				echo '<td>'  . $row['group_name'] . '</td>';
 				echo '<td><a href="' . $scripturl . '?action=tema;sa=catperm;cat=' . $row['ID_CAT'] . '">'  . $row['catname'] . '</a></td>';
 				echo '<td>' . ($row['view'] ? $txt['tema_perm_allowed'] : $txt['tema_perm_denied']) . '</td>';
@@ -2131,12 +2114,10 @@ function template_catpermlist()
 				echo '</tr>';
 
 			}
-
-			// Show Regular members
 			foreach ($context['downloads_regmem'] as $i => $row)
 			{
 
-				echo '<tr class="windowbg2">';
+				echo '<tr class="windowbg">';
 				echo '<td>'  . $txt['membergroups_members'] . '</td>';
 				echo '<td><a href="' . $scripturl . '?action=tema;sa=catperm;cat=' . $row['ID_CAT'] . '">'  . $row['catname'] . '</a></td>';
 				echo '<td>' . ($row['view'] ? $txt['tema_perm_allowed'] : $txt['tema_perm_denied']) . '</td>';
@@ -2147,11 +2128,10 @@ function template_catpermlist()
 				echo '</tr>';
 			}
 
-			// Show Guests
 			foreach ($context['downloads_guestmem'] as $i => $row)
 			{
 
-				echo '<tr class="windowbg2">';
+				echo '<tr class="windowbg">';
 				echo '<td>'  . $txt['membergroups_guests'] . '</td>';
 				echo '<td><a href="' . $scripturl . '?action=tema;sa=catperm;cat=' . $row['ID_CAT'] . '">'  . $row['catname'] . '</a></td>';
 				echo '<td>' . ($row['view'] ? $txt['tema_perm_allowed'] : $txt['tema_perm_denied']) . '</td>';
@@ -2164,95 +2144,84 @@ function template_catpermlist()
 
 
 		echo '
-
-
-				</table>
-			</td>
-		</tr>
-
-</table>';
+		</table>';
 }
 
 function template_catperm()
 {
 	global $scripturl, $txt, $context;
-
 	echo '
-
-    <div class="cat_bar">
-		<h3 class="catbg centertext">
-        ' .$txt['tema_text_catperm'] . ' - ' . $context['downloads_cat_name']  . '
-        </h3>
-</div>
-	<table border="0" width="100%" cellspacing="0" align="center" cellpadding="4" class="tborder">
-
-		<tr class="windowbg">
-		<td>
-		<form method="post" action="' . $scripturl . '?action=tema;sa=catperm2">
-		<table align="center" class="tborder">
-		<tr class="titlebg">
-			<td colspan="2">'  . $txt['tema_text_addperm'] . '</td>
-		</tr>
-
-			  <tr class="windowbg2">
-			  	<td align="right"><b>' . $txt['tema_filespace_groupname'] . '</b>&nbsp;</td>
-			  	<td><select name="groupname">
-			  					<option value="-1">' . $txt['membergroups_guests'] . '</option>
-								<option value="0">' . $txt['membergroups_members'] . '</option>';
+		<div class="cat_bar">
+			<h3 class="catbg centertext">
+				' .$txt['tema_text_catperm'] . ' - ' . $context['downloads_cat_name']  . '
+			</h3>
+		</div>
+		<div class="windowbg centertext">
+			<form class="login" method="post" action="' . $scripturl . '?action=tema;sa=catperm2">
+				<p>'  . $txt['tema_text_addperm'] . '</p>
+				<dl>
+					<dt>
+						' . $txt['tema_filespace_groupname'] . '
+					</dt>
+					<dd>
+						<select name="groupname">
+							<option value="-1">' . $txt['membergroups_guests'] . '</option>
+							<option value="0">' . $txt['membergroups_members'] . '</option>';
 								foreach ($context['groups'] as $group)
-									echo '<option value="', $group['ID_GROUP'], '">', $group['group_name'], '</option>';
-
-							echo '</select>
-				</td>
-			  </tr>
-			  <tr class="windowbg2">
-			  	<td align="right"><input type="checkbox" name="view" checked="checked" /></td>
-			  	<td><b>' . $txt['tema_perm_view'] .'</b></td>
-			  </tr>
-			  <tr class="windowbg2">
-			  	<td align="right"><input type="checkbox" name="viewdownload" checked="checked" /></td>
-			  	<td><b>'.$txt['tema_perm_viewdownload'].'</b></td>
-			  </tr>
-			  <tr class="windowbg2">
-			  	<td align="right"><input type="checkbox" name="add" checked="checked" /></td>
-			  	<td><b>' . $txt['tema_perm_add'] .'</b></td>
-			  </tr>
-			  <tr class="windowbg2">
-			  	<td align="right"><input type="checkbox" name="edit" checked="checked" /></td>
-			  	<td><b>' . $txt['tema_perm_edit'] .'</b></td>
-			  </tr>
-			  <tr class="windowbg2">
-			  	<td align="right"><input type="checkbox" name="delete" checked="checked" /></td>
-			  	<td><b>' . $txt['tema_perm_delete'] .'</b></td>
-			  </tr>
-			  <tr class="windowbg2">
-			  	<td align="center" colspan="2">
-			  	<input type="hidden" name="cat" value="' . $context['downloads_cat'] . '" />
-			  	<input type="submit" value="' . $txt['tema_text_addperm'] . '" /></td>
-
-			  </tr>
-		</table>
-		</form>
-		</td>
-		</tr>
-			<tr class="windowbg">
-			<td>
-			<table cellspacing="0" cellpadding="10" border="0" align="center" width="90%" class="tborder">
-			<tr class="catbg">
-				<td>' . $txt['tema_filespace_groupname'] . '</td>
-				<td>' .  $txt['tema_perm_view']  . '</td>
-				<td>' .  $txt['tema_perm_viewdownload']  . '</td>
-				<td>' .  $txt['tema_perm_add']  . '</td>
-				<td>' .  $txt['tema_perm_edit']  . '</td>
-				<td>' .  $txt['tema_perm_delete']  . '</td>
-				<td>' .  $txt['tema_text_options']  . '</td>
-				</tr>';
-
-		// Show the member groups
+								echo '<option value="', $group['ID_GROUP'], '">', $group['group_name'], '</option>';
+					echo '</select>
+					</dd>
+					<dt>
+						' . $txt['tema_perm_view'] .'
+					</dt>
+					<dd>
+						<input type="checkbox" name="view" checked="checked" />
+					</dd>
+					<dt>
+						'.$txt['tema_perm_viewdownload'].'
+					</dt>
+					<dd>
+						<input type="checkbox" name="viewdownload" checked="checked" />
+					</dd>
+					<dt>
+						' . $txt['tema_perm_add'] .'
+					</dt>
+					<dd>
+						<input type="checkbox" name="add" checked="checked" />
+					</dd>
+					<dt>
+						' . $txt['tema_perm_edit'] .'
+					</dt>
+					<dd>
+						<input type="checkbox" name="edit" checked="checked" />
+					</dd>
+					<dt>
+						' . $txt['tema_perm_delete'] .'
+					</dt>
+					<dd>
+						<input type="checkbox" name="delete" checked="checked" />
+					</dd>
+				</dl>	
+				<p><input type="hidden" name="cat" value="' . $context['downloads_cat'] . '" />
+				<input type="submit" value="' . $txt['tema_text_addperm'] . '" /></p>	
+			</form>
+		</div>
+		<table class="table_grid">
+				<thead>
+					<tr class="title_bar">
+						<th>' . $txt['tema_filespace_groupname'] . '</th>
+						<th>' .  $txt['tema_perm_view']  . '</th>
+						<th>' .  $txt['tema_perm_viewdownload']  . '</th>
+						<th>' .  $txt['tema_perm_add']  . '</th>
+						<th>' .  $txt['tema_perm_edit']  . '</th>
+						<th>' .  $txt['tema_perm_delete']  . '</th>
+						<th>' .  $txt['tema_text_options']  . '</th>
+					</tr>
+				</thead>';
 			foreach ($context['downloads_membergroups'] as $i => $row)
 			{
 
-				echo '<tr class="windowbg2">';
+				echo '<tr class="windowbg">';
 				echo '<td>', $row['group_name'], '</td>';
 				echo '<td>' . ($row['view'] ? $txt['tema_perm_allowed'] : $txt['tema_perm_denied']) . '</td>';
 				echo '<td>' . ($row['viewdownload'] ? $txt['tema_perm_allowed'] : $txt['tema_perm_denied']) . '</td>';
@@ -2263,12 +2232,10 @@ function template_catperm()
 				echo '</tr>';
 
 			}
-
-			// Show Regular members
 			foreach ($context['downloads_reggroup'] as $i => $row)
 			{
 
-				echo '<tr class="windowbg2">';
+				echo '<tr class="windowbg">';
 				echo '<td>', $txt['membergroups_members'], '</td>';
 				echo '<td>' . ($row['view'] ? $txt['tema_perm_allowed'] : $txt['tema_perm_denied']) . '</td>';
 				echo '<td>' . ($row['viewdownload'] ? $txt['tema_perm_allowed'] : $txt['tema_perm_denied']) . '</td>';
@@ -2278,8 +2245,6 @@ function template_catperm()
 				echo '<td><a href="' . $scripturl . '?action=tema;sa=catpermdelete&id=' . $row['ID'] . '">' . $txt['tema_text_delete'] . '</a></td>';
 				echo '</tr>';
 			}
-
-			// Show Guests
 			foreach ($context['downloads_guestgroup'] as $i => $row)
 			{
 
@@ -2293,16 +2258,71 @@ function template_catperm()
 				echo '<td><a href="' . $scripturl . '?action=tema;sa=catpermdelete&id=' . $row['ID'] . '">' . $txt['tema_text_delete'] . '</a></td>';
 				echo '</tr>';
 			}
-
-
 		echo '
-
-
-				</table>
-			</td>
-		</tr>
-</table>';
+		</table>';
 }
+function Enlist()
+{
 
+	global $context,$txt,$modSettings,$scripturl;
+				echo '<br class="clear"/>
+					<div class="cat_bar">
+						<h3 class="catbg centertext">
+							', $context['MainPagebaslik'], '
+						</h3>
+					</div>';
+					echo '<div class="themesicerik">'; 
+				foreach($context['MainPageicerik'] as $icerik)
+				{
 
+					echo '<div class="themesbox">
+						<a href="' . $scripturl . '?action=tema;sa=view;down=' . $icerik['ID_FILE'] . '"><img src="',$icerik['picture'] == '' ? $modSettings['tema_url'].'temaresim/default.png' : $modSettings['tema_url'].'temaresim/'.$icerik['picture'],'" alt="">
+						</a><br />
+						<a class="subject" href="' . $scripturl . '?action=tema;sa=view;down=' . $icerik['ID_FILE'] . '">',$icerik['title'],'</a>';
+						echo'<dl>';
+					if (!empty($modSettings['tema_set_t_rating']))
+						if ($icerik['totalratings'] == 0)
+						{
+							echo' <dt>'. $txt['tema_form_rating'].'</dt><dd> '. $txt['tema_text_catnone'] . '</dd>';
+						}
+						else
+						{
+							$stars = 5;
+							$derece =($icerik['rating'] / ($icerik['totalratings']* $stars) * 100);
+							if ($derece == 0)
+								echo $txt['tema_form_rating'];
+							else if ($derece <= 20)
+								echo' <dt>'.$txt['tema_form_rating'].'</dt><dd> '.str_repeat('<span class="generic_star"></span>', 1) . '</dd>';
+							else if ($derece <= 40)
+								echo' <dt>'.$txt['tema_form_rating'].'</dt><dd> '.str_repeat('<span class="generic_star"></span>', 2) . '</dd>';
+							else if ($derece <= 60)
+								echo' <dt>'.$txt['tema_form_rating'].'</dt><dd> '.str_repeat('<span class="generic_star"></span>', 3) . '</dd>';
+							else if ($derece <= 80)
+								echo' <dt>'.$txt['tema_form_rating'].'</dt><dd> '.str_repeat('<span class="generic_star"></span>', 4) . '</dd>';
+							else if ($derece <= 100)
+								echo' <dt>'.$txt['tema_form_rating'].'</dt><dd> '.str_repeat('<span class="generic_star"></span>', 5) . '</dd>';
+						}
+					if (!empty($modSettings['tema_set_t_downloads']))
+						echo' <dt>'.$txt['tema_text_downloads'].'</dt><dd> '. $icerik['totaldownloads'] . '</dd>';
+					if (!empty($modSettings['tema_set_t_views']))
+						echo' <dt>'. $txt['tema_text_views'].'</dt><dd>'.$icerik['views'] . '</dd>';
+					if (!empty($modSettings['tema_set_t_filesize']))
+						echo' <dt>'. $txt['tema_text_filesize'].'</dt><dd>  '. Downloads_format_size($icerik['filesize'], 2) . '<br />';
+					if (!empty($modSettings['tema_set_t_date']))
+						echo' <dt>'. $txt['tema_text_date'].'</dt><dd>  '.timeformat($icerik['date'], '%d %b %Y ') . '</dd>';
+					if (!empty($modSettings['tema_set_t_username']))
+					{
+						if ($icerik['real_name'] != '')
+							echo' <dt>'. $txt['tema_text_by'] . '</dt><dd> <a href="' . $scripturl . '?action=profile;u=' . $icerik['id_member'] . '">'  . $icerik['real_name'] . '</a></dd>';
+						else
+							echo' <dt>'.  $txt['tema_text_by'] . '</dt><dd> ' . $txt['tema_guest'] . '</dd>';
+					}
+					echo '</dl></div>';
+				
+				}
+				echo '
+				  </div><br class="clear"/>';
+	
+
+}
 ?>

@@ -37,6 +37,7 @@ function themes_admin_areas(&$admin_areas)
 									'label' =>'',
 									'file' => 'tema2.php',
 									'function' => 'ThemesMain',
+									'custom_url' => $scripturl . '?action=admin;area=adminset',
 								),
 								'adminset' => array(
 									'label' => $txt['tema_text_settings'],
@@ -124,10 +125,12 @@ $txt['tema_pos']=$set.'<br>'.$set2;
 				array('title','tema_catthumb_settings'),
 				array('check', 'tema_who_viewing'),
 				array('check', 'tema_set_enable_multifolder'),
-				array('check', 'tema_show_ratings'),  
-				array('check', 'tema_index_recent'), 
-				array('check', 'tema_index_showtop'),	
 				array('check', 'tema_set_show_quickreply'),	
+				array('check', 'tema_show_ratings'),  
+				array('check', 'tema_index_recent'),
+				array('check', 'tema_index_toprated'),
+				array('check', 'tema_index_mostviewed'),
+				array('check', 'tema_index_mostdownloaded'),
 
 				array('title', 'tema_files_settings'),
 				array('check', 'tema_set_t_downloads'),
@@ -154,7 +157,6 @@ $txt['tema_pos']=$set.'<br>'.$set2;
 				array('title', 'tema_txt_download_linking'),
 				array('check', 'tema_set_showcode_directlink'),
 				array('check', 'tema_set_showcode_htmllink'),
-				'',
 
 				array('title', 'themesizinlerbaslik'),
 				array('title', 'themes_view'),
