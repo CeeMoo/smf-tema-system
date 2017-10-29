@@ -58,7 +58,6 @@ $mod_settings = array(
 	'tema_set_t_username' => '1',
 	'tema_set_t_rating' => '1',
 	'tema_set_t_title' => '1',
-	'tema_index_showtop' => '0',
 	'tema_set_cat_width' => '120',
 	'tema_set_cat_height' => '120',
 	'tema_set_file_image_height' => '350',
