@@ -25,8 +25,10 @@ function themes_actions(&$actionArray)
 function themes_admin_areas(&$admin_areas)
 {
    global $txt, $modSettings, $scripturl;
-   	loadLanguage('tema');
+   	loadtemplate('tema2.1');
+	loadLanguage('tema');
 	loadLanguage('ManageSettings');
+	$admin_areas['config']['areas']['modsettings']['subsections']['tema_izinler'] = array($txt['themesizinlerbaslik']);
     themes_array_insert($admin_areas, 'layout',
 	        array(
             'tema' => array(
@@ -34,23 +36,17 @@ function themes_admin_areas(&$admin_areas)
 			'permission' => array('themes_manage'),
 			'areas' => array(
 								'tema' => array(
-									'label' =>'',
-									'file' => 'tema2.php',
-									'function' => 'ThemesMain',
-									'custom_url' => $scripturl . '?action=admin;area=adminset',
-								),
-								'adminset' => array(
 									'label' => $txt['tema_text_settings'],
-									'function' => 'Themes_AdminSettings2',
+									'file' => 'tema2.php',
+									'function' => 'Themes_AdminSettings',
+									'custom_url' => $scripturl . '?action=admin;area=tema;sa=adminset',
 									'icon' => 'temaicon.png',
-									'subsections' => array(
-									),
 								),
 								'approvelist' => array(
 									'label' => $txt['tema_form_approvethemes'],
 									'file' => 'tema2.php',
 									'function' => 'Themes_ApproveList',
-									'custom_url' => $scripturl . '?action=admin;area=tema;sa=approvelist',
+									'custom_url' => $scripturl . '?action=admin;area=approvelist',
 									'icon' => 'temaicon.png',
 									'subsections' => array(
 									),
@@ -59,7 +55,7 @@ function themes_admin_areas(&$admin_areas)
 									'label' => $txt['tema_form_reportthemes'],
 									'file' => 'tema2.php',
 									'function' => 'Themes_ReportList',
-									'custom_url' => $scripturl . '?action=admin;area=tema;sa=reportlist',
+									'custom_url' => $scripturl . '?action=admin;area=reportlist',
 									'icon' => 'temaicon.png',
 									'subsections' => array(
 									),
@@ -69,7 +65,7 @@ function themes_admin_areas(&$admin_areas)
 									'label' => $txt['tema_filespace'],
 									'file' => 'tema2.php',
 									'function' => 'Themes_FileSpaceAdmin',
-									'custom_url' => $scripturl . '?action=admin;area=tema;sa=filespace',
+									'custom_url' => $scripturl . '?action=admin;area=filespace',
 									'icon' => 'temaicon.png',
 									'subsections' => array(
 									),
@@ -79,7 +75,7 @@ function themes_admin_areas(&$admin_areas)
 									'label' => $txt['tema_text_catpermlist2'],
 									'file' => 'tema2.php',
 									'function' => 'Themes_CatPermList',
-									'custom_url' => $scripturl . '?action=admin;area=tema;sa=catpermlist',
+									'custom_url' => $scripturl . '?action=admin;area=catpermlist',
 									'icon' => 'temaicon.png',
 									'subsections' => array(
 									),
@@ -91,74 +87,16 @@ function themes_admin_areas(&$admin_areas)
 		
 }
 
-function Themes_AdminSettings2()
+function Themes_mod_Ayarlar(&$sub_actions)
+{
+	$sub_actions['tema_izinler'] = 'Themes_mod';
+}
+function Themes_mod($return_config = false)
 {
 
-	global $context, $scripturl, $sourcedir;
-		global $context, $mbname, $txt;
-	require_once($sourcedir . '/ManageServer.php');
-
-	$context['sub_template'] = 'show_settings';
-	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_text_settings'];
-	$context[$context['admin_menu_name']]['tab_data'] = array(
-		'title' => $context['page_title'],
-	);
-$set= $txt['tema_upload_max_filesize'].' : <a href="http://www.php.net/manual/en/ini.core.php#ini.upload-max-filesize" target="_blank">' . @ini_get("upload_max_filesize") . '</a>';
-$set2= $txt['tema_post_max_size'].' : <a href="http://www.php.net/manual/en/ini.core.php#ini.post-max-size" target="_blank">' . @ini_get("post_max_size") . '</a>';
-$txt['tema_pos']=$set.'<br>'.$set2;	
+		global $txt, $scripturl, $context;
 
 	$config_vars = array(
-				
-				array('title', 'tema_max_file'),
-				array('desc','tema_pos'),
-
-				array('title','tema_text_settings'),
-				array('text', 'tema_max_filesize'),
-				array('text', 'tema_path'),
-				array('text', 'tema_url'),
-				array('text', 'tema_set_files_per_page'),
-				array('text', 'tema_set_cat_width'),
-				array('text', 'tema_set_cat_height'),
-				array('text', 'tema_set_file_image_width'),
-				array('text', 'tema_set_file_image_height'),
-
-				array('title','tema_catthumb_settings'),
-				array('check', 'tema_who_viewing'),
-				array('check', 'tema_set_enable_multifolder'),
-				array('check', 'tema_set_show_quickreply'),	
-				array('check', 'tema_show_ratings'),  
-				array('check', 'tema_index_recent'),
-				array('check', 'tema_index_toprated'),
-				array('check', 'tema_index_mostviewed'),
-				array('check', 'tema_index_mostdownloaded'),
-
-				array('title', 'tema_files_settings'),
-				array('check', 'tema_set_t_downloads'),
-				array('check', 'tema_set_t_views'),
-				array('check', 'tema_set_t_filesize'),  
-				array('check', 'tema_set_t_date'), 
-				array('check', 'tema_set_t_username'),	
-				array('check', 'tema_set_t_rating'),	
-				array('check', 'tema_set_t_title'),
-				array('check', 'tema_set_count_child'), 
-				array('check', 'tema_set_file_prevnext'),
-				array('check', 'tema_set_file_thumb'),
-				array('check', 'tema_set_file_desc'),  
-				array('check', 'tema_set_file_title'), 
-				array('check', 'tema_set_file_views'),	
-				array('check', 'tema_set_file_downloads'),	
-				array('check', 'tema_set_file_lastdownload'),
-				array('check', 'tema_set_file_poster'),
-				array('check', 'tema_set_file_date'),
-				array('check', 'tema_set_file_showfilesize'),
-				array('check', 'tema_set_file_showrating'),  
-				array('check', 'tema_set_file_keywords'), 
-
-				array('title', 'tema_txt_download_linking'),
-				array('check', 'tema_set_showcode_directlink'),
-				array('check', 'tema_set_showcode_htmllink'),
-
-				array('title', 'themesizinlerbaslik'),
 				array('title', 'themes_view'),
 				array('permissions', 'themes_view', 'subtext' => $txt['permissionhelp_themes_view']),	  
 				'',
@@ -186,14 +124,17 @@ $txt['tema_pos']=$set.'<br>'.$set2;
 				array('title', 'themes_manage'),
 				array('permissions', 'themes_manage', 'subtext' => $txt['permissionhelp_themes_manage']),
 	);
-	$context['post_url'] = $scripturl . '?action=admin;area=adminset;save';
+if ($return_config)
+			return $config_vars;
+
+		$context['post_url'] = $scripturl . '?action=admin;area=modsettings;sa=tema_izinler;save';
+		$context['settings_title'] = $txt['themesizinlerbaslik'];
 
 
 	if (isset($_GET['save']))
 	{
-		checkSession();
 		saveDBSettings($config_vars);
-		redirectexit('action=admin;area=adminset');
+		redirectexit('action=admin;area=modsettings;sa=tema_izinler');
 	}
 
 		prepareDBSettingContext($config_vars);

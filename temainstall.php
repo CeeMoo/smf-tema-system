@@ -19,7 +19,7 @@ $hook_functions = array(
         'integrate_admin_areas' => 'themes_admin_areas',
 	    'integrate_menu_buttons' => 'themes_menu_buttons',
 		'integrate_actions' => 'themes_actions',
-		'integrate_modify_modifications' => 'Themes_AdminSettings2',
+		'integrate_modify_modifications' => 'Themes_mod_Ayarlar',
 );
 
 // Adding or removing them?

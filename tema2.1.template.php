@@ -1938,6 +1938,93 @@ function template_stats()
 		</div>';
         
 }
+function template_settings()
+{
+	global $scripturl, $modSettings, $txt;
+
+echo '
+			<div class="cat_bar">
+								<h3 class="catbg">' . $txt['tema_text_settings'] . '</h3>
+            </div>
+	<table border="0" width="100%" cellspacing="0" align="center" cellpadding="4" class="tborder">
+		<tr class="windowbg">
+			<td>
+				
+			<form method="post" action="' . $scripturl . '?action=tema;sa=adminset2">
+				<table border="0" width="100%" cellspacing="0" align="center" cellpadding="4">
+					<tr><td width="30%">' . $txt['tema_set_filesize'] . '</td><td><input type="text" name="tema_max_filesize" value="' .  $modSettings['tema_max_filesize'] . '" /> (bytes)</td></tr>
+				<tr><td width="30%">' . $txt['tema_set_path'] . '</td><td><input type="text" name="tema_path" value="' .  $modSettings['tema_path'] . '" size="50" /></td></tr>
+				<tr><td width="30%">' . $txt['tema_set_url'] . '</td><td><input type="text" name="tema_url" value="' .  $modSettings['tema_url'] . '" size="50" /></td></tr>
+
+				<tr><td width="30%">' . $txt['tema_upload_max_filesize'] . '</td><td><a href="http://www.php.net/manual/en/ini.core.php#ini.upload-max-filesize" target="_blank">' . @ini_get("upload_max_filesize") . '</a></td></tr>
+				<tr><td width="30%">' . $txt['tema_post_max_size'] . '</td><td><a href="http://www.php.net/manual/en/ini.core.php#ini.post-max-size" target="_blank">' . @ini_get("post_max_size") . '</a></td></tr>
+				<tr><td colspan="2">',$txt['tema_upload_limits_notes'] ,'</td></tr>
+
+
+
+				<tr><td width="30%">' . $txt['tema_set_files_per_page'] . '</td><td><input type="text" name="tema_set_files_per_page" value="' .  $modSettings['tema_set_files_per_page'] . '" /></td></tr>
+				<tr><td width="30%">' . $txt['tema_set_cat_width'] . '</td><td><input type="text" name="tema_set_cat_width" value="' .  $modSettings['tema_set_cat_width'] . '" /></td></tr>
+				<tr><td width="30%">' . $txt['tema_set_cat_height'] . '</td><td><input type="text" name="tema_set_cat_height" value="' .  $modSettings['tema_set_cat_height'] . '" /></td></tr>
+				<tr><td width="30%">' . $txt['tema_set_file_image_width'] . '</td><td><input type="text" name="tema_set_file_image_width" value="' .  $modSettings['tema_set_file_image_width'] . '" /></td></tr>
+				<tr><td width="30%">' . $txt['tema_set_file_image_height'] . '</td><td><input type="text" name="tema_set_file_image_height" value="' .  $modSettings['tema_set_file_image_height'] . '" /></td></tr>
+				</table>
+				<input type="checkbox" name="tema_set_file_thumb" ' . ($modSettings['tema_set_file_thumb'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_thumb'] . '<br />
+				<input type="checkbox" name="tema_who_viewing" ' . ($modSettings['tema_who_viewing'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_whoonline'] . '<br />
+				<input type="checkbox" name="tema_set_count_child" ' . ($modSettings['tema_set_count_child'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_count_child'] . '<br />
+				<input type="checkbox" name="tema_set_show_quickreply" ' . ($modSettings['tema_set_show_quickreply'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_show_quickreply'] . '<br />
+				<input type="checkbox" name="tema_show_ratings" ' . ($modSettings['tema_show_ratings'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_showratings'] . '<br />
+				<input type="checkbox" name="tema_set_enable_multifolder" ' . ($modSettings['tema_set_enable_multifolder'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_enable_multifolder'] . '<br />
+				<input type="checkbox" name="tema_index_toprated" ' . ($modSettings['tema_index_toprated'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_index_toprated'] . '<br />
+				<input type="checkbox" name="tema_index_recent" ' . ($modSettings['tema_index_recent'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_index_recent'] . '<br />
+				<input type="checkbox" name="tema_index_mostviewed" ' . ($modSettings['tema_index_mostviewed'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_index_mostviewed'] . '<br />
+				<input type="checkbox" name="tema_index_mostdownloaded" ' . ($modSettings['tema_index_mostdownloaded'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_index_mostdownloaded'] . '<br />
+
+
+				<b>' . $txt['tema_catthumb_settings'] . '</b><br />
+				<input type="checkbox" name="tema_set_t_title" ' . ($modSettings['tema_set_t_title'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_title'] . '<br />
+				<input type="checkbox" name="tema_set_t_downloads" ' . ($modSettings['tema_set_t_downloads'] ? ' checked="checked" ' : '') . ' />' .$txt['tema_set_t_downloads'] . '<br />
+				<input type="checkbox" name="tema_set_t_views" ' . ($modSettings['tema_set_t_views'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_t_views'] . '<br />
+				<input type="checkbox" name="tema_set_t_filesize" ' . ($modSettings['tema_set_t_filesize'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_t_filesize'] . '<br />
+				<input type="checkbox" name="tema_set_t_date" ' . ($modSettings['tema_set_t_date'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_t_date'] . '<br />
+				<input type="checkbox" name="tema_set_t_username" ' . ($modSettings['tema_set_t_username'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_t_username'] . '<br />
+				<input type="checkbox" name="tema_set_t_rating" ' . ($modSettings['tema_set_t_rating'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_t_rating'] . '<br />
+
+				<b>' . $txt['tema_files_settings'] . '</b><br />
+
+				<input type="checkbox" name="tema_set_file_prevnext" ' . ($modSettings['tema_set_file_prevnext'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_prevnext'] . '<br />
+				<input type="checkbox" name="tema_set_file_desc" ' . ($modSettings['tema_set_file_desc'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_desc'] . '<br />
+				<input type="checkbox" name="tema_set_file_title" ' . ($modSettings['tema_set_file_title'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_title'] . '<br />
+				<input type="checkbox" name="tema_set_file_views" ' . ($modSettings['tema_set_file_views'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_views'] . '<br />
+				<input type="checkbox" name="tema_set_file_downloads" ' . ($modSettings['tema_set_file_downloads'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_downloads'] . '<br />
+				<input type="checkbox" name="tema_set_file_lastdownload" ' . ($modSettings['tema_set_file_lastdownload'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_lastdownload'] . '<br />
+				<input type="checkbox" name="tema_set_file_poster" ' . ($modSettings['tema_set_file_poster'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_poster'] . '<br />
+				<input type="checkbox" name="tema_set_file_date" ' . ($modSettings['tema_set_file_date'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_date'] . '<br />
+				<input type="checkbox" name="tema_set_file_showfilesize" ' . ($modSettings['tema_set_file_showfilesize'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_showfilesize'] . '<br />
+				<input type="checkbox" name="tema_set_file_showrating" ' . ($modSettings['tema_set_file_showrating'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_showrating'] . '<br />
+				<input type="checkbox" name="tema_set_file_keywords" ' . ($modSettings['tema_set_file_keywords'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_file_keywords'] . '<br />
+
+				<br /><b>' . $txt['tema_txt_download_linking'] . '</b><br />
+				<input type="checkbox" name="tema_set_showcode_directlink" ' . ($modSettings['tema_set_showcode_directlink'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_showcode_directlink'] . '<br />
+				<input type="checkbox" name="tema_set_showcode_htmllink" ' . ($modSettings['tema_set_showcode_htmllink'] ? ' checked="checked" ' : '') . ' />' . $txt['tema_set_showcode_htmllink'] . '<br />
+
+				';
+
+				if (!is_writable($modSettings['tema_path']))
+					echo '<font color="#FF0000"><b>' . $txt['tema_write_error']  . $modSettings['tema_path'] . '</b></font>';
+
+				echo '
+
+				<input type="submit" name="savesettings" value="' . $txt['tema_save_settings'] . '" />
+			</form>
+			<br />
+			<b>' . $txt['tema_text_permissions'] . '</b><br/><span class="smalltext">' . $txt['tema_set_permissionnotice'] . '</span>
+			<br /><a href="' . $scripturl . '?action=admin;area=modsettings;sa=tema_izinler">' . $txt['tema_set_editpermissions']  . '</a>
+
+			</td>
+		</tr>
+</table>';
+
+}
 
 
 function template_filespace()

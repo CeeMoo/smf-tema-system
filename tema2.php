@@ -70,7 +70,8 @@ function ThemesMain()
 		'cusadd' => 'Downloads_CustomAdd',
 		'cusdelete' => 'Downloads_CustomDelete',
 		'downfile' => 'Downloads_DownloadFile',
-
+		'adminset'=> 'Themes_AdminSettings',
+		'adminset2'=> 'Themes_AdminSettings2',
 	);
 
 	if (isset($_GET['sa']))
@@ -868,6 +869,128 @@ function Downloads_MyFiles()
 	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $context['downloads_userdownloads_name'];
 	$context['sub_template']  = 'myfiles';
 	$context['page_index'] = constructPageIndex($scripturl . '?action=tema;sa=myfiles;u=' . $context['downloads_userid'], $_REQUEST['start'], $context['downloads_total'], $modSettings['tema_set_files_per_page']);
+}
+function Themes_AdminSettings()
+{
+	global $context, $mbname, $txt;
+	isAllowedTo('themes_manage');
+	$context['page_title'] = $mbname . ' - ' . $txt['tema_text_title'] . ' - ' . $txt['tema_text_settings'];
+	$context['sub_template']  = 'settings';
+}
+function Themes_AdminSettings2()
+{
+	isAllowedTo('themes_manage');
+	$tema_max_filesize =  (int) $_REQUEST['tema_max_filesize'];
+	$tema_set_files_per_page = (int) $_REQUEST['tema_set_files_per_page'];
+	$tema_path = $_REQUEST['tema_path'];
+	$tema_url = $_REQUEST['tema_url'];
+	$tema_who_viewing = isset($_REQUEST['tema_who_viewing']) ? 1 : 0;
+
+	$tema_set_enable_multifolder = isset($_REQUEST['tema_set_enable_multifolder']) ? 1 : 0;
+	$tema_show_ratings =  isset($_REQUEST['tema_show_ratings']) ? 1 : 0;
+	$tema_index_toprated =  isset($_REQUEST['tema_index_toprated']) ? 1 : 0;
+	$tema_index_recent =   isset($_REQUEST['tema_index_recent']) ? 1 : 0;
+	$tema_index_mostviewed =  isset($_REQUEST['tema_index_mostviewed']) ? 1 : 0;
+	$tema_index_mostdownloaded = isset($_REQUEST['tema_index_mostdownloaded']) ? 1 : 0;
+	$tema_set_show_quickreply = isset($_REQUEST['tema_set_show_quickreply']) ? 1 : 0;
+	$tema_set_cat_width = (int) $_REQUEST['tema_set_cat_width'];
+	$tema_set_cat_height = (int) $_REQUEST['tema_set_cat_height'];
+	// Category view category settings
+	$tema_set_t_downloads = isset($_REQUEST['tema_set_t_downloads']) ? 1 : 0;
+	$tema_set_t_views = isset($_REQUEST['tema_set_t_views']) ? 1 : 0;
+	$tema_set_t_filesize = isset($_REQUEST['tema_set_t_filesize']) ? 1 : 0;
+	$tema_set_t_date = isset($_REQUEST['tema_set_t_date']) ? 1 : 0;
+	$tema_set_t_username = isset($_REQUEST['tema_set_t_username']) ? 1 : 0;
+	$tema_set_t_rating = isset($_REQUEST['tema_set_t_rating']) ? 1 : 0;
+	$tema_set_t_title = isset($_REQUEST['tema_set_t_title']) ? 1 : 0;
+	$tema_set_count_child = isset($_REQUEST['tema_set_count_child']) ? 1 : 0;
+
+	// Download display settings
+	$tema_set_file_prevnext = isset($_REQUEST['tema_set_file_prevnext']) ? 1 : 0;
+	$tema_set_file_desc = isset($_REQUEST['tema_set_file_desc']) ? 1 : 0;
+	$tema_set_file_title = isset($_REQUEST['tema_set_file_title']) ? 1 : 0;
+	$tema_set_file_views = isset($_REQUEST['tema_set_file_views']) ? 1 : 0;
+	$tema_set_file_downloads = isset($_REQUEST['tema_set_file_downloads']) ? 1 : 0;
+	$tema_set_file_lastdownload = isset($_REQUEST['tema_set_file_lastdownload']) ? 1 : 0;
+	$tema_set_file_poster = isset($_REQUEST['tema_set_file_poster']) ? 1 : 0;
+	$tema_set_file_date = isset($_REQUEST['tema_set_file_date']) ? 1 : 0;
+	$tema_set_file_showfilesize = isset($_REQUEST['tema_set_file_showfilesize']) ? 1 : 0;
+	$tema_set_file_showrating = isset($_REQUEST['tema_set_file_showrating']) ? 1 : 0;
+	$tema_set_file_keywords = isset($_REQUEST['tema_set_file_keywords']) ? 1 : 0;
+
+
+	// Download Linking codes
+	$tema_set_showcode_directlink = isset($_REQUEST['tema_set_showcode_directlink']) ? 1 : 0;
+	$tema_set_showcode_htmllink = isset($_REQUEST['tema_set_showcode_htmllink']) ? 1 : 0;
+	
+	$tema_set_file_image_width = (int) $_REQUEST['tema_set_file_image_width'];
+	$tema_set_file_image_height = (int) $_REQUEST['tema_set_file_image_height'];
+	$tema_set_file_thumb = isset($_REQUEST['tema_set_file_thumb']) ? 1 : 0;
+
+	if (empty($tema_set_file_image_width))
+		$tema_set_file_image_width = 450;
+
+	if (empty($tema_set_file_image_height))
+		$tema_set_file_image_height = 350;
+	
+	
+	if (empty($tema_set_cat_height))
+		$tema_set_cat_height = 120;
+
+	if (empty($tema_set_cat_width))
+		$tema_set_cat_width = 120;
+				
+
+		
+	// Save the setting information
+	updateSettings(
+	array(
+	'tema_max_filesize' => $tema_max_filesize,
+	'tema_path' => $tema_path,
+	'tema_url' => $tema_url,
+	'tema_who_viewing' => $tema_who_viewing,
+	'tema_set_count_child' => $tema_set_count_child,
+	'tema_show_ratings' => $tema_show_ratings,
+	'tema_index_toprated' => $tema_index_toprated,
+	'tema_index_recent' => $tema_index_recent,
+	'tema_index_mostviewed' => $tema_index_mostviewed,
+	'tema_index_mostdownloaded' => $tema_index_mostdownloaded,
+
+	'tema_set_files_per_page' => $tema_set_files_per_page,
+	'tema_set_show_quickreply' => $tema_set_show_quickreply,
+	'tema_set_enable_multifolder' => $tema_set_enable_multifolder,
+
+	'tema_set_cat_height' => $tema_set_cat_height,
+	'tema_set_cat_width' => $tema_set_cat_width,
+	'tema_set_t_downloads' => $tema_set_t_downloads,
+	'tema_set_t_views' => $tema_set_t_views,
+	'tema_set_t_filesize' => $tema_set_t_filesize,
+	'tema_set_t_date' => $tema_set_t_date,
+	'tema_set_t_username' => $tema_set_t_username,
+	'tema_set_t_rating' => $tema_set_t_rating,
+	'tema_set_t_title' => $tema_set_t_title,
+	'tema_set_file_prevnext' => $tema_set_file_prevnext,
+	'tema_set_file_desc' => $tema_set_file_desc,
+	'tema_set_file_title' => $tema_set_file_title,
+	'tema_set_file_views' => $tema_set_file_views,
+	'tema_set_file_downloads' => $tema_set_file_downloads,
+	'tema_set_file_lastdownload' => $tema_set_file_lastdownload,
+	'tema_set_file_poster' => $tema_set_file_poster,
+	'tema_set_file_date' => $tema_set_file_date,
+	'tema_set_file_showfilesize' => $tema_set_file_showfilesize,
+	'tema_set_file_showrating' => $tema_set_file_showrating,
+	'tema_set_file_keywords' => $tema_set_file_keywords,
+	'tema_set_showcode_directlink' => $tema_set_showcode_directlink,
+	'tema_set_showcode_htmllink' => $tema_set_showcode_htmllink,
+	'tema_set_file_image_width' => $tema_set_file_image_width,
+	'tema_set_file_image_height' => $tema_set_file_image_height,
+	'tema_set_file_thumb' => $tema_set_file_thumb,
+	));
+
+
+
+	redirectexit('action=admin;area=tema;sa=adminset');
+
 }
 
 function Themes_ApproveList()
